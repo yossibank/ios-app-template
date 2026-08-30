@@ -13,6 +13,10 @@ permissions:
 
 env:
   DEVELOPER_DIR: /Applications/Xcode.app
+  # 共通コアが private の場合、GITHUB_TOKEN では別リポジトリを clone できない
+  # （remote: Repository not found. になる）。その場合は SHARED_CORE_TOKEN に
+  # repo スコープを持つ PAT を登録する。public の間は GITHUB_TOKEN で足りる。
+  SHARED_CORE_TOKEN: ${{ secrets.SHARED_CORE_TOKEN || secrets.GITHUB_TOKEN }}
 
 jobs:
   verify:
@@ -34,19 +38,19 @@ jobs:
       - name: Configure git credentials
         run: |
           git config --global \
-            url."https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf \
+            url."https://${{ github.actor }}:${SHARED_CORE_TOKEN}@github.com/".insteadOf \
             "https://github.com/"
 
       - name: Configure netrc
         run: |
           umask 077
-          cat > "$HOME/.netrc" <<'NETRC'
+          cat > "$HOME/.netrc" <<NETRC
           machine github.com
             login ${{ github.actor }}
-            password ${{ secrets.GITHUB_TOKEN }}
+            password ${SHARED_CORE_TOKEN}
           machine api.github.com
             login ${{ github.actor }}
-            password ${{ secrets.GITHUB_TOKEN }}
+            password ${SHARED_CORE_TOKEN}
           NETRC
 
       - name: Verify
