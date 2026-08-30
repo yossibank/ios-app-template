@@ -20,7 +20,6 @@ flowchart LR
 
 | コマンド | 内容 |
 | --- | --- |
-| `make bootstrap` | 共通コアの XCFramework を生成（clone 直後に 1 度。`../kmp-app-template` が必要） |
 | `make verify` | ビルド + ユニットテスト（変更後はこれを通す） |
 | `make test-ui` | UI テストも実行する（時間がかかる） |
 | `make build` | ビルドのみ |

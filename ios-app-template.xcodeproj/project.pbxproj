@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B6FAF50E8926B7370D0C7D13 /* Shared.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = F94085CCC7F8562E34F6A31B /* Shared.xcframework */; };
+		D74A4CB25ABB33040D1B0546 /* Shared in Frameworks */ = {isa = PBXBuildFile; productRef = A561BECD362AA926608EC6C0 /* Shared */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,7 +31,6 @@
 		7829F5413043F3F80052BC9D /* ios-app-template.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ios-app-template.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7829F54E3043F3FA0052BC9D /* ios-app-templateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ios-app-templateTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7829F5583043F3FA0052BC9D /* ios-app-templateUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ios-app-templateUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F94085CCC7F8562E34F6A31B /* Shared.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; name = Shared.xcframework; path = "../kmp-app-template/shared/build/XCFrameworks/debug/Shared.xcframework"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -63,7 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B6FAF50E8926B7370D0C7D13 /* Shared.xcframework in Frameworks */,
+				D74A4CB25ABB33040D1B0546 /* Shared in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,7 +86,6 @@
 		703A8C58B4BB7CD87C3ADD5C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F94085CCC7F8562E34F6A31B /* Shared.xcframework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -132,6 +130,9 @@
 				7829F5433043F3F80052BC9D /* ios-app-template */,
 			);
 			name = "ios-app-template";
+			packageProductDependencies = (
+				A561BECD362AA926608EC6C0 /* Shared */,
+			);
 			productName = "ios-app-template";
 			productReference = 7829F5413043F3F80052BC9D /* ios-app-template.app */;
 			productType = "com.apple.product-type.application";
@@ -210,6 +211,9 @@
 			);
 			mainGroup = 7829F5383043F3F80052BC9D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1A8BEFE0B33C313C2509957F /* XCRemoteSwiftPackageReference "kmp-app-template" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7829F5423043F3F80052BC9D /* Products */;
 			projectDirPath = "";
@@ -411,10 +415,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/../kmp-app-template/shared/build/XCFrameworks/debug",
-				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -446,10 +446,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/../kmp-app-template/shared/build/XCFrameworks/release",
-				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -593,6 +589,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1A8BEFE0B33C313C2509957F /* XCRemoteSwiftPackageReference "kmp-app-template" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/yossibank/kmp-app-template.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A561BECD362AA926608EC6C0 /* Shared */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1A8BEFE0B33C313C2509957F /* XCRemoteSwiftPackageReference "kmp-app-template" */;
+			productName = Shared;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7829F5393043F3F80052BC9D /* Project object */;
 }

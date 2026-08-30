@@ -4,8 +4,8 @@ iOS アプリ。SwiftUI の 1 画面のみの最小構成。
 
 ## 検証
 
-clone 直後と kmp-app-template を変更した後は `make bootstrap`（XCFramework の生成）を先に実行する。
-共通コアは現在ローカル参照で、`../kmp-app-template` に checkout されている前提。
+共通コアは SPM で GitHub Packages から取得する。`~/.netrc` に maven.pkg.github.com の
+認証情報が必要（GitHub Packages は public リポジトリでも読み取りにトークンを要求する）。
 
 変更したら必ず通す。通らないものは完了ではない。
 
