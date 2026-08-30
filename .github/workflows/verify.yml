@@ -26,12 +26,17 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      # SPM は binaryTarget のダウンロードに netrc の資格情報を使う。
-      # 共通コアは別リポジトリの Release アセットにあるため認証が必要。
+      # SPM は 2 か所で認証を要求する。
+      #   github.com     … Package.swift を読むための git clone
+      #   api.github.com … binaryTarget の Release アセットのダウンロード
+      # 共通コアが private の場合、どちらか一方でも欠けると解決に失敗する。
       - name: Configure netrc
         run: |
           umask 077
           cat > "$HOME/.netrc" <<'NETRC'
+          machine github.com
+            login ${{ github.actor }}
+            password ${{ secrets.GITHUB_TOKEN }}
           machine api.github.com
             login ${{ github.actor }}
             password ${{ secrets.GITHUB_TOKEN }}
