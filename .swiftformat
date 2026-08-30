@@ -1,13 +1,24 @@
-# https://github.com/nicklockwood/SwiftFormat/blob/master/Rules.md
+# Rule List - https://github.com/nicklockwood/SwiftFormat/blob/master/Rules.md
+# SwiftTemplate と同じ設定に揃えている。書式は「正しさ」ではなく
+# 揃っていることに価値があるため、独自判断を持ち込まない。
 
 --swiftversion 5.0
 
+--disable wrapMultilineStatementBraces
+--enable blankLinesBetweenImports
+# wrapConditionalBodies は非推奨。後継の3ルールに置き換えている
+# （SwiftTemplate はまだ旧ルールのままで、実行のたびに警告が出る）。
+--enable wrapIfStatementBodies
+--enable wrapGuardStatementBodies
+--enable wrapIfExpressionBodies
+
 --commas inline
 --header strip
---redundanttype inferred
 --maxwidth 120
+--ranges no-space
+--redundanttype inferred
 --self init-only
 --stripunusedargs closure-only
 --wraparguments before-first
---wrapparameters before-first
 --wrapcollections before-first
+--wrapparameters before-first

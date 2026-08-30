@@ -1,13 +1,38 @@
 included:
   - ios-app-template
   - ios-app-templateTests
-  - ios-app-templateUITests
 
 disabled_rules:
-  - line_length
+  # --- SwiftFormat が担当する書式。二重に強制すると衝突する ---
+  - line_length            # SwiftFormat の --maxwidth 120
+  - colon
+  - opening_brace
+  - trailing_comma         # SwiftFormat の --commas inline
+
+  # --- 規模の指標。SwiftUI では自然に長くなり、指摘の大半が実害なし ---
+  - cyclomatic_complexity
+  - nesting
+  - file_length
+  - type_body_length
+  - function_body_length
+  - function_parameter_count
+
   - todo
 
+# 命名は無効化せず、長さの上限だけ緩める。
+# 下線や記号の混入は検出したい（Xcode 生成の型名はこれで見つかった）。
+type_name:
+  max_length: 60
+identifier_name:
+  min_length: 1
+  max_length: 60
+
+# force_cast / force_try は既定のまま有効にする。
+# 個別に必要な箇所は // swiftlint:disable:next で意図を残す。
 opt_in_rules:
   - empty_count
   - closure_spacing
   - redundant_nil_coalescing
+  - explicit_init
+  - first_where
+  - toggle_bool
