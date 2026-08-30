@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/yossibank/kmp-app-template.git",
       "state" : {
-        "revision" : "2f4cb826cfcb18bb1e293da0df5558452e95de34",
-        "version" : "0.2.0"
+        "revision" : "4105648a233761f05498bf6c5b27e8256dd57531",
+        "version" : "0.3.0"
       }
     }
   ],
