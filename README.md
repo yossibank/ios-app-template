@@ -19,8 +19,6 @@ make verify   # ビルド + ユニットテスト
 make test-ui  # UI テストも実行する
 ```
 
-スキームは共有済みなので、clone 直後や CI でも `-scheme ios-app-template` が解決できる。
-
 ## 関連リポジトリ
 
 - [android-app-template](https://github.com/yossibank/android-app-template)
