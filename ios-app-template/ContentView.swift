@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Shared
 
 struct ContentView: View {
     var body: some View {
@@ -13,7 +14,8 @@ struct ContentView: View {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
-            Text("Hello, world!")
+            // 文言は共通コア（kmp-app-template）から取得する。
+            Text(Greeting().greet())
         }
         .padding()
     }

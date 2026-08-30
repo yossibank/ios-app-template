@@ -4,6 +4,9 @@ iOS アプリ。SwiftUI の 1 画面のみの最小構成。
 
 ## 検証
 
+clone 直後と kmp-app-template を変更した後は `make bootstrap`（XCFramework の生成）を先に実行する。
+共通コアは現在ローカル参照で、`../kmp-app-template` に checkout されている前提。
+
 変更したら必ず通す。通らないものは完了ではない。
 
 ```sh
