@@ -36,22 +36,16 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7829F5433043F3F80052BC9D /* ios-app-template */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = "ios-app-template";
 			sourceTree = "<group>";
 		};
 		7829F5513043F3FA0052BC9D /* ios-app-templateTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = "ios-app-templateTests";
 			sourceTree = "<group>";
 		};
 		7829F55B3043F3FA0052BC9D /* ios-app-templateUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = "ios-app-templateUITests";
 			sourceTree = "<group>";
 		};
@@ -83,13 +77,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		703A8C58B4BB7CD87C3ADD5C /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 		7829F5383043F3F80052BC9D = {
 			isa = PBXGroup;
 			children = (
@@ -97,7 +84,6 @@
 				7829F5513043F3FA0052BC9D /* ios-app-templateTests */,
 				7829F55B3043F3FA0052BC9D /* ios-app-templateUITests */,
 				7829F5423043F3F80052BC9D /* Products */,
-				703A8C58B4BB7CD87C3ADD5C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};

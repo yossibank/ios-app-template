@@ -1,12 +1,5 @@
-//
-//  ContentView.swift
-//  ios-app-template
-//
-//  Created by Kamiyama Yoshihito on 2026/08/30.
-//
-
-import SwiftUI
 import Shared
+import SwiftUI
 
 struct ContentView: View {
     var body: some View {

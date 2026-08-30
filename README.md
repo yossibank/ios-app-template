@@ -24,6 +24,8 @@ flowchart LR
 | `make test-ui` | UI テストも実行する（時間がかかる） |
 | `make build` | ビルドのみ |
 | `make verify SIMULATOR='iPhone 17'` | シミュレータを指定して実行 |
+| `make lint` | SwiftFormat / SwiftLint によるチェック（`make verify` に含まれる） |
+| `make format` | SwiftFormat / SwiftLint で自動修正 |
 
 ## 環境
 

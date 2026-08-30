@@ -53,5 +53,11 @@ jobs:
             password ${SHARED_CORE_TOKEN}
           NETRC
 
+      # ランナーに入っていない場合に備える。入っていれば即座に抜ける。
+      - name: Install lint tools
+        run: |
+          command -v swiftformat >/dev/null || brew install swiftformat
+          command -v swiftlint   >/dev/null || brew install swiftlint
+
       - name: Verify
         run: make verify

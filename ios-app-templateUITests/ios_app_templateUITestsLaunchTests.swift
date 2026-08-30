@@ -1,15 +1,7 @@
-//
-//  ios_app_templateUITestsLaunchTests.swift
-//  ios-app-templateUITests
-//
-//  Created by Kamiyama Yoshihito on 2026/08/30.
-//
-
 import XCTest
 
-final class ios_app_templateUITestsLaunchTests: XCTestCase {
-
-    override class var runsForEachTargetApplicationUIConfiguration: Bool {
+final class IOSAppTemplateUITestsLaunchTests: XCTestCase {
+    override static var runsForEachTargetApplicationUIConfiguration: Bool {
         true
     }
 
@@ -18,7 +10,7 @@ final class ios_app_templateUITestsLaunchTests: XCTestCase {
     }
 
     @MainActor
-    func testLaunch() throws {
+    func testLaunch() {
         let app = XCUIApplication()
         app.launch()
 
