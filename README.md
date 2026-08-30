@@ -21,7 +21,6 @@ flowchart LR
 | コマンド | 内容 |
 | --- | --- |
 | `make verify` | ビルド + ユニットテスト（変更後はこれを通す） |
-| `make test-ui` | UI テストも実行する（時間がかかる） |
 | `make build` | ビルドのみ |
 | `make verify SIMULATOR='iPhone 17'` | シミュレータを指定して実行 |
 | `make lint` | SwiftFormat / SwiftLint によるチェック（`make verify` に含まれる） |

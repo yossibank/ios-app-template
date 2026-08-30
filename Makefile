@@ -3,7 +3,7 @@ PROJECT   := ios-app-template.xcodeproj
 SIMULATOR ?= iPhone 17 Pro
 DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 
-.PHONY: verify lint format build test test-ui clean
+.PHONY: verify lint format build test clean
 
 # 変更後に必ず通すもの。xcodebuild test はビルドを含む。
 verify: lint test
@@ -20,12 +20,7 @@ format:
 build:
 	xcodebuild build -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)'
 
-# ユニットテストのみ。UI テストは時間がかかるため除外する。
 test:
-	xcodebuild test -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' \
-		-skip-testing:ios-app-templateUITests
-
-test-ui:
 	xcodebuild test -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)'
 
 clean:
