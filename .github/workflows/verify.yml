@@ -1,0 +1,41 @@
+name: Verify
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+
+permissions:
+  contents: read
+
+env:
+  DEVELOPER_DIR: /Applications/Xcode.app
+
+jobs:
+  verify:
+    name: Build and test
+    runs-on: macos-26
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      # SPM は binaryTarget のダウンロードに netrc の資格情報を使う。
+      # 共通コアは別リポジトリの Release アセットにあるため認証が必要。
+      - name: Configure netrc
+        run: |
+          umask 077
+          cat > "$HOME/.netrc" <<'NETRC'
+          machine api.github.com
+            login ${{ github.actor }}
+            password ${{ secrets.GITHUB_TOKEN }}
+          NETRC
+
+      - name: Verify
+        run: make verify
