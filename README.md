@@ -23,9 +23,7 @@ flowchart LR
 | `make verify` | ビルド + ユニットテスト（変更後はこれを通す） |
 | `make test-ui` | UI テストも実行する（時間がかかる） |
 | `make build` | ビルドのみ |
-
-Xcode で作業する場合は `ios-app-template.xcodeproj` を開く。
-シミュレータを変えるときは `make verify SIMULATOR='iPhone 17'`。
+| `make verify SIMULATOR='iPhone 17'` | シミュレータを指定して実行 |
 
 ## 環境
 
