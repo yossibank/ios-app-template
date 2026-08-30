@@ -18,13 +18,6 @@
 			remoteGlobalIDString = 7829F5403043F3F80052BC9D;
 			remoteInfo = "ios-app-template";
 		};
-		7829F5593043F3FA0052BC9D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7829F5393043F3F80052BC9D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7829F5403043F3F80052BC9D;
-			remoteInfo = "ios-app-template";
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -45,13 +38,6 @@
 			exceptions = (
 			);
 			path = "ios-app-templateTests";
-			sourceTree = "<group>";
-		};
-		7829F55B3043F3FA0052BC9D /* ios-app-templateUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			path = "ios-app-templateUITests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -80,7 +66,6 @@
 			children = (
 				7829F5433043F3F80052BC9D /* ios-app-template */,
 				7829F5513043F3FA0052BC9D /* ios-app-templateTests */,
-				7829F55B3043F3FA0052BC9D /* ios-app-templateUITests */,
 				7829F5423043F3F80052BC9D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -450,44 +435,6 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ios-app-template.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ios-app-template";
-			};
-			name = Release;
-		};
-		7829F5693043F3FA0052BC9D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yossibank-yahoo.co.jp.ios-app-templateUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "ios-app-template";
-			};
-			name = Debug;
-		};
-		7829F56A3043F3FA0052BC9D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yossibank-yahoo.co.jp.ios-app-templateUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = "ios-app-template";
 			};
 			name = Release;
 		};
