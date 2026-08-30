@@ -32,3 +32,4 @@ flowchart LR
 | Xcode | 26.x |
 | Swift | 5.0 |
 | Deployment Target | iOS 26.5 |
+| 認証 | `~/.netrc` に `api.github.com` の資格情報（共通コアの取得に必要） |
