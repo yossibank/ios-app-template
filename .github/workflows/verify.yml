@@ -30,6 +30,13 @@ jobs:
       #   github.com     … Package.swift を読むための git clone
       #   api.github.com … binaryTarget の Release アセットのダウンロード
       # 共通コアが private の場合、どちらか一方でも欠けると解決に失敗する。
+      # git は netrc を既定で読まないため、clone 用の資格情報は別に設定する。
+      - name: Configure git credentials
+        run: |
+          git config --global \
+            url."https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf \
+            "https://github.com/"
+
       - name: Configure netrc
         run: |
           umask 077
