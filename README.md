@@ -12,7 +12,14 @@ iOS アプリの初期テンプレート。SwiftUI の 1 画面のみを含む�
 
 ## ビルド
 
-`ios-app-template.xcodeproj` を Xcode で開いて実行する。
+`ios-app-template.xcodeproj` を Xcode で開いて実行する。コマンドラインからは以下。
+
+```sh
+make verify   # ビルド + ユニットテスト
+make test-ui  # UI テストも実行する
+```
+
+スキームは共有済みなので、clone 直後や CI でも `-scheme ios-app-template` が解決できる。
 
 ## 関連リポジトリ
 
