@@ -1,6 +1,6 @@
 # ios-app-template
 
-> iOS アプリの初期テンプレート。SwiftUI の 1 画面のみを含む最小構成。
+> iOS アプリの初期テンプレート。画面とロジックはローカル SPM パッケージに分割している。
 
 ## 3 リポジトリの関係
 
@@ -16,11 +16,41 @@ flowchart LR
 [android-app-template](https://github.com/yossibank/android-app-template) ・
 [kmp-app-template](https://github.com/yossibank/kmp-app-template)
 
+## モジュール構成
+
+```mermaid
+flowchart LR
+    SHARED["Shared<br/><i>共通コア</i>"]
+    CORE["Core"]
+    HOME["FeatureHome"]
+    ROOT["AppRoot"]
+    APP["ios-app-template.app"]
+    SHARED --> CORE --> HOME --> ROOT --> APP
+```
+
+| モジュール | 役割 |
+| --- | --- |
+| `Core` | 共通コアの入口。`Shared` を import してよいのはここだけ |
+| `FeatureHome` | 画面 1 つ分。機能ごとに `Feature<名前>` を並べる |
+| `AppRoot` | 画面の組み立て |
+| アプリターゲット | 起動と Assets のみ |
+
+```
+Package/
+├── Package.swift          # 依存とモジュールの宣言（共通コアのバージョンもここ）
+└── Sources/
+    ├── Core/
+    ├── FeatureHome/
+    └── AppRoot/
+ios-app-template/          # @main と Assets
+ios-app-templateTests/
+```
+
 ## コマンド
 
 | コマンド | 内容 |
 | --- | --- |
-| `make verify` | ビルド + ユニットテスト（変更後はこれを通す） |
+| `make verify` | lint + ビルド + ユニットテスト（変更後はこれを通す） |
 | `make build` | ビルドのみ |
 | `make verify SIMULATOR='iPhone 17'` | シミュレータを指定して実行 |
 | `make lint` | SwiftFormat / SwiftLint によるチェック（`make verify` に含まれる） |
@@ -31,6 +61,6 @@ flowchart LR
 | 項目 | バージョン |
 | --- | --- |
 | Xcode | 26.x |
-| Swift | 5.0 |
-| Deployment Target | iOS 26.5 |
+| Swift 言語モード | アプリターゲット 5 / `Package` 6（swift-tools-version 6.2） |
+| Deployment Target | iOS 26.5（`Package.swift` は `.iOS(.v26)`） |
 | 認証 | `~/.netrc` に `api.github.com` の資格情報（共通コアの取得に必要） |

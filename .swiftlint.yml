@@ -1,4 +1,5 @@
 included:
+  - Package/Sources
   - ios-app-template
   - ios-app-templateTests
 

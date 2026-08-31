@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D74A4CB25ABB33040D1B0546 /* Shared in Frameworks */ = {isa = PBXBuildFile; productRef = A561BECD362AA926608EC6C0 /* Shared */; };
+		D74A4CB25ABB33040D1B0546 /* AppRoot in Frameworks */ = {isa = PBXBuildFile; productRef = A561BECD362AA926608EC6C0 /* AppRoot */; };
+		C0RE0000000000000000B001 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = C0RE0000000000000000A001 /* Core */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,7 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D74A4CB25ABB33040D1B0546 /* Shared in Frameworks */,
+				D74A4CB25ABB33040D1B0546 /* AppRoot in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0RE0000000000000000B001 /* Core in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,7 +101,7 @@
 			);
 			name = "ios-app-template";
 			packageProductDependencies = (
-				A561BECD362AA926608EC6C0 /* Shared */,
+				A561BECD362AA926608EC6C0 /* AppRoot */,
 			);
 			productName = "ios-app-template";
 			productReference = 7829F5413043F3F80052BC9D /* ios-app-template.app */;
@@ -122,6 +124,9 @@
 				7829F5513043F3FA0052BC9D /* ios-app-templateTests */,
 			);
 			name = "ios-app-templateTests";
+			packageProductDependencies = (
+				C0RE0000000000000000A001 /* Core */,
+			);
 			productName = "ios-app-templateTests";
 			productReference = 7829F54E3043F3FA0052BC9D /* ios-app-templateTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -159,7 +164,7 @@
 			mainGroup = 7829F5383043F3F80052BC9D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				1A8BEFE0B33C313C2509957F /* XCRemoteSwiftPackageReference "kmp-app-template" */,
+				1A8BEFE0B33C313C2509957F /* XCLocalSwiftPackageReference "Package" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7829F5423043F3F80052BC9D /* Products */;
@@ -470,22 +475,21 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		1A8BEFE0B33C313C2509957F /* XCRemoteSwiftPackageReference "kmp-app-template" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/yossibank/kmp-app-template.git";
-			requirement = {
-				kind = exactVersion;
-				version = 0.5.0;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		1A8BEFE0B33C313C2509957F /* XCLocalSwiftPackageReference "Package" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Package;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		A561BECD362AA926608EC6C0 /* Shared */ = {
+		A561BECD362AA926608EC6C0 /* AppRoot */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1A8BEFE0B33C313C2509957F /* XCRemoteSwiftPackageReference "kmp-app-template" */;
-			productName = Shared;
+			productName = AppRoot;
+		};
+		C0RE0000000000000000A001 /* Core */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Core;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

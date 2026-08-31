@@ -1,8 +1,10 @@
-import Shared
+import Core
 import SwiftUI
 
-struct ContentView: View {
-    var body: some View {
+public struct HomeView: View {
+    public init() {}
+
+    public var body: some View {
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
@@ -15,5 +17,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    HomeView()
 }
