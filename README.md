@@ -35,6 +35,8 @@ flowchart LR
 | `AppRoot` | 画面の組み立て |
 | アプリターゲット | 起動と Assets のみ |
 
+`Core` 以外から `import Shared` した場合は SwiftLint が error として落とす（`shared_import_outside_core`）。
+
 ```
 Package/
 ├── Package.swift          # 依存とモジュールの宣言（共通コアのバージョンもここ）
@@ -61,6 +63,6 @@ ios-app-templateTests/
 | 項目 | バージョン |
 | --- | --- |
 | Xcode | 26.x |
-| Swift 言語モード | アプリターゲット 5 / `Package` 6（swift-tools-version 6.2） |
+| Swift 言語モード | 6（アプリターゲット・`Package` とも） |
 | Deployment Target | iOS 26.5（`Package.swift` は `.iOS(.v26)`） |
 | 認証 | `~/.netrc` に `api.github.com` の資格情報（共通コアの取得に必要） |

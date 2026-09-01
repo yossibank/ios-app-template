@@ -19,9 +19,10 @@ Xcode プロジェクト側はアプリの起動と Assets だけを持つ。
 
 ## 規約
 
-- **Feature から直接 `import Shared` しない。** 共通コアは `Core` 経由で使う。
+- **`Core` 以外から `import Shared` しない。** 共通コアは `Core` 経由で使う。
   ビルドシステムでは防げない（依存に宣言していなくても `import Shared` は通ることを確認済み）ため、
-  規約として守る。
+  SwiftLint の custom rule `shared_import_outside_core` が error として検出する。
+  共通コアを直接扱うモジュールを増やすときは、`.swiftlint.yml` の `excluded` に足す。
 - 機能を足すときは `Package/Sources/Feature<名前>/` を作り、`Package.swift` に
   target と product を 1 つずつ足す。フォルダは平坦のまま。
 - UI は SwiftUI のみ。UIKit を使う場合は必要な箇所に閉じる。
