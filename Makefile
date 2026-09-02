@@ -9,7 +9,7 @@ SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO
 
 .PHONY: verify lint format build test clean
 
-# 変更後に必ず通すもの。xcodebuild test はビルドを含む。
+# xcodebuild test はビルドを含む。
 verify: lint test
 
 lint:

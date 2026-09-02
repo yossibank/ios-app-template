@@ -13,9 +13,8 @@ permissions:
 
 env:
   DEVELOPER_DIR: /Applications/Xcode.app
-  # 共通コアが private の場合、GITHUB_TOKEN では別リポジトリを clone できない
-  # （remote: Repository not found. になる）。その場合は SHARED_CORE_TOKEN に
-  # repo スコープを持つ PAT を登録する。public の間は GITHUB_TOKEN で足りる。
+  # 共通コアが private の場合、GITHUB_TOKEN では別リポジトリを clone できない。
+  # その場合は SHARED_CORE_TOKEN に repo スコープを持つ PAT を登録する。
   SHARED_CORE_TOKEN: ${{ secrets.SHARED_CORE_TOKEN || secrets.GITHUB_TOKEN }}
 
 jobs:
@@ -30,11 +29,9 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      # SPM は 2 か所で認証を要求する。
-      #   github.com     … Package.swift を読むための git clone
-      #   api.github.com … binaryTarget の Release アセットのダウンロード
-      # 共通コアが private の場合、どちらか一方でも欠けると解決に失敗する。
-      # git は netrc を既定で読まないため、clone 用の資格情報は別に設定する。
+      # SPM は github.com（clone）と api.github.com（アセット取得）の 2 か所で
+      # 認証を要求し、片方でも欠けると解決に失敗する。
+      # git は netrc を読まないため、clone 用は別に設定する。
       - name: Configure git credentials
         run: |
           git config --global \
