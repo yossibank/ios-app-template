@@ -25,6 +25,10 @@ Xcode プロジェクト側はアプリの起動と Assets だけを持つ。
   共通コアを直接扱うモジュールを増やすときは、`.swiftlint.yml` の `excluded` に足す。
 - 機能を足すときは `Package/Sources/Feature<名前>/` を作り、`Package.swift` に
   target と product を 1 つずつ足す。フォルダは平坦のまま。
+- 並行性の既定は層で分ける。UI 層（`Feature*` / `AppRoot`）で必要になったら
+  `Package.swift` の該当 target に `.defaultIsolation(MainActor.self)` を足す。
+  `Core` は nonisolated のままにする（共通コアの async / AsyncSequence を
+  既定でメインスレッドに寄せないため）。
 - UI は SwiftUI のみ。UIKit を使う場合は必要な箇所に閉じる。
 - 共通ロジックは kmp-app-template 側に置く。ここには iOS 固有のものだけ。
 
@@ -40,6 +44,11 @@ make verify   # lint + ビルド + ユニットテスト
 ```
 
 シミュレータを変えるときは `make verify SIMULATOR='iPhone 17'`。
+
+`Package/` のコードの警告は **Xcode.app では表示されない**。Xcode がパッケージ
+ターゲットに `-suppress-warnings` を渡すためで、プロジェクト設定でも `Package.swift`
+でも打ち消せない。`make` が `SWIFT_SUPPRESS_WARNINGS=NO` を渡して外しているので、
+警告は `make verify` で確認する。Xcode で警告ゼロに見えても根拠にならない。
 
 ## やってはいけない
 
