@@ -9,7 +9,6 @@ public struct HomeView: View {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
-            // 文言は共通コア（kmp-app-template）から取得する。
             Text(Greeting().greet())
         }
         .padding()

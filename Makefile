@@ -16,7 +16,6 @@ lint:
 	swiftformat --lint .
 	swiftlint lint
 
-# 自動修正できるものを直す。
 format:
 	swiftformat .
 	swiftlint --fix
