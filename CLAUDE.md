@@ -40,10 +40,14 @@ Xcode プロジェクト側はアプリの起動と Assets だけを持つ。
 変更したら必ず通す。通らないものは完了ではない。
 
 ```sh
-make verify   # lint + ビルド + ユニットテスト
+make verify   # lint + ビルド
 ```
 
 シミュレータを変えるときは `make verify SIMULATOR='iPhone 17'`。
+
+テストターゲットは無い。テストを書くときは Xcode で追加し、`make verify` に
+`test` を戻すこと。ターゲットが無い状態で `xcodebuild test` を呼ぶと
+`There are no test bundles available to test.` で失敗する。
 
 `Package/` のコードの警告は **Xcode.app では表示されない**。Xcode がパッケージ
 ターゲットに `-suppress-warnings` を渡すためで、プロジェクト設定でも `Package.swift`

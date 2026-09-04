@@ -7,10 +7,9 @@ DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 # Package/ 配下（＝このリポジトリのコードのほぼ全部）の警告が一切出ない。
 SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO
 
-.PHONY: verify lint format build test clean
+.PHONY: verify lint format build clean
 
-# xcodebuild test はビルドを含む。
-verify: lint test
+verify: lint build
 
 lint:
 	swiftformat --lint .
@@ -22,9 +21,6 @@ format:
 
 build:
 	xcodebuild build -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
-
-test:
-	xcodebuild test -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
 
 clean:
 	xcodebuild clean -project $(PROJECT) -scheme $(SCHEME)

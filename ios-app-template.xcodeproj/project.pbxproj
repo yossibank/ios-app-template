@@ -8,37 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		D74A4CB25ABB33040D1B0546 /* AppRoot in Frameworks */ = {isa = PBXBuildFile; productRef = A561BECD362AA926608EC6C0 /* AppRoot */; };
-		C0RE0000000000000000B001 /* Core in Frameworks */ = {isa = PBXBuildFile; productRef = C0RE0000000000000000A001 /* Core */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		7829F54F3043F3FA0052BC9D /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 7829F5393043F3F80052BC9D /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7829F5403043F3F80052BC9D;
-			remoteInfo = "ios-app-template";
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		7829F5413043F3F80052BC9D /* ios-app-template.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ios-app-template.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		7829F54E3043F3FA0052BC9D /* ios-app-templateTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "ios-app-templateTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		7829F5433043F3F80052BC9D /* ios-app-template */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = "ios-app-template";
-			sourceTree = "<group>";
-		};
-		7829F5513043F3FA0052BC9D /* ios-app-templateTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			path = "ios-app-templateTests";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -52,14 +31,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7829F54B3043F3FA0052BC9D /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C0RE0000000000000000B001 /* Core in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -67,7 +38,6 @@
 			isa = PBXGroup;
 			children = (
 				7829F5433043F3F80052BC9D /* ios-app-template */,
-				7829F5513043F3FA0052BC9D /* ios-app-templateTests */,
 				7829F5423043F3F80052BC9D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -76,7 +46,6 @@
 			isa = PBXGroup;
 			children = (
 				7829F5413043F3F80052BC9D /* ios-app-template.app */,
-				7829F54E3043F3FA0052BC9D /* ios-app-templateTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,30 +76,6 @@
 			productReference = 7829F5413043F3F80052BC9D /* ios-app-template.app */;
 			productType = "com.apple.product-type.application";
 		};
-		7829F54D3043F3FA0052BC9D /* ios-app-templateTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7829F5653043F3FA0052BC9D /* Build configuration list for PBXNativeTarget "ios-app-templateTests" */;
-			buildPhases = (
-				7829F54A3043F3FA0052BC9D /* Sources */,
-				7829F54B3043F3FA0052BC9D /* Frameworks */,
-				7829F54C3043F3FA0052BC9D /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				7829F5503043F3FA0052BC9D /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				7829F5513043F3FA0052BC9D /* ios-app-templateTests */,
-			);
-			name = "ios-app-templateTests";
-			packageProductDependencies = (
-				C0RE0000000000000000A001 /* Core */,
-			);
-			productName = "ios-app-templateTests";
-			productReference = 7829F54E3043F3FA0052BC9D /* ios-app-templateTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -143,14 +88,6 @@
 				TargetAttributes = {
 					7829F5403043F3F80052BC9D = {
 						CreatedOnToolsVersion = 26.6;
-					};
-					7829F54D3043F3FA0052BC9D = {
-						CreatedOnToolsVersion = 26.6;
-						TestTargetID = 7829F5403043F3F80052BC9D;
-					};
-					7829F5573043F3FA0052BC9D = {
-						CreatedOnToolsVersion = 26.6;
-						TestTargetID = 7829F5403043F3F80052BC9D;
 					};
 				};
 			};
@@ -172,20 +109,12 @@
 			projectRoot = "";
 			targets = (
 				7829F5403043F3F80052BC9D /* ios-app-template */,
-				7829F54D3043F3FA0052BC9D /* ios-app-templateTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		7829F53F3043F3F80052BC9D /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7829F54C3043F3FA0052BC9D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -202,22 +131,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7829F54A3043F3FA0052BC9D /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		7829F5503043F3FA0052BC9D /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7829F5403043F3F80052BC9D /* ios-app-template */;
-			targetProxy = 7829F54F3043F3FA0052BC9D /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		7829F5603043F3FA0052BC9D /* Debug */ = {
@@ -401,48 +315,6 @@
 			};
 			name = Release;
 		};
-		7829F5663043F3FA0052BC9D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yossibank-yahoo.co.jp.ios-app-templateTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ios-app-template.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ios-app-template";
-			};
-			name = Debug;
-		};
-		7829F5673043F3FA0052BC9D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "yossibank-yahoo.co.jp.ios-app-templateTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ios-app-template.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/ios-app-template";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -464,15 +336,6 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7829F5653043F3FA0052BC9D /* Build configuration list for PBXNativeTarget "ios-app-templateTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7829F5663043F3FA0052BC9D /* Debug */,
-				7829F5673043F3FA0052BC9D /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -486,10 +349,6 @@
 		A561BECD362AA926608EC6C0 /* AppRoot */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = AppRoot;
-		};
-		C0RE0000000000000000A001 /* Core */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Core;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

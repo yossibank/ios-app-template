@@ -19,7 +19,7 @@ env:
 
 jobs:
   verify:
-    name: Build and test
+    name: Build
     runs-on: macos-26
 
     steps:

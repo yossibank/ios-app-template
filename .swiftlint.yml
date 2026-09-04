@@ -1,7 +1,6 @@
 included:
   - Package/Sources
   - ios-app-template
-  - ios-app-templateTests
 
 disabled_rules:
   # --- SwiftFormat が担当する書式。二重に強制すると衝突する ---
