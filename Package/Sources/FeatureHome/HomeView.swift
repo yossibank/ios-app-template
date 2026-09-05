@@ -2,9 +2,18 @@ import Core
 import SwiftUI
 
 public struct HomeView: View {
+    private let load: () async -> PokemonListResult?
+
     @State private var result: PokemonListResult?
 
-    public init() {}
+    /// 失敗は Failed として返るため、throw はキャンセル時だけ。
+    public init() {
+        self.init { try? await PokemonApi().fetchPage(limit: 20, offset: 0) }
+    }
+
+    public init(load: @escaping () async -> PokemonListResult?) {
+        self.load = load
+    }
 
     public var body: some View {
         Group {
@@ -26,13 +35,28 @@ public struct HomeView: View {
                 ProgressView()
             }
         }
-        .task {
-            // 失敗は Failed として返るため、throw はキャンセル時だけ。
-            result = try? await PokemonApi().fetchPage(limit: 20, offset: 0)
-        }
+        .task { result = await load() }
     }
 }
 
-#Preview {
-    HomeView()
+#Preview("一覧") {
+    Text("HOGE")
+//    HomeView {
+//        PokemonListResultLoaded(
+//            pokemon: [
+//                PokemonSummary(name: "bulbasaur", url: "https://pokeapi.co/api/v2/pokemon/1/"),
+//                PokemonSummary(name: "ivysaur", url: "https://pokeapi.co/api/v2/pokemon/2/"),
+//                PokemonSummary(name: "venusaur", url: "https://pokeapi.co/api/v2/pokemon/3/")
+//            ],
+//            hasMore: true
+//        )
+//    }
+}
+
+#Preview("失敗") {
+    HomeView { PokemonListResultFailed(message: "ネットワークに接続できません") }
+}
+
+#Preview("読み込み中") {
+    HomeView { nil }
 }
