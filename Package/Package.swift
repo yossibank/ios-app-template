@@ -8,7 +8,8 @@ let package = Package(
         .iOS(.v26)
     ],
     products: [
-        .library(name: "Core", targets: ["Core"]),
+        .library(name: "ScreenCore", targets: ["ScreenCore"]),
+        .library(name: "SharedCore", targets: ["SharedCore"]),
         .library(name: "FeatureHome", targets: ["FeatureHome"]),
         .library(name: "AppRoot", targets: ["AppRoot"])
     ],
@@ -19,15 +20,18 @@ let package = Package(
         )
     ],
     targets: [
+        // 画面の土台。純粋な Swift / SwiftUI で、共通コアに依存しない。
+        .target(name: "ScreenCore"),
+        // 共通コアを import してよい唯一のモジュール。
         .target(
-            name: "Core",
+            name: "SharedCore",
             dependencies: [
                 .product(name: "Shared", package: "kmp-app-template")
             ]
         ),
         .target(
             name: "FeatureHome",
-            dependencies: ["Core"]
+            dependencies: ["ScreenCore", "SharedCore"]
         ),
         .target(
             name: "AppRoot",

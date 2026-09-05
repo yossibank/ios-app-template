@@ -43,11 +43,12 @@ custom_rules:
   shared_import_outside_core:
     name: "共通コアの直接 import"
     regex: '^[ \t]*(@_exported[ \t]+)?import[ \t]+Shared\b'
-    message: "共通コアは Core 経由で使う。Core 以外から import Shared しない"
+    message: "共通コアは SharedCore 経由で使う。SharedCore 以外から import Shared しない"
     severity: error
     excluded_match_kinds:
       - comment
       - doccomment
       - string
     excluded:
-      - ".*/Package/Sources/Core/.*"
+      - ".*/Package/Sources/SharedCore/.*"
+

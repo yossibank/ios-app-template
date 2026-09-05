@@ -1,49 +1,34 @@
-import Core
 import Observation
+import ScreenCore
+import SharedCore
 
 @MainActor
 @Observable
-public final class HomeViewModel: ScreenModel {
-    public private(set) var phase: Phase<[PokemonSummary]> = .loading
-    public var destination: NoDestination?
+public final class HomeViewModel: ScreenViewModel {
+    public struct Dependency {
+        public var api: PokemonApi
 
-    /// スタブでは nil。`load()` は状態を触らずに戻る。
-    private let fetchPage: ((Int32, Int32) async -> PokemonListResult?)?
-
-    /// 失敗は Failed として返るため、throw はキャンセル時だけ。
-    public init(
-        fetchPage: @escaping (Int32, Int32) async -> PokemonListResult? = {
-            try? await PokemonApi().fetchPage(limit: $0, offset: $1)
+        public init(api: PokemonApi = PokemonApi()) {
+            self.api = api
         }
-    ) {
-        self.fetchPage = fetchPage
     }
 
-    /// プレビューとテスト用。通信せずに状態だけを固定する。
-    public init(phase: Phase<[PokemonSummary]>) {
-        self.phase = phase
-        self.fetchPage = nil
+    public let screen = ScreenState<[PokemonSummary]>()
+    public let dependency: Dependency
+
+    public init(dependency: Dependency = .init()) {
+        self.dependency = dependency
     }
 
-    public func load() async {
-        guard let fetchPage else {
-            return
-        }
-
-        phase = .loading
-
-        guard let result = await fetchPage(Self.pageSize, 0) else {
-            return
-        }
+    public func fetch() async throws -> [PokemonSummary] {
+        let result = try await dependency.api.fetchPage(limit: 20, offset: 0)
 
         switch onEnum(of: result) {
         case let .loaded(loaded):
-            phase = .loaded(loaded.pokemon)
+            return loaded.pokemon
 
         case let .failed(failed):
-            phase = .failed(failed.message)
+            throw ScreenFailure(failed.message)
         }
     }
-
-    private static let pageSize: Int32 = 20
 }
