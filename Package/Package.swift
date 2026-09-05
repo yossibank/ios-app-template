@@ -36,6 +36,10 @@ let package = Package(
         .target(
             name: "AppRoot",
             dependencies: ["FeatureHome"]
+        ),
+        .testTarget(
+            name: "FeatureHomeTests",
+            dependencies: ["FeatureHome"]
         )
     ]
 )

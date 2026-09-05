@@ -3,19 +3,19 @@ import SharedCore
 import SwiftUI
 
 public struct HomeView: View {
-    private let source: ScreenSource<HomeViewModel>
-
-    public init(_ source: ScreenSource<HomeViewModel> = .live(HomeViewModel())) {
-        self.source = source
-    }
+    let source: ScreenSource<HomeViewModel>
 
     public var body: some View {
-        NavigationStack {
-            ScreenView(source) { viewState, pokemon in
-                HomeContent(viewState: viewState, pokemon: pokemon)
-            }
-            .navigationTitle("ポケモン")
+        ScreenView(source) { viewState, pokemon in
+            HomeContent(viewState: viewState, pokemon: pokemon)
         }
+        .navigationTitle("ポケモン")
+    }
+}
+
+public extension HomeView {
+    init() {
+        self.init(source: .live(HomeViewModel()))
     }
 }
 
@@ -50,9 +50,22 @@ private struct HomeContent: View {
 }
 
 #Preview("一覧") {
-    HomeView(.snapshot(.loaded([
-        PokemonSummary(name: "bulbasaur", url: "https://pokeapi.co/api/v2/pokemon/1/"),
-        PokemonSummary(name: "ivysaur", url: "https://pokeapi.co/api/v2/pokemon/2/"),
-        PokemonSummary(name: "venusaur", url: "https://pokeapi.co/api/v2/pokemon/3/")
-    ])))
+    HomeView(
+        source: .snapshot(
+            .loaded([
+                PokemonSummary(
+                    name: "bulbasaur",
+                    url: "https://pokeapi.co/api/v2/pokemon/1/"
+                ),
+                PokemonSummary(
+                    name: "ivysaur",
+                    url: "https://pokeapi.co/api/v2/pokemon/2/"
+                ),
+                PokemonSummary(
+                    name: "venusaur",
+                    url: "https://pokeapi.co/api/v2/pokemon/3/"
+                )
+            ])
+        )
+    )
 }

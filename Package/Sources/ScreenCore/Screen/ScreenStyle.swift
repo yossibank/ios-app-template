@@ -5,11 +5,6 @@ public struct ScreenStyle {
         public let error: any Error
         public let retry: () -> Void
 
-        public init(error: any Error, retry: @escaping () -> Void) {
-            self.error = error
-            self.retry = retry
-        }
-
         public var message: String {
             error.localizedDescription
         }

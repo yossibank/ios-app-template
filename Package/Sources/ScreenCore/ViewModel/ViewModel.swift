@@ -8,7 +8,7 @@ public protocol ViewModel: AnyObject, Observable {
     var viewState: State { get }
     var dependency: Dependency { get }
 
-    init(dependency: Dependency)
+    init()
 }
 
 public extension ViewModel where State == EmptyViewState {

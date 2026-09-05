@@ -4,31 +4,22 @@ import SharedCore
 
 @MainActor
 @Observable
-public final class HomeViewModel: ScreenViewModel {
-    @Observable
-    public final class State: ViewState {
-        public var query = ""
+final class HomeViewModel: ScreenViewModel {
+    let viewState = State()
+    let fetchState = FetchState<[PokemonSummary]>()
+    let dependency: Dependency
 
-        public init() {}
+    convenience init() {
+        self.init(dependency: .init())
     }
 
-    public struct Dependency {
-        public var api: PokemonApi
-
-        public init(api: PokemonApi = PokemonApi()) {
-            self.api = api
-        }
-    }
-
-    public let viewState = State()
-    public let fetchState = FetchState<[PokemonSummary]>()
-    public let dependency: Dependency
-
-    public init(dependency: Dependency = .init()) {
+    init(dependency: Dependency) {
         self.dependency = dependency
     }
+}
 
-    public func fetch() async throws -> [PokemonSummary] {
+extension HomeViewModel {
+    func fetch() async throws -> [PokemonSummary] {
         let result = try await dependency.api.fetchPage(limit: 20, offset: 0)
 
         switch onEnum(of: result) {
@@ -38,5 +29,16 @@ public final class HomeViewModel: ScreenViewModel {
         case let .failed(failed):
             throw FetchFailure(failed.message)
         }
+    }
+}
+
+extension HomeViewModel {
+    @Observable
+    final class State: ViewState {
+        var query = ""
+    }
+
+    struct Dependency {
+        var api: any PokemonFetching = PokemonApi()
     }
 }

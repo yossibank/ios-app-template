@@ -1,5 +1,3 @@
-import Foundation
-
 public enum FetchPhase<Value> {
     case idle
     case loading
