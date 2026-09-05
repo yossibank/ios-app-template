@@ -3,8 +3,8 @@ import Observation
 
 @MainActor
 @Observable
-public final class ScreenState<Value> {
-    public private(set) var phase: ScreenPhase<Value> = .idle
+public final class FetchState<Value> {
+    public private(set) var phase: FetchPhase<Value> = .idle
 
     private(set) var reloadID = UUID()
 
@@ -26,12 +26,6 @@ public final class ScreenState<Value> {
         activeRequest = request
         phase = .loading
 
-        defer {
-            if activeRequest == request {
-                activeRequest = nil
-            }
-        }
-
         do {
             let value = try await operation()
 
@@ -43,11 +37,8 @@ public final class ScreenState<Value> {
 
             phase = .loaded(value)
         } catch {
-            guard activeRequest == request else {
-                return
-            }
-
             guard
+                activeRequest == request,
                 !Task.isCancelled,
                 !(error is CancellationError)
             else {

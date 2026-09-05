@@ -1,5 +1,5 @@
 {
-  "originHash" : "173cf7a02ab0a4e25a3f0f0e3bb7c079ce2230792be76242ebcebf4593827dbc",
+  "originHash" : "92622fdc2c3853d9cc7c4942dd3b2a5943e1f193fd39e05c2ce8ab565356463e",
   "pins" : [
     {
       "identity" : "kmp-app-template",
@@ -8,15 +8,6 @@
       "state" : {
         "revision" : "283cbb100556018153ba553d4f15445df5c42bbc",
         "version" : "0.7.0"
-      }
-    },
-    {
-      "identity" : "swift-syntax",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swiftlang/swift-syntax.git",
-      "state" : {
-        "revision" : "79e4b74a295b6eb74a8b585e3a39d29e70c1dbd1",
-        "version" : "603.0.2"
       }
     }
   ],

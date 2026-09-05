@@ -3,7 +3,7 @@ import SwiftUI
 @MainActor
 public enum ScreenSource<Model: ScreenViewModel> {
     case live(Model)
-    case snapshot(ScreenPhase<Model.Value>)
+    case snapshot(FetchPhase<Model.Value>)
 }
 
 @MainActor
@@ -53,13 +53,16 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View>: View {
     }
 
     var body: some View {
-        PhaseView(
-            model.phase,
-            success: { success(model.state, $0) },
-            retry: model.reload
+        PhaseContent(model.fetchState.phase) {
+            success(model.viewState, $0)
+        }
+        .environment(
+            \.screenReload,
+            ScreenReloadAction {
+                model.reload()
+            }
         )
-        .environment(\.screenReload, ScreenReloadAction { model.reload() })
-        .task(id: model.screen.reloadID) {
+        .task(id: model.fetchState.reloadID) {
             await model.load()
         }
     }
@@ -67,13 +70,13 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View>: View {
 
 @MainActor
 private struct SnapshotScreen<Model: ScreenViewModel, Success: View>: View {
-    @State private var state = Model.State()
+    @State private var viewState = Model.State()
 
-    private let phase: ScreenPhase<Model.Value>
+    private let phase: FetchPhase<Model.Value>
     private let success: (Model.State, Model.Value) -> Success
 
     init(
-        _ phase: ScreenPhase<Model.Value>,
+        _ phase: FetchPhase<Model.Value>,
         @ViewBuilder success: @escaping (Model.State, Model.Value) -> Success
     ) {
         self.phase = phase
@@ -81,10 +84,39 @@ private struct SnapshotScreen<Model: ScreenViewModel, Success: View>: View {
     }
 
     var body: some View {
-        PhaseView(
-            phase,
-            success: { success(state, $0) },
-            retry: {}
-        )
+        PhaseContent(phase) {
+            success(viewState, $0)
+        }
+    }
+}
+
+private struct PhaseContent<Value, Success: View>: View {
+    @Environment(\.screenStyle) private var style
+    @Environment(\.screenReload) private var reload
+
+    private let phase: FetchPhase<Value>
+    private let success: (Value) -> Success
+
+    init(
+        _ phase: FetchPhase<Value>,
+        @ViewBuilder success: @escaping (Value) -> Success
+    ) {
+        self.phase = phase
+        self.success = success
+    }
+
+    var body: some View {
+        switch phase {
+        case .idle, .loading:
+            style.loading()
+
+        case let .loaded(value):
+            success(value)
+
+        case let .failed(error):
+            style.failure(
+                ScreenStyle.Failure(error: error) { reload() }
+            )
+        }
     }
 }

@@ -1,7 +1,5 @@
 included:
   - Package/Sources
-  - Macro/RequiresMacro/Sources
-  - Macro/RequiresMacro/Tests
   - App/AppTemplate
 
 disabled_rules:

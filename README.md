@@ -49,8 +49,6 @@ Package/
     ├── SharedCore/
     ├── FeatureHome/
     └── AppRoot/
-Macro/
-└── RequiresMacro/         # マクロ 1 つで 1 パッケージ
 ```
 
 ## コマンド

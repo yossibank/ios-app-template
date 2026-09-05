@@ -1,9 +1,14 @@
 import SwiftUI
 
-public struct PhaseViewStyle {
+public struct ScreenStyle {
     public struct Failure {
         public let error: any Error
         public let retry: () -> Void
+
+        public init(error: any Error, retry: @escaping () -> Void) {
+            self.error = error
+            self.retry = retry
+        }
 
         public var message: String {
             error.localizedDescription
@@ -13,9 +18,9 @@ public struct PhaseViewStyle {
     let loading: () -> AnyView
     let failure: (Failure) -> AnyView
 
-    public init<Loading: View, FailureBody: View>(
-        @ViewBuilder loading: @escaping () -> Loading,
-        @ViewBuilder failure: @escaping (Failure) -> FailureBody
+    public init(
+        @ViewBuilder loading: @escaping () -> some View,
+        @ViewBuilder failure: @escaping (Failure) -> some View
     ) {
         self.loading = {
             AnyView(loading())
@@ -26,8 +31,8 @@ public struct PhaseViewStyle {
         }
     }
 
-    public static var standard: PhaseViewStyle {
-        PhaseViewStyle(
+    public static var standard: ScreenStyle {
+        ScreenStyle(
             loading: {
                 ProgressView()
             },
@@ -45,11 +50,21 @@ public struct PhaseViewStyle {
 }
 
 public extension EnvironmentValues {
-    @Entry var phaseViewStyle: PhaseViewStyle = .standard
+    @Entry var screenStyle: ScreenStyle = .standard
 }
 
 public extension View {
-    func phaseViewStyle(_ style: PhaseViewStyle) -> some View {
-        environment(\.phaseViewStyle, style)
+    func screenStyle(_ style: ScreenStyle) -> some View {
+        environment(\.screenStyle, style)
     }
+}
+
+#Preview("読み込み中") {
+    ScreenStyle.standard.loading()
+}
+
+#Preview("失敗") {
+    ScreenStyle.standard.failure(
+        ScreenStyle.Failure(error: FetchFailure("ネットワークに接続できません")) {}
+    )
 }

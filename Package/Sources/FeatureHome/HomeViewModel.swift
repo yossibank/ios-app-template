@@ -4,8 +4,14 @@ import SharedCore
 
 @MainActor
 @Observable
-@Requires("Observable")
 public final class HomeViewModel: ScreenViewModel {
+    @Observable
+    public final class State: ViewState {
+        public var query = ""
+
+        public init() {}
+    }
+
     public struct Dependency {
         public var api: PokemonApi
 
@@ -14,7 +20,8 @@ public final class HomeViewModel: ScreenViewModel {
         }
     }
 
-    public let screen = ScreenState<[PokemonSummary]>()
+    public let viewState = State()
+    public let fetchState = FetchState<[PokemonSummary]>()
     public let dependency: Dependency
 
     public init(dependency: Dependency = .init()) {
@@ -29,7 +36,7 @@ public final class HomeViewModel: ScreenViewModel {
             return loaded.pokemon
 
         case let .failed(failed):
-            throw ScreenFailure(failed.message)
+            throw FetchFailure(failed.message)
         }
     }
 }

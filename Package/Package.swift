@@ -17,17 +17,11 @@ let package = Package(
         .package(
             url: "https://github.com/yossibank/kmp-app-template.git",
             exact: "0.7.0"
-        ),
-        .package(path: "../Macro/RequiresMacro")
+        )
     ],
     targets: [
         // 画面の土台。純粋な Swift / SwiftUI で、共通コアに依存しない。
-        .target(
-            name: "ScreenCore",
-            dependencies: [
-                .product(name: "RequiresMacro", package: "RequiresMacro")
-            ]
-        ),
+        .target(name: "ScreenCore"),
         // 共通コアを import してよい唯一のモジュール。
         .target(
             name: "SharedCore",
