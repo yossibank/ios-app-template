@@ -2,61 +2,32 @@ import Core
 import SwiftUI
 
 public struct HomeView: View {
-    private let load: () async -> PokemonListResult?
+    @State private var model: HomeViewModel
 
-    @State private var result: PokemonListResult?
-
-    /// 失敗は Failed として返るため、throw はキャンセル時だけ。
-    public init() {
-        self.init { try? await PokemonApi().fetchPage(limit: 20, offset: 0) }
-    }
-
-    public init(load: @escaping () async -> PokemonListResult?) {
-        self.load = load
+    public init(model: HomeViewModel = HomeViewModel()) {
+        _model = State(initialValue: model)
     }
 
     public var body: some View {
-        Group {
-            if let result {
-                switch onEnum(of: result) {
-                case let .loaded(loaded):
-                    List(loaded.pokemon, id: \.url) { pokemon in
-                        Text(pokemon.name)
-                    }
-
-                case let .failed(failed):
-                    ContentUnavailableView(
-                        "読み込めませんでした",
-                        systemImage: "exclamationmark.triangle",
-                        description: Text(failed.message)
-                    )
-                }
-            } else {
-                ProgressView()
-            }
+        PhaseView(model) { pokemon in
+            List(pokemon, id: \.url) { Text($0.name) }
         }
-        .task { result = await load() }
+        .task { await model.load() }
     }
 }
 
 #Preview("一覧") {
-    Text("HOGE")
-//    HomeView {
-//        PokemonListResultLoaded(
-//            pokemon: [
-//                PokemonSummary(name: "bulbasaur", url: "https://pokeapi.co/api/v2/pokemon/1/"),
-//                PokemonSummary(name: "ivysaur", url: "https://pokeapi.co/api/v2/pokemon/2/"),
-//                PokemonSummary(name: "venusaur", url: "https://pokeapi.co/api/v2/pokemon/3/")
-//            ],
-//            hasMore: true
-//        )
-//    }
+    HomeView(model: HomeViewModel(phase: .loaded([
+        PokemonSummary(name: "bulbasaur", url: "https://pokeapi.co/api/v2/pokemon/1/"),
+        PokemonSummary(name: "ivysaur", url: "https://pokeapi.co/api/v2/pokemon/2/"),
+        PokemonSummary(name: "venusaur", url: "https://pokeapi.co/api/v2/pokemon/3/")
+    ])))
 }
 
 #Preview("失敗") {
-    HomeView { PokemonListResultFailed(message: "ネットワークに接続できません") }
+    HomeView(model: HomeViewModel(phase: .failed("ネットワークに接続できません")))
 }
 
 #Preview("読み込み中") {
-    HomeView { nil }
+    HomeView(model: HomeViewModel(phase: .loading))
 }

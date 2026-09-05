@@ -7,7 +7,7 @@ Xcode プロジェクト側はアプリの起動と Assets だけを持つ。
 
 | モジュール | 依存 | 置くもの |
 | --- | --- | --- |
-| `Core` | `Shared`（共通コア） | 共通コアの再エクスポート。全機能から使う土台 |
+| `Core` | `Shared`（共通コア） | 共通コアの再エクスポート。全機能が使う土台（`Phase` / `ScreenModel` / `PhaseView`） |
 | `FeatureHome` | `Core` | 画面 1 つ分。機能を足すときは `Feature<名前>` を並べる |
 | `AppRoot` | `FeatureHome` | 画面の組み立て。アプリ本体はこれを表示するだけ |
 
@@ -25,15 +25,27 @@ Xcode プロジェクト側はアプリの起動と Assets だけを持つ。
   共通コアを直接扱うモジュールを増やすときは、`.swiftlint.yml` の `excluded` に足す。
 - 機能を足すときは `Package/Sources/Feature<名前>/` を作り、`Package.swift` に
   target と product を 1 つずつ足す。フォルダは平坦のまま。
-- 並行性の既定は層で分ける。UI 層（`Feature*` / `AppRoot`）で必要になったら
-  `Package.swift` の該当 target に `.defaultIsolation(MainActor.self)` を足す。
-  `Core` は nonisolated のままにする（共通コアの async / AsyncSequence を
-  既定でメインスレッドに寄せないため）。
+- 並行性は型に `@MainActor` を明示する。`Package.swift` の
+  `.defaultIsolation(MainActor.self)` は使わない。影響範囲が target 全体に及び、
+  `Core` の非 UI コードまでメインスレッドに寄るため。`ScreenModel` と
+  その準拠型が `@MainActor`。
 - UI は SwiftUI のみ。UIKit を使う場合は必要な箇所に閉じる。
 - 共通ロジックは kmp-app-template 側に置く。ここには iOS 固有のものだけ。
-- **View にデータ取得を直接書かない。** 取得は `init` で注入し、引数なしの `init` が
-  本番の経路を与える。`#Preview` にはスタブを渡す。View の中で呼ぶと、プレビューを
-  開くたびに実 API を叩き、ネットワークが無いと描画できなくなる。
+- **画面のモデルは `ScreenModel` に準拠させる。** `phase` / `destination` / `load()` を
+  持たない型はコンパイルが通らない。MARK やレビューではなく型で揃える。
+  **基底クラスにしないのは、継承するとサブクラスへの `@Observable` の付け忘れで
+  観測が無警告のまま壊れるため**（実測で確認済み）。
+- **取得状態は `Phase` で表す。** `isLoading` と `error` を別々の変数にすると、
+  両方が立った状態が型として表現できてしまう。
+- **読み込み中と失敗の表示は `PhaseView` に任せる。** 各画面が書くのは成功時だけ。
+  再試行は `ScreenModel.load()` に必ず繋がる。
+- **状態を1つの struct にまとめない。** `@Observable` はプロパティ単位で追跡するため、
+  まとめると無関係な変更で View が再評価される（実測で確認済み）。
+- **View 固有の見た目（フォーカス・スクロール位置・アニメーション）は View の
+  `@State` に置く。** 画面モデルに入れない。
+- **View にデータ取得を直接書かない。** 取得は画面モデルの `init` で注入し、
+  引数なしの `init` が本番の経路を与える。`#Preview` は `init(phase:)` で状態を固定する。
+  View の中で呼ぶと、プレビューを開くたびに実 API を叩く。
 
 ## 検証
 
