@@ -24,7 +24,7 @@ flowchart LR
     CORE["Core"]
     HOME["FeatureHome"]
     ROOT["AppRoot"]
-    APP["ios-app-template.app"]
+    APP["AppTemplate.app"]
     SHARED --> CORE --> HOME --> ROOT --> APP
 ```
 
@@ -38,14 +38,19 @@ flowchart LR
 `Core` 以外から `import Shared` した場合は SwiftLint が error として落とす（`shared_import_outside_core`）。
 
 ```
+AppTemplate.xcworkspace     # 入口
+App/
+├── AppTemplate.xcodeproj
+└── AppTemplate/           # @main と Assets
 Package/
 ├── Package.swift          # 依存とモジュールの宣言（共通コアのバージョンもここ）
 └── Sources/
-    ├── Core/
+    ├── ScreenCore/
+    ├── SharedCore/
     ├── FeatureHome/
     └── AppRoot/
-ios-app-template/          # @main と Assets
-ios-app-templateTests/
+Macro/
+└── RequiresMacro/         # マクロ 1 つで 1 パッケージ
 ```
 
 ## コマンド

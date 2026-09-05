@@ -1,5 +1,5 @@
-SCHEME    := ios-app-template
-PROJECT   := ios-app-template.xcodeproj
+SCHEME    := AppTemplate
+WORKSPACE := AppTemplate.xcworkspace
 SIMULATOR ?= iPhone 17 Pro
 DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 
@@ -7,9 +7,9 @@ DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 # Package/ 配下（＝このリポジトリのコードのほぼ全部）の警告が一切出ない。
 SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO
 
-.PHONY: verify lint format build clean
+.PHONY: verify lint format test build clean
 
-verify: lint build
+verify: lint test build
 
 lint:
 	swiftformat --lint .
@@ -19,8 +19,11 @@ format:
 	swiftformat .
 	swiftlint --fix
 
+test:
+	swift test --package-path Macro/RequiresMacro
+
 build:
-	xcodebuild build -project $(PROJECT) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
+	xcodebuild build -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
 
 clean:
-	xcodebuild clean -project $(PROJECT) -scheme $(SCHEME)
+	xcodebuild clean -workspace $(WORKSPACE) -scheme $(SCHEME)

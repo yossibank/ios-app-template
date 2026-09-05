@@ -4,6 +4,7 @@ import SharedCore
 
 @MainActor
 @Observable
+@Requires("Observable")
 public final class HomeViewModel: ScreenViewModel {
     public struct Dependency {
         public var api: PokemonApi

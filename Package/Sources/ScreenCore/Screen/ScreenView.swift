@@ -50,11 +50,6 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View>: View {
     ) {
         _model = State(initialValue: model)
         self.success = success
-
-        #if DEBUG
-            ObservationCheck.assertObservable(model)
-            ObservationCheck.assertObservable(model.state)
-        #endif
     }
 
     var body: some View {
@@ -83,10 +78,6 @@ private struct SnapshotScreen<Model: ScreenViewModel, Success: View>: View {
     ) {
         self.phase = phase
         self.success = success
-
-        #if DEBUG
-            ObservationCheck.assertObservable(Model.State())
-        #endif
     }
 
     var body: some View {

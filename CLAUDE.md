@@ -3,14 +3,39 @@
 iOS アプリ。画面とロジックは `Package/` のローカル SPM パッケージに置き、
 Xcode プロジェクト側はアプリの起動と Assets だけを持つ。
 
+## ディレクトリ構成
+
+```
+AppTemplate.xcworkspace     入口。App のプロジェクトと Package を束ねる
+App/
+  AppTemplate.xcodeproj     アプリターゲット。Package を ../Package で参照する
+  AppTemplate/              @main と Assets のみ
+Package/                    画面とロジック。モジュールはここに並べる
+Macro/
+  RequiresMacro/            マクロ 1 つで 1 パッケージ。増えたら横に並べる
+```
+
+**入口は `.xcodeproj` ではなく `.xcworkspace`。** workspace にすると Package の各
+モジュールがスキームとして個別に出るため、モジュール単体のビルドとプレビューができる
+（`ScreenCore` / `FeatureHome` / `RequiresMacro` などが `xcodebuild -list` に並ぶことを確認済み）。
+`Package.resolved` は `AppTemplate.xcworkspace/xcshareddata/swiftpm/` が実体で、
+プロジェクト側には置かない。
+
 ## モジュール構成
 
 | モジュール | 依存 | 置くもの |
 | --- | --- | --- |
-| `ScreenCore` | なし | 画面の土台。`ViewModel` / `ViewState` / `ScreenViewModel` / `ScreenState` / `ScreenPhase` / `ScreenView` / `PhaseView` / `PhaseViewStyle` / `ScreenReloadAction` / `ObservationCheck` |
+| `ScreenCore` | `RequiresMacro` | 画面の土台。`ViewModel` / `ViewState` / `ScreenViewModel` / `ScreenState` / `ScreenPhase` / `ScreenView` / `PhaseView` / `PhaseViewStyle` / `ScreenReloadAction` |
 | `SharedCore` | `Shared`（共通コア） | 共通コアの再エクスポートと `Sendable` の表明。中身はこれだけ |
 | `FeatureHome` | `ScreenCore`, `SharedCore` | 画面 1 つ分。機能を足すときは `Feature<名前>` を並べる |
 | `AppRoot` | `FeatureHome` | 画面の組み立て。アプリ本体はこれを表示するだけ |
+
+マクロは `Package/` ではなく **`Macro/<マクロ名>/` という別パッケージ**に置き、`Package/` から
+`.package(path: "../Macro/RequiresMacro")` で参照する。同じパッケージに置くと `Package.swift` に
+`.macOS` を足す必要が生じ、iOS アプリのパッケージが macOS 対応を名乗ることになる
+（分離したら `.macOS(.v15)` を落としてビルドが通ることを実測で確認済み）。
+**マクロを足すときは `Macro/` の下にパッケージを 1 つ増やす。** 既存のパッケージに
+ターゲットを足さない。テストは `make verify` が `swift test` で実行する。
 
 依存は `*Core` → `Feature*` → `AppRoot` の一方向。逆流させない。
 **`ScreenCore` と `SharedCore` は兄弟で、互いに依存しない。** 画面の土台は純粋な
@@ -58,14 +83,18 @@ Swift / SwiftUI で書き、共通コアに依存させない。
   別物を掴む（親 3 回の再評価でインスタンスが 4 個作られ、画面が使っていたのは
   1 個目であることを実測で確認済み）。View が触れるのは `ScreenView` が渡す
   `State` と `Value`、および `\.screenReload` だけ。
-- **`ViewModel` と `ViewState` には無条件で `@Observable` を付ける。**「状態を足すときだけ」に
-  しない。付け忘れると View が更新されないまま無言で壊れる（body が初回 1 回しか評価されず
-  画面が固着することを実測で確認済み）。**型システムでは強制できない。** `Observable` は
-  要求を持たないマーカーなので継承させてもマクロ無しで通り、基底クラスに付けても
-  サブクラスの追加プロパティには届かない（いずれも実測で確認済み）。代わりに
-  `ObservationCheck` が DEBUG 時に `Mirror` でマクロ生成物の有無を検査し、無ければ型名つきで
-  `assert` する。**SwiftLint では守れない**——入れ子の型では「どの宣言に付いた属性か」を
-  近接では判定できないため（実際に検出できないことを確認済み）。
+- **`ViewModel` と `ViewState` には `@Requires("Observable")` と `@Observable` を必ず並べて書く。**
+  付け忘れると View が更新されないまま無言で壊れる（body が初回 1 回しか評価されず画面が
+  固着することを実測で確認済み）。`Observable` は要求を持たないマーカーなのでプロトコルでは
+  強制できず、基底クラスに付けてもサブクラスの追加プロパティには届かない（いずれも実測）。
+  そこで `@Requires` が指定された属性の有無を見て診断を出し、あわせて
+  `requiredAttributes` を生成する。**この生成物がプロトコル要求なので、マクロ自体の
+  書き忘れも `does not conform` で落ちる。** 入れ子の `State` を含めて実測で確認済み。
+  `requiredAttributes` はマクロが生成する目印であって、コードから読む値ではない。
+  `@Requires` は属性名を引数で受ける汎用マクロなので、別の属性を強制したい
+  プロトコルが出てきたら同じものを使う。
+  SwiftLint の正規表現では守れなかった——入れ子の型では外側の `@Observable` が近接に
+  入るため「どの宣言に付いた属性か」を判定できない（実際に検出できないことを確認済み）。
 - **取得状態は `ScreenPhase` で表す。** `isLoading` と `error` を別々の変数にすると、
   両方が立った状態が型として表現できてしまう。失敗は `any Error` を保つので、
   認証切れとネットワーク断で表示を変える必要が出ても全画面に波及しない。
@@ -104,13 +133,14 @@ Swift / SwiftUI で書き、共通コアに依存させない。
 変更したら必ず通す。通らないものは完了ではない。
 
 ```sh
-make verify   # lint + ビルド
+make verify   # lint + マクロテスト + ビルド
 ```
 
 シミュレータを変えるときは `make verify SIMULATOR='iPhone 17'`。
 
-テストターゲットは無い。テストを書くときは Xcode で追加し、`make verify` に
-`test` を戻すこと。ターゲットが無い状態で `xcodebuild test` を呼ぶと
+アプリ側にテストターゲットは無い。`make verify` の `test` は `Macro/RequiresMacro` の
+`swift test` だけを走らせる。アプリ側にテストを書くときは Xcode でターゲットを
+追加すること。ターゲットが無い状態で `xcodebuild test` を呼ぶと
 `There are no test bundles available to test.` で失敗する。
 
 `Package/` のコードの警告は **Xcode.app では表示されない**。Xcode がパッケージ
@@ -123,3 +153,8 @@ make verify   # lint + ビルド
 - `xcuserdata/` をコミットしない（`.gitignore` 済み。`git add -f` で足さない）
 - 共通コアのバージョンを `Package.swift` 以外で指定しない（Xcode の GUI から
   リモートパッケージを足すと二重管理になる）
+- **swift-syntax のバージョンを toolchain とずらさない。** 系列が toolchain に対応する
+  （603.x が Swift 6.3）。合っていると SwiftPM が prebuilt を使い、ソースからのビルドが
+  消える。ずれると黙ってソースビルドに落ちる。実測では 600.0.1 が prebuilt 不在で
+  SwiftSyntax を 214 ステップ・55 秒かけてビルドし、603.0.2 では 0 ステップ・26.5 秒だった。
+  Xcode を上げたらこのバージョンも上げること。

@@ -11,13 +11,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		7829F5413043F3F80052BC9D /* ios-app-template.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ios-app-template.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7829F5413043F3F80052BC9D /* AppTemplate.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AppTemplate.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		7829F5433043F3F80052BC9D /* ios-app-template */ = {
+		7829F5433043F3F80052BC9D /* AppTemplate */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "ios-app-template";
+			path = "AppTemplate";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -37,7 +37,7 @@
 		7829F5383043F3F80052BC9D = {
 			isa = PBXGroup;
 			children = (
-				7829F5433043F3F80052BC9D /* ios-app-template */,
+				7829F5433043F3F80052BC9D /* AppTemplate */,
 				7829F5423043F3F80052BC9D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -45,7 +45,7 @@
 		7829F5423043F3F80052BC9D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				7829F5413043F3F80052BC9D /* ios-app-template.app */,
+				7829F5413043F3F80052BC9D /* AppTemplate.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -53,9 +53,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		7829F5403043F3F80052BC9D /* ios-app-template */ = {
+		7829F5403043F3F80052BC9D /* AppTemplate */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 7829F5623043F3FA0052BC9D /* Build configuration list for PBXNativeTarget "ios-app-template" */;
+			buildConfigurationList = 7829F5623043F3FA0052BC9D /* Build configuration list for PBXNativeTarget "AppTemplate" */;
 			buildPhases = (
 				7829F53D3043F3F80052BC9D /* Sources */,
 				7829F53E3043F3F80052BC9D /* Frameworks */,
@@ -66,14 +66,14 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				7829F5433043F3F80052BC9D /* ios-app-template */,
+				7829F5433043F3F80052BC9D /* AppTemplate */,
 			);
-			name = "ios-app-template";
+			name = "AppTemplate";
 			packageProductDependencies = (
 				A561BECD362AA926608EC6C0 /* AppRoot */,
 			);
-			productName = "ios-app-template";
-			productReference = 7829F5413043F3F80052BC9D /* ios-app-template.app */;
+			productName = "AppTemplate";
+			productReference = 7829F5413043F3F80052BC9D /* AppTemplate.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -91,7 +91,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 7829F53C3043F3F80052BC9D /* Build configuration list for PBXProject "ios-app-template" */;
+			buildConfigurationList = 7829F53C3043F3F80052BC9D /* Build configuration list for PBXProject "AppTemplate" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -108,7 +108,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7829F5403043F3F80052BC9D /* ios-app-template */,
+				7829F5403043F3F80052BC9D /* AppTemplate */,
 			);
 		};
 /* End PBXProject section */
@@ -318,7 +318,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		7829F53C3043F3F80052BC9D /* Build configuration list for PBXProject "ios-app-template" */ = {
+		7829F53C3043F3F80052BC9D /* Build configuration list for PBXProject "AppTemplate" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7829F5603043F3FA0052BC9D /* Debug */,
@@ -327,7 +327,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		7829F5623043F3FA0052BC9D /* Build configuration list for PBXNativeTarget "ios-app-template" */ = {
+		7829F5623043F3FA0052BC9D /* Build configuration list for PBXNativeTarget "AppTemplate" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				7829F5633043F3FA0052BC9D /* Debug */,
@@ -341,7 +341,7 @@
 /* Begin XCLocalSwiftPackageReference section */
 		1A8BEFE0B33C313C2509957F /* XCLocalSwiftPackageReference "Package" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Package;
+			relativePath = ../Package;
 		};
 /* End XCLocalSwiftPackageReference section */
 

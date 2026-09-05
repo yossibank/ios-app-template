@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "7829F5403043F3F80052BC9D"
-               BuildableName = "ios-app-template.app"
-               BlueprintName = "ios-app-template"
-               ReferencedContainer = "container:ios-app-template.xcodeproj">
+               BuildableName = "AppTemplate.app"
+               BlueprintName = "AppTemplate"
+               ReferencedContainer = "container:AppTemplate.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,9 +46,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7829F5403043F3F80052BC9D"
-            BuildableName = "ios-app-template.app"
-            BlueprintName = "ios-app-template"
-            ReferencedContainer = "container:ios-app-template.xcodeproj">
+            BuildableName = "AppTemplate.app"
+            BlueprintName = "AppTemplate"
+            ReferencedContainer = "container:AppTemplate.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -63,9 +63,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "7829F5403043F3F80052BC9D"
-            BuildableName = "ios-app-template.app"
-            BlueprintName = "ios-app-template"
-            ReferencedContainer = "container:ios-app-template.xcodeproj">
+            BuildableName = "AppTemplate.app"
+            BlueprintName = "AppTemplate"
+            ReferencedContainer = "container:AppTemplate.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

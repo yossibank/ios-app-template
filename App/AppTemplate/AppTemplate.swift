@@ -2,7 +2,7 @@ import AppRoot
 import SwiftUI
 
 @main
-struct IOSAppTemplateApp: App {
+struct AppTemplate: App {
     var body: some Scene {
         WindowGroup {
             AppRootView()
