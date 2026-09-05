@@ -29,6 +29,11 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      # make verify がテストでシミュレータを使う。ここで起動だけ先に始め、
+      # 起動待ちを後続ステップと重ねる（kmp の実測で 337 秒 → 120 秒）。
+      - name: Start booting the simulator
+        run: make boot
+
       # SPM は github.com（clone）と api.github.com（アセット取得）の 2 か所で
       # 認証を要求し、片方でも欠けると解決に失敗する。
       # git は netrc を読まないため、clone 用は別に設定する。
@@ -54,6 +59,9 @@ jobs:
         run: |
           command -v swiftformat >/dev/null || brew install swiftformat
           command -v swiftlint   >/dev/null || brew install swiftlint
+
+      - name: Wait for the simulator
+        run: make boot-wait
 
       - name: Verify
         run: make verify
