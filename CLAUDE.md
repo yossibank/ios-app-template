@@ -7,7 +7,7 @@ Xcode プロジェクト側はアプリの起動と Assets だけを持つ。
 
 | モジュール | 依存 | 置くもの |
 | --- | --- | --- |
-| `Core` | `Shared`（共通コア） | 共通コアの再エクスポート。全機能が使う土台（`Phase` / `ScreenModel` / `PhaseView`） |
+| `Core` | `Shared`（共通コア） | 共通コアの再エクスポート。全機能が使う土台（`Phase` / `ScreenModel` / `PhaseView` / `PhaseViewStyle`） |
 | `FeatureHome` | `Core` | 画面 1 つ分。機能を足すときは `Feature<名前>` を並べる |
 | `AppRoot` | `FeatureHome` | 画面の組み立て。アプリ本体はこれを表示するだけ |
 
@@ -38,7 +38,10 @@ Xcode プロジェクト側はアプリの起動と Assets だけを持つ。
 - **取得状態は `Phase` で表す。** `isLoading` と `error` を別々の変数にすると、
   両方が立った状態が型として表現できてしまう。
 - **読み込み中と失敗の表示は `PhaseView` に任せる。** 各画面が書くのは成功時だけ。
-  再試行は `ScreenModel.load()` に必ず繋がる。
+  見た目を変えたい範囲には `.phaseViewStyle(_:)` を付ける。`ButtonStyle` と同じ作法で、
+  差し替えは modifier を付けた階層に閉じる。**画面ごとに独自の失敗表示を直接書かない。**
+  再試行は既定で `ScreenModel.load()` に繋がり、別の処理を呼びたいときだけ
+  `PhaseView(model, retry:)` に渡す。
 - **状態を1つの struct にまとめない。** `@Observable` はプロパティ単位で追跡するため、
   まとめると無関係な変更で View が再評価される（実測で確認済み）。
 - **View 固有の見た目（フォーカス・スクロール位置・アニメーション）は View の
