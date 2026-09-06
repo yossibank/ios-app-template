@@ -2,6 +2,8 @@
 
 > iOS アプリの初期テンプレート。画面とロジックはローカル SPM パッケージに分割している。
 
+書き方の規約は [CLAUDE.md](CLAUDE.md)。
+
 ## 3 リポジトリの関係
 
 ```mermaid
@@ -21,21 +23,25 @@ flowchart LR
 ```mermaid
 flowchart LR
     SHARED["Shared<br/><i>共通コア</i>"]
-    CORE["Core"]
+    SHAREDCORE["SharedCore"]
+    SCREENCORE["ScreenCore"]
     HOME["FeatureHome"]
     ROOT["AppRoot"]
     APP["AppTemplate.app"]
-    SHARED --> CORE --> HOME --> ROOT --> APP
+    SHARED --> SHAREDCORE --> HOME
+    SCREENCORE --> HOME
+    HOME --> ROOT --> APP
 ```
 
 | モジュール | 役割 |
 | --- | --- |
-| `Core` | 共通コアの入口。`Shared` を import してよいのはここだけ |
+| `ScreenCore` | 画面の土台。共通コアに依存しない |
+| `SharedCore` | 共通コアの入口。`Shared` を import してよいのはここだけ |
 | `FeatureHome` | 画面 1 つ分。機能ごとに `Feature<名前>` を並べる |
 | `AppRoot` | 画面の組み立て |
 | アプリターゲット | 起動と Assets のみ |
 
-`Core` 以外から `import Shared` した場合は SwiftLint が error として落とす（`shared_import_outside_core`）。
+## ディレクトリ
 
 ```
 AppTemplate.xcworkspace     # 入口
@@ -44,20 +50,25 @@ App/
 └── AppTemplate/           # @main と Assets
 Package/
 ├── Package.swift          # 依存とモジュールの宣言（共通コアのバージョンもここ）
-└── Sources/
-    ├── ScreenCore/
-    ├── SharedCore/
-    ├── FeatureHome/
-    └── AppRoot/
+├── Sources/
+│   ├── ScreenCore/        # ViewModel/ Fetch/ Screen/
+│   ├── SharedCore/
+│   ├── FeatureHome/
+│   └── AppRoot/
+└── Tests/
+    └── FeatureHomeTests/
 ```
+
+**入口は `.xcodeproj` ではなく `.xcworkspace`。**
 
 ## コマンド
 
 | コマンド | 内容 |
 | --- | --- |
-| `make verify` | lint + ビルド + ユニットテスト（変更後はこれを通す） |
-| `make build` | ビルドのみ |
+| `make verify` | lint + ユニットテスト + ビルド（変更後はこれを通す） |
 | `make verify SIMULATOR='iPhone 17'` | シミュレータを指定して実行 |
+| `make build` | ビルドのみ |
+| `make test` | ユニットテストのみ |
 | `make lint` | SwiftFormat / SwiftLint によるチェック（`make verify` に含まれる） |
 | `make format` | SwiftFormat / SwiftLint で自動修正 |
 
