@@ -20,9 +20,9 @@ let package = Package(
         )
     ],
     targets: [
-        // 画面の土台。純粋な Swift / SwiftUI で、共通コアに依存しない。
-        .target(name: "ScreenCore"),
-        // 共通コアを import してよい唯一のモジュール。
+        .target(
+            name: "ScreenCore"
+        ),
         .target(
             name: "SharedCore",
             dependencies: [
