@@ -1,4 +1,6 @@
-public protocol PokemonFetching: Sendable {
+import SharedCore
+
+protocol PokemonFetching: Sendable {
     func fetchPage(limit: Int32, offset: Int32) async throws -> any PokemonListResult
 }
 
