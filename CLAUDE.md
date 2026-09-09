@@ -47,4 +47,3 @@ Package/                    画面とロジック。モジュールはここに�
 - 変更したら `make verify` を通す。通らないものは完了ではない。
 - 共通ロジックは kmp-app-template 側に置く。ここには iOS 固有のものだけ。
 - 共通コアのバージョンを `Package.swift` 以外で指定しない。
-- `xcuserdata/` をコミットしない。
