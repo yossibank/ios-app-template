@@ -13,6 +13,7 @@
 --redundanttype inferred
 --self init-only
 --stripunusedargs closure-only
+--test-case-name-format preserve
 --wraparguments before-first
 --wrapcollections before-first
 --wrapparameters before-first
