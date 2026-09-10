@@ -8,6 +8,10 @@ public struct ScreenStyle {
         public var message: String {
             error.localizedDescription
         }
+
+        public var canRetry: Bool {
+            (error as? FetchFailure)?.canRetry ?? true
+        }
     }
 
     let loading: () -> AnyView
@@ -37,7 +41,9 @@ public struct ScreenStyle {
                 } description: {
                     Text(failure.message)
                 } actions: {
-                    Button("再試行", action: failure.retry)
+                    if failure.canRetry {
+                        Button("再試行", action: failure.retry)
+                    }
                 }
             }
         )
@@ -61,5 +67,16 @@ public extension View {
 #Preview("失敗") {
     ScreenStyle.standard.failure(
         ScreenStyle.Failure(error: FetchFailure("ネットワークに接続できません")) {}
+    )
+}
+
+#Preview("失敗（再試行できない）") {
+    ScreenStyle.standard.failure(
+        ScreenStyle.Failure(
+            error: FetchFailure(
+                "データを読み取れませんでした",
+                canRetry: false
+            )
+        ) {}
     )
 }

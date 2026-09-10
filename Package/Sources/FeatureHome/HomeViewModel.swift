@@ -27,7 +27,7 @@ extension HomeViewModel {
             return loaded.pokemon
 
         case let .failed(failed):
-            throw FetchFailure(failed.message)
+            throw failed.asFetchFailure
         }
     }
 }
@@ -40,5 +40,20 @@ extension HomeViewModel {
 
     struct Dependency {
         var api: any PokemonFetching = PokemonApi()
+    }
+}
+
+private extension PokemonListResultFailed {
+    var asFetchFailure: FetchFailure {
+        switch onEnum(of: self) {
+        case .offline:
+            FetchFailure("接続を確認してください")
+
+        case let .server(server):
+            FetchFailure("サーバーが応答しませんでした（\(server.statusCode)）")
+
+        case .unexpected, .legacy:
+            FetchFailure("データを読み取れませんでした", canRetry: false)
+        }
     }
 }
