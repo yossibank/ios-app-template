@@ -24,8 +24,6 @@ private struct HomeContent: View {
 
     @Bindable var viewState: HomeViewModel.State
 
-    let pokemon: [PokemonSummary]
-
     private var filtered: [PokemonSummary] {
         guard !viewState.query.isEmpty else {
             return pokemon
@@ -36,9 +34,26 @@ private struct HomeContent: View {
         }
     }
 
+    let pokemon: [PokemonSummary]
+
     var body: some View {
         List(filtered, id: \.url) {
             Text($0.name)
+        }
+        .overlay {
+            if pokemon.isEmpty {
+                ContentUnavailableView {
+                    Label("ポケモンがいません", systemImage: "tray")
+                } description: {
+                    Text("取得できましたが 1 件もありませんでした")
+                } actions: {
+                    Button("再取得") {
+                        reload()
+                    }
+                }
+            } else if filtered.isEmpty {
+                ContentUnavailableView.search(text: viewState.query)
+            }
         }
         .searchable(text: $viewState.query, prompt: "名前で絞り込む")
         .toolbar {
@@ -68,4 +83,8 @@ private struct HomeContent: View {
             ])
         )
     )
+}
+
+#Preview("空") {
+    HomeView(source: .snapshot(.loaded([])))
 }
