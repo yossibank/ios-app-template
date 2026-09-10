@@ -4,7 +4,10 @@ SIMULATOR ?= iPhone 17 Pro
 DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO
 
-.PHONY: verify lint format test build clean boot boot-wait
+.PHONY: open verify lint format test build clean boot boot-wait
+
+open:
+	open $(WORKSPACE)
 
 verify: lint test build
 

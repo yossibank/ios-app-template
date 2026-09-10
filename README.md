@@ -65,6 +65,7 @@ Package/
 
 | コマンド | 内容 |
 | --- | --- |
+| `make open` | Xcode で `AppTemplate.xcworkspace` を開く |
 | `make verify` | lint + ユニットテスト + ビルド（変更後はこれを通す） |
 | `make verify SIMULATOR='iPhone 17'` | シミュレータを指定して実行 |
 | `make build` | ビルドのみ |
