@@ -52,7 +52,7 @@ private extension PokemonListResultFailed {
         case let .server(server):
             FetchFailure("サーバーが応答しませんでした（\(server.statusCode)）")
 
-        case .unexpected, .legacy:
+        case .unexpected:
             FetchFailure("データを読み取れませんでした", canRetry: false)
         }
     }

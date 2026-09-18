@@ -17,8 +17,7 @@ struct HomeViewModelTests {
     func mapsLoadedResult() async throws {
         let pokemon = try await model(
             returning: PokemonListResultLoaded(
-                pokemon: [PokemonSummary(name: "pikachu", url: "u")],
-                hasMore: false
+                pokemon: [PokemonSummary(name: "pikachu", url: "u")]
             )
         ).fetch()
 
