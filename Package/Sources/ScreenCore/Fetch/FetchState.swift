@@ -32,29 +32,13 @@ public final class FetchState<Value> {
             return
         }
 
-        let request = UUID()
-        activeRequest = request
         phase = .loading
 
-        do {
-            let value = try await operation()
-
-            try Task.checkCancellation()
-
-            guard activeRequest == request else {
-                return
+        await settle(operation) { value in
+            if let value {
+                phase = .loaded(value)
             }
-
-            phase = .loaded(value)
-        } catch {
-            guard
-                activeRequest == request,
-                !Task.isCancelled,
-                !(error is CancellationError)
-            else {
-                return
-            }
-
+        } failed: { error in
             phase = .failed(error)
         }
     }
@@ -64,9 +48,26 @@ public final class FetchState<Value> {
             return
         }
 
+        isLoadingMore = true
+
+        await settle(operation) { value in
+            isLoadingMore = false
+
+            if let value {
+                phase = .loaded(value)
+            }
+        } failed: { _ in
+            isLoadingMore = false
+        }
+    }
+
+    private func settle(
+        _ operation: @MainActor () async throws -> Value?,
+        succeeded: @MainActor (Value?) -> Void,
+        failed: @MainActor (any Error) -> Void
+    ) async {
         let request = UUID()
         activeRequest = request
-        isLoadingMore = true
 
         do {
             let value = try await operation()
@@ -77,17 +78,17 @@ public final class FetchState<Value> {
                 return
             }
 
-            isLoadingMore = false
-
-            if let value {
-                phase = .loaded(value)
-            }
+            succeeded(value)
         } catch {
-            guard activeRequest == request, !Task.isCancelled, !(error is CancellationError) else {
+            guard
+                activeRequest == request,
+                !Task.isCancelled,
+                !(error is CancellationError)
+            else {
                 return
             }
 
-            isLoadingMore = false
+            failed(error)
         }
     }
 }
