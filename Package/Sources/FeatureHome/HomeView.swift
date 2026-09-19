@@ -21,8 +21,12 @@ public extension HomeView {
 
 private struct HomeContent: View {
     @Environment(\.screenReload) private var reload
+    @Environment(\.screenLoadMore) private var loadMore
+    @Environment(\.screenIsLoadingMore) private var isLoadingMore
 
     @Bindable var viewState: HomeViewModel.State
+
+    let pokemon: [PokemonSummary]
 
     private var filtered: [PokemonSummary] {
         guard !viewState.query.isEmpty else {
@@ -34,11 +38,23 @@ private struct HomeContent: View {
         }
     }
 
-    let pokemon: [PokemonSummary]
-
     var body: some View {
-        List(filtered, id: \.url) {
-            Text($0.name)
+        List {
+            ForEach(filtered, id: \.url) { item in
+                Text(item.name)
+                    .onAppear {
+                        guard viewState.query.isEmpty, item.url == pokemon.last?.url else {
+                            return
+                        }
+
+                        loadMore()
+                    }
+            }
+
+            if isLoadingMore {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+            }
         }
         .overlay {
             if pokemon.isEmpty {
@@ -68,18 +84,9 @@ private struct HomeContent: View {
     HomeView(
         source: .snapshot(
             .loaded([
-                PokemonSummary(
-                    name: "bulbasaur",
-                    url: "https://pokeapi.co/api/v2/pokemon/1/"
-                ),
-                PokemonSummary(
-                    name: "ivysaur",
-                    url: "https://pokeapi.co/api/v2/pokemon/2/"
-                ),
-                PokemonSummary(
-                    name: "venusaur",
-                    url: "https://pokeapi.co/api/v2/pokemon/3/"
-                )
+                PokemonSummary(name: "bulbasaur", url: "1"),
+                PokemonSummary(name: "ivysaur", url: "2"),
+                PokemonSummary(name: "venusaur", url: "3")
             ])
         )
     )

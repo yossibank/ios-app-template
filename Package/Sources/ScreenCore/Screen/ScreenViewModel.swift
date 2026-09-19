@@ -5,6 +5,13 @@ public protocol ScreenViewModel: ViewModel {
     var fetchState: FetchState<Value> { get }
 
     func fetch() async throws -> Value
+    func fetchMore() async throws -> Value?
+}
+
+public extension ScreenViewModel {
+    func fetchMore() async throws -> Value? {
+        nil
+    }
 }
 
 extension ScreenViewModel {
@@ -16,5 +23,15 @@ extension ScreenViewModel {
 
     func reload() {
         fetchState.requestReload()
+    }
+
+    func requestLoadMore() {
+        fetchState.requestLoadMore()
+    }
+
+    func loadMore() async {
+        await fetchState.runMore {
+            try await fetchMore()
+        }
     }
 }

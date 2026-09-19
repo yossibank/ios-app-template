@@ -45,6 +45,7 @@ public struct ScreenView<Model: ScreenViewModel, Success: View>: View {
 @MainActor
 private struct LiveScreen<Model: ScreenViewModel, Success: View>: View {
     @State private var model: Model
+    @State private var screenID = UUID()
 
     private let success: (Model.State, Model.Value) -> Success
 
@@ -60,20 +61,42 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View>: View {
         PhaseContent(phase: model.fetchState.phase) {
             success(model.viewState, $0)
         }
-        .environment(\.screenReload) {
-            model.reload()
-        }
+        .environment(
+            \.screenReload,
+            ScreenAction(.reload, screenID: screenID) { model.reload() }
+        )
+        .environment(
+            \.screenLoadMore,
+            ScreenAction(.loadMore, screenID: screenID) { model.requestLoadMore() }
+        )
+        .environment(
+            \.screenIsLoadingMore,
+            model.fetchState.isLoadingMore
+        )
         .task(id: model.fetchState.reloadID) {
             await model.load()
+        }
+        .task(id: model.fetchState.loadMoreID) {
+            await model.loadMore()
         }
     }
 }
 
+@MainActor
 private struct SnapshotScreen<Model: ScreenViewModel, Success: View>: View {
-    @State private var viewState = Model.State()
+    @State private var viewState: Model.State
 
-    let phase: FetchPhase<Model.Value>
-    let success: (Model.State, Model.Value) -> Success
+    private let phase: FetchPhase<Model.Value>
+    private let success: (Model.State, Model.Value) -> Success
+
+    init(
+        phase: FetchPhase<Model.Value>,
+        success: @escaping (Model.State, Model.Value) -> Success
+    ) {
+        _viewState = State(initialValue: Model.State())
+        self.phase = phase
+        self.success = success
+    }
 
     var body: some View {
         PhaseContent(phase: phase) {

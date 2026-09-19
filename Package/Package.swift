@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/yossibank/kmp-app-template.git",
-            exact: "0.9.0"
+            exact: "0.10.0"
         )
     ],
     targets: [
@@ -36,6 +36,10 @@ let package = Package(
         .target(
             name: "AppRoot",
             dependencies: ["FeatureHome"]
+        ),
+        .testTarget(
+            name: "ScreenCoreTests",
+            dependencies: ["ScreenCore"]
         ),
         .testTarget(
             name: "FeatureHomeTests",
