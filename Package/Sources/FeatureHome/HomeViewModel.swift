@@ -58,15 +58,19 @@ extension HomeViewModel {
 
 private extension PokemonListResultFailed {
     var asFetchFailure: FetchFailure {
+        FetchFailure(message, canRetry: canRetry)
+    }
+
+    var message: String {
         switch onEnum(of: self) {
         case .offline:
-            FetchFailure("接続を確認してください")
+            "接続を確認してください"
 
         case let .server(server):
-            FetchFailure("サーバーが応答しませんでした（\(server.statusCode)）")
+            "サーバーが応答しませんでした（\(server.statusCode)）"
 
         case .unexpected:
-            FetchFailure("データを読み取れませんでした", canRetry: false)
+            "データを読み取れませんでした"
         }
     }
 }
