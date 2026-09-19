@@ -4,7 +4,7 @@ DEFAULT_SIMULATOR := $(shell xcrun simctl list devices available | awk -F'[()]' 
 SIMULATOR ?= $(DEFAULT_SIMULATOR)
 DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO
-TEST_SCHEMES := ScreenCoreTests FeatureHomeTests
+TEST_SCHEMES := ScreenCore FeatureHomeTests
 
 .PHONY: open verify lint format test build clean boot boot-wait
 
