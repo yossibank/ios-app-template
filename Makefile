@@ -1,8 +1,10 @@
 SCHEME    := AppTemplate
 WORKSPACE := AppTemplate.xcworkspace
-SIMULATOR ?= iPhone 17 Pro
+DEFAULT_SIMULATOR := $(shell xcrun simctl list devices available | awk -F'[()]' '/^ *iPhone/ {gsub(/^ +| +$$/,"",$$1); print $$1; exit}')
+SIMULATOR ?= $(DEFAULT_SIMULATOR)
 DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO
+TEST_SCHEMES := ScreenCoreTests FeatureHomeTests
 
 .PHONY: open verify lint format test build clean boot boot-wait
 
@@ -26,7 +28,9 @@ boot-wait:
 	xcrun simctl bootstatus '$(SIMULATOR)' -b
 
 test:
-	xcodebuild test -workspace $(WORKSPACE) -scheme FeatureHomeTests -destination '$(DEST)'
+	for scheme in $(TEST_SCHEMES); do \
+		xcodebuild test -workspace $(WORKSPACE) -scheme $$scheme -destination '$(DEST)' || exit 1; \
+	done
 
 build:
 	xcodebuild build -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
