@@ -6,7 +6,7 @@ import SharedCore
 @Observable
 final class HomeViewModel: ScreenViewModel {
     let viewState = State()
-    let fetchState = FetchState<[PokemonSummary]>()
+    let fetchState = FetchState<[PokemonEntry]>()
     let dependency: Dependency
 
     convenience init() {
@@ -19,26 +19,37 @@ final class HomeViewModel: ScreenViewModel {
 }
 
 extension HomeViewModel {
-    func fetch() async throws(FetchFailure) -> [PokemonSummary] {
-        try await dependency.paging.reset()
-        return try await nextPage().value
+    func fetch() async throws(FetchFailure) -> [PokemonEntry] {
+        try await reset()
+
+        let result = try await nextPage()
+
+        if let failure = result.failure, result.pokemon.isEmpty {
+            throw failure.asFetchFailure
+        }
+
+        return result.pokemon
     }
 
-    func fetchMore() async throws(FetchFailure) -> FetchMore<[PokemonSummary]>? {
-        try await nextPage()
+    func fetchMore() async throws(FetchFailure) -> FetchMore<[PokemonEntry]>? {
+        let result = try await nextPage()
+
+        return result.hasMore ? .more(result.pokemon) : .last(result.pokemon)
     }
 
-    private func nextPage() async throws(FetchFailure) -> FetchMore<[PokemonSummary]> {
-        switch try await onEnum(of: dependency.paging.loadNext()) {
-        case let .loaded(loaded):
-            if loaded.hasMore {
-                .more(loaded.pokemon)
-            } else {
-                .last(loaded.pokemon)
-            }
+    private func nextPage() async throws(FetchFailure) -> PokemonListResult {
+        do {
+            return try await dependency.paging.loadNext()
+        } catch {
+            throw FetchFailure(HomeStrings.unexpected)
+        }
+    }
 
-        case let .failed(failed):
-            throw failed.asFetchFailure
+    private func reset() async throws(FetchFailure) {
+        do {
+            try await dependency.paging.reset()
+        } catch {
+            throw FetchFailure(HomeStrings.unexpected)
         }
     }
 }
@@ -50,11 +61,11 @@ extension HomeViewModel {
     }
 
     struct Dependency {
-        var paging: any PokemonPaging = SharedPokemonPaging()
+        var paging: any PokemonPaging = PokemonPager()
     }
 }
 
-private extension PokemonListResultFailed {
+private extension PokemonListFailure {
     var asFetchFailure: FetchFailure {
         FetchFailure(message, canRetry: canRetry)
     }

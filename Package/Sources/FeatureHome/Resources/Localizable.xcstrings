@@ -1,105 +1,336 @@
 {
-  "sourceLanguage" : "ja",
-  "strings" : {
-    "home.empty_description" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取得できましたが 1 件もありませんでした"
+  "sourceLanguage": "ja",
+  "strings": {
+    "home.empty_description": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取得できましたが 1 件もありませんでした"
           }
         }
       }
     },
-    "home.empty_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポケモンがいません"
+    "home.empty_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ポケモンがいません"
           }
         }
       }
     },
-    "home.offline" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "接続を確認してください"
+    "home.number": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "#%03d"
           }
         }
       }
     },
-    "home.reload" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "再取得"
+    "home.offline": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "接続を確認してください"
           }
         }
       }
     },
-    "home.search_prompt" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "名前で絞り込む"
+    "home.reload": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再取得"
           }
         }
       }
     },
-    "home.server_error" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サーバーが応答しませんでした（%lld）"
+    "home.search_prompt": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名前で絞り込む"
           }
         }
       }
     },
-    "home.title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ポケモン"
+    "home.server_error": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "サーバーが応答しませんでした（%lld）"
           }
         }
       }
     },
-    "home.unexpected" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "予期しないエラーが発生しました"
+    "home.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ポケモン"
           }
         }
       }
     },
-    "home.unreadable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "データを読み取れませんでした"
+    "home.total": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "合計 %lld"
+          }
+        }
+      }
+    },
+    "home.type.bug": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "むし"
+          }
+        }
+      }
+    },
+    "home.type.dark": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "あく"
+          }
+        }
+      }
+    },
+    "home.type.dragon": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ドラゴン"
+          }
+        }
+      }
+    },
+    "home.type.electric": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "でんき"
+          }
+        }
+      }
+    },
+    "home.type.fairy": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "フェアリー"
+          }
+        }
+      }
+    },
+    "home.type.fighting": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "かくとう"
+          }
+        }
+      }
+    },
+    "home.type.fire": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ほのお"
+          }
+        }
+      }
+    },
+    "home.type.flying": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ひこう"
+          }
+        }
+      }
+    },
+    "home.type.ghost": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ゴースト"
+          }
+        }
+      }
+    },
+    "home.type.grass": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "くさ"
+          }
+        }
+      }
+    },
+    "home.type.ground": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "じめん"
+          }
+        }
+      }
+    },
+    "home.type.ice": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "こおり"
+          }
+        }
+      }
+    },
+    "home.type.normal": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ノーマル"
+          }
+        }
+      }
+    },
+    "home.type.poison": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "どく"
+          }
+        }
+      }
+    },
+    "home.type.psychic": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "エスパー"
+          }
+        }
+      }
+    },
+    "home.type.rock": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "いわ"
+          }
+        }
+      }
+    },
+    "home.type.steel": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "はがね"
+          }
+        }
+      }
+    },
+    "home.type.unknown": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不明"
+          }
+        }
+      }
+    },
+    "home.type.water": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "みず"
+          }
+        }
+      }
+    },
+    "home.unexpected": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "予期しないエラーが発生しました"
+          }
+        }
+      }
+    },
+    "home.unreadable": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "データを読み取れませんでした"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

@@ -1,4 +1,5 @@
 @testable import FeatureHome
+import SharedCore
 import Testing
 
 struct HomeStringsTests {
@@ -12,6 +13,20 @@ struct HomeStringsTests {
         #expect(HomeStrings.offline == "接続を確認してください")
         #expect(HomeStrings.unreadable == "データを読み取れませんでした")
         #expect(HomeStrings.unexpected == "予期しないエラーが発生しました")
+    }
+
+    @Test("型の名前がすべてカタログから引ける")
+    func everyKindResolves() {
+        for kind in PokemonTypeKind.allCases {
+            let name = HomeStrings.typeName(kind)
+            #expect(!name.hasPrefix("home.type."), "\(kind) の文言が引けていない")
+        }
+    }
+
+    @Test("Android と語彙を揃えている型名")
+    func typeNamesMatchAndroid() {
+        #expect(HomeStrings.typeName(.grass) == "くさ")
+        #expect(HomeStrings.typeName(.poison) == "どく")
     }
 
     @Test("サーバーエラーは状態コードを文言に含める")

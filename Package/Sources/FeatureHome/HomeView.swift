@@ -36,30 +36,33 @@ public extension HomeView {
 private struct HomeContent: View {
     @Bindable var viewState: HomeViewModel.State
 
-    let pokemon: [PokemonSummary]
+    let pokemon: [PokemonEntry]
     let actions: ScreenActions
 
-    private static let prefetchDistance = 3
-
-    private var filtered: [PokemonSummary] {
+    private var filtered: [PokemonEntry] {
         guard !viewState.query.isEmpty else {
             return pokemon
         }
 
         return pokemon.filter {
-            $0.name.localizedStandardContains(viewState.query)
+            $0.displayName.localizedStandardContains(viewState.query)
+                || $0.name.localizedStandardContains(viewState.query)
         }
     }
 
     var body: some View {
         let items = filtered
-        let prefetch = Set(items.suffix(Self.prefetchDistance).map(\.url))
+        let prefetch = Set(
+            items
+                .suffix(Int(PokemonPager.companion.PREFETCH_DISTANCE))
+                .map(\.id)
+        )
 
         List {
-            ForEach(items, id: \.url) { item in
-                Text(item.name)
+            ForEach(items, id: \.id) { item in
+                PokemonRow(pokemon: item)
                     .onAppear {
-                        guard viewState.query.isEmpty, prefetch.contains(item.url) else {
+                        guard viewState.query.isEmpty, prefetch.contains(item.id) else {
                             return
                         }
 
@@ -72,6 +75,7 @@ private struct HomeContent: View {
                     .frame(maxWidth: .infinity)
             }
         }
+        .listStyle(.plain)
         .overlay {
             if items.isEmpty {
                 ContentUnavailableView.search(text: viewState.query)
@@ -89,33 +93,154 @@ private struct HomeContent: View {
     }
 }
 
-#Preview("一覧") {
-    HomeView(
-        source: .snapshot(
-            .loaded([
-                PokemonSummary(name: "bulbasaur", url: "1"),
-                PokemonSummary(name: "ivysaur", url: "2"),
-                PokemonSummary(name: "venusaur", url: "3")
-            ])
+private struct PokemonRow: View {
+    let pokemon: PokemonEntry
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Sprite(pokemon: pokemon)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(pokemon.displayName)
+                    .font(.headline)
+
+                if !pokemon.types.isEmpty {
+                    HStack(spacing: 6) {
+                        ForEach(pokemon.types, id: \.self) { type in
+                            TypeBadge(type: type)
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(HomeStrings.number(Int(pokemon.id)))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+
+                if !pokemon.baseStats.isEmpty {
+                    Text(HomeStrings.total(Int(pokemon.totalBaseStat)))
+                        .font(.subheadline.weight(.semibold))
+                        .monospacedDigit()
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+private struct Sprite: View {
+    let pokemon: PokemonEntry
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(.quaternary)
+
+            if let url = pokemon.spriteUrl.flatMap(URL.init(string:)) {
+                AsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                } placeholder: {
+                    ProgressView()
+                }
+            } else {
+                Text(pokemon.displayName.prefix(1))
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: 56, height: 56)
+    }
+}
+
+private struct TypeBadge: View {
+    let type: PokemonTypeKind
+
+    var body: some View {
+        Text(HomeStrings.typeName(type))
+            .font(.caption2)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 3)
+            .background(type.badgeColor, in: Capsule())
+    }
+}
+
+private enum PreviewData {
+    static var pokemon: [PokemonEntry] {
+        [
+            entry(
+                id: 1,
+                japanese: "フシギダネ",
+                name: "bulbasaur",
+                types: [.grass, .poison],
+                stats: [45, 49, 49, 65, 65, 45]
+            ),
+            entry(id: 4, japanese: "ヒトカゲ", name: "charmander", types: [.fire], stats: [39, 52, 43, 60, 50, 65]),
+            entry(id: 7, japanese: "ゼニガメ", name: "squirtle", types: [.water], stats: [44, 48, 65, 50, 64, 43]),
+            entry(id: 10, japanese: "キャタピー", name: "caterpie", types: [.bug], stats: [45, 30, 35, 20, 20, 45]),
+            entry(id: 25, japanese: "ピカチュウ", name: "pikachu", types: [.electric], stats: [35, 55, 40, 50, 50, 90])
+        ]
+    }
+
+    static var degraded: PokemonEntry {
+        PokemonEntry(
+            id: 132,
+            name: "ditto",
+            japaneseName: nil,
+            spriteUrl: nil,
+            types: [],
+            baseStats: []
         )
-    )
+    }
+
+    private static func entry(
+        id: Int32,
+        japanese: String,
+        name: String,
+        types: [PokemonTypeKind],
+        stats: [Int32]
+    ) -> PokemonEntry {
+        let kinds: [PokemonStatKind] = [
+            .hp, .attack, .defense, .specialAttack, .specialDefense, .speed
+        ]
+
+        return PokemonEntry(
+            id: id,
+            name: name,
+            japaneseName: japanese,
+            spriteUrl: nil,
+            types: types,
+            baseStats: zip(kinds, stats).map { PokemonBaseStat(kind: $0, value: $1) }
+        )
+    }
+}
+
+#Preview("一覧") {
+    NavigationStack {
+        HomeView(source: .snapshot(.loaded(PreviewData.pokemon)))
+    }
 }
 
 #Preview("続きを読み込み中") {
-    HomeView(
-        source: .snapshot(
-            .loadingMore([
-                PokemonSummary(name: "bulbasaur", url: "1"),
-                PokemonSummary(name: "ivysaur", url: "2")
-            ])
-        )
-    )
+    NavigationStack {
+        HomeView(source: .snapshot(.loadingMore(PreviewData.pokemon)))
+    }
+}
+
+#Preview("詳細を引けなかった行") {
+    NavigationStack {
+        HomeView(source: .snapshot(.loaded([PreviewData.degraded])))
+    }
 }
 
 #Preview("空") {
-    HomeView(
-        source: .snapshot(
-            .loaded([])
-        )
-    )
+    NavigationStack {
+        HomeView(source: .snapshot(.loaded([])))
+    }
 }
