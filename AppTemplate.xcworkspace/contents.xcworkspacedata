@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:AppTemplate.xctestplan">
+   </FileRef>
+   <FileRef
       location = "group:App/AppTemplate.xcodeproj">
    </FileRef>
    <FileRef

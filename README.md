@@ -45,6 +45,7 @@ flowchart LR
 
 ```
 AppTemplate.xcworkspace     # 入口
+AppTemplate.xctestplan      # テスト対象。増やしたらここに足す
 App/
 ├── AppTemplate.xcodeproj
 └── AppTemplate/           # @main と Assets
@@ -71,13 +72,11 @@ Package/
 | `make verify` | lint + ユニットテスト + ビルド（変更後はこれを通す） |
 | `make verify SIMULATOR='iPhone 17'` | シミュレータを指定して実行 |
 | `make build` | ビルドのみ |
-| `make test` | ユニットテストのみ |
+| `make test` | ユニットテストのみ（`AppTemplate.xctestplan` の全ターゲット） |
 | `make lint` | SwiftFormat / SwiftLint によるチェック（`make verify` に含まれる） |
 | `make format` | SwiftFormat / SwiftLint で自動修正 |
 
 ## 環境
-
-バージョンはここに書き写さない。写した値は必ず古くなる。
 
 | 項目 | 出所 |
 | --- | --- |

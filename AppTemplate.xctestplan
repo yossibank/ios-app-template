@@ -1,0 +1,32 @@
+{
+  "configurations" : [
+    {
+      "id" : "69A1A7FA-DDC8-4312-B0A5-AA1B014FEDE5",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testInteropMode" : "complete",
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:..\/Package",
+        "identifier" : "ScreenCoreTests",
+        "name" : "ScreenCoreTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/Package",
+        "identifier" : "FeatureHomeTests",
+        "name" : "FeatureHomeTests"
+      }
+    }
+  ],
+  "version" : 1
+}

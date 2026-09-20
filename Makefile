@@ -4,7 +4,6 @@ DEFAULT_SIMULATOR := $(shell xcrun simctl list devices available | awk -F'[()]' 
 SIMULATOR ?= $(DEFAULT_SIMULATOR)
 DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO
-TEST_SCHEMES := ScreenCore FeatureHome
 
 SWIFTFORMAT ?= mint run swiftformat
 SWIFTLINT   ?= mint run swiftlint
@@ -34,9 +33,7 @@ boot-wait:
 	xcrun simctl bootstatus '$(SIMULATOR)' -b
 
 test:
-	for scheme in $(TEST_SCHEMES); do \
-		xcodebuild test -workspace $(WORKSPACE) -scheme $$scheme -destination '$(DEST)' || exit 1; \
-	done
+	xcodebuild test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)'
 
 build:
 	xcodebuild build -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
