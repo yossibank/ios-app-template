@@ -48,16 +48,34 @@ jobs:
             password ${SHARED_CORE_TOKEN}
           NETRC
 
-      - name: Cache lint tools
-        uses: actions/cache@v6
-        with:
-          path: ~/.mint
-          key: ${{ runner.os }}-mint-${{ hashFiles('Mintfile') }}
-
+      # 版は Mintfile が出所。CI はソースからビルドせず、同じ版の配布バイナリを取る。
       - name: Install lint tools
         run: |
-          command -v mint >/dev/null || brew install mint
-          mint bootstrap
+          set -euo pipefail
+          tools="$RUNNER_TEMP/lint-tools"
+          mkdir -p "$tools"
+
+          version() {
+            sed -n "s|^$1@||p" Mintfile
+          }
+
+          curl -fsSL -o "$RUNNER_TEMP/swiftformat.zip" \
+            "https://github.com/nicklockwood/SwiftFormat/releases/download/$(version nicklockwood/SwiftFormat)/swiftformat.zip"
+          curl -fsSL -o "$RUNNER_TEMP/swiftlint.zip" \
+            "https://github.com/realm/SwiftLint/releases/download/$(version realm/SwiftLint)/portable_swiftlint.zip"
+
+          unzip -oq "$RUNNER_TEMP/swiftformat.zip" swiftformat -d "$tools"
+          unzip -oq "$RUNNER_TEMP/swiftlint.zip" swiftlint -d "$tools"
+          chmod +x "$tools/swiftformat" "$tools/swiftlint"
+
+          echo "$tools" >> "$GITHUB_PATH"
+          echo "SWIFTFORMAT=swiftformat" >> "$GITHUB_ENV"
+          echo "SWIFTLINT=swiftlint" >> "$GITHUB_ENV"
+
+      - name: Show lint tool versions
+        run: |
+          swiftformat --version
+          swiftlint version
 
       - name: Wait for the simulator
         run: make boot-wait

@@ -83,6 +83,6 @@ Package/
 | --- | --- |
 | Swift 言語モード・Deployment Target | [project.pbxproj](App/AppTemplate.xcodeproj/project.pbxproj) の `SWIFT_VERSION` / `IPHONEOS_DEPLOYMENT_TARGET` |
 | Package の対象 OS・共通コア | [Package/Package.swift](Package/Package.swift) |
-| SwiftFormat / SwiftLint | [Mintfile](Mintfile) |
+| SwiftFormat / SwiftLint | [Mintfile](Mintfile)。手元は Mint 経由、CI は同じ版の配布バイナリ |
 | Xcode | リポジトリでは固定していない。CI は [verify.yml](.github/workflows/verify.yml) のランナー任せ |
 | 認証 | `~/.netrc` に `api.github.com` の資格情報（共通コアの取得に必要） |
