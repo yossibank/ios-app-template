@@ -1,0 +1,94 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "home.empty_description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取得できましたが 1 件もありませんでした"
+          }
+        }
+      }
+    },
+    "home.empty_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポケモンがいません"
+          }
+        }
+      }
+    },
+    "home.offline" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続を確認してください"
+          }
+        }
+      }
+    },
+    "home.reload" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再取得"
+          }
+        }
+      }
+    },
+    "home.search_prompt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前で絞り込む"
+          }
+        }
+      }
+    },
+    "home.server_error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーが応答しませんでした（%lld）"
+          }
+        }
+      }
+    },
+    "home.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ポケモン"
+          }
+        }
+      }
+    },
+    "home.unreadable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データを読み取れませんでした"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

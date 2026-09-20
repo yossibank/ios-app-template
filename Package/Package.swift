@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "Package",
+    defaultLocalization: "ja",
     platforms: [
         .iOS(.v26)
     ],
@@ -21,7 +22,10 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "ScreenCore"
+            name: "ScreenCore",
+            resources: [
+                .process("Resources")
+            ]
         ),
         .target(
             name: "SharedCore",
@@ -31,7 +35,10 @@ let package = Package(
         ),
         .target(
             name: "FeatureHome",
-            dependencies: ["ScreenCore", "SharedCore"]
+            dependencies: ["ScreenCore", "SharedCore"],
+            resources: [
+                .process("Resources")
+            ]
         ),
         .target(
             name: "AppRoot",

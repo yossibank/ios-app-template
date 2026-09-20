@@ -1,5 +1,15 @@
+import Foundation
+
 enum ScreenStrings {
-    static let loadFailed = "読み込めませんでした"
-    static let retry = "再試行"
-    static let unexpectedError = "予期しないエラーが発生しました"
+    static var loadFailed: String {
+        String(localized: "screen.load_failed", bundle: .module)
+    }
+
+    static var retry: String {
+        String(localized: "screen.retry", bundle: .module)
+    }
+
+    static var unexpectedError: String {
+        String(localized: "screen.unexpected_error", bundle: .module)
+    }
 }

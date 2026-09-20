@@ -42,6 +42,9 @@ Package/                    画面とロジック。モジュールはここに�
 
 - コードに無駄なコメントを書かない。
 - グローバル関数を作らない。型のメソッドか、対象の型への extension にする。
+- 画面に出る文言を Swift のリテラルで書かない。`Localizable.xcstrings` に置き、
+  `String(localized:bundle: .module)` で引く。`defaultValue` は渡さない
+  （引けていないことをテストで検出できなくなる）。
 
 ## 全体ルール
 

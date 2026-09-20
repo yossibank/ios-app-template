@@ -1,0 +1,39 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "screen.load_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "読み込めませんでした"
+          }
+        }
+      }
+    },
+    "screen.retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試行"
+          }
+        }
+      }
+    },
+    "screen.unexpected_error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予期しないエラーが発生しました"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

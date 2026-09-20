@@ -51,11 +51,12 @@ App/
 Package/
 ├── Package.swift          # 依存とモジュールの宣言（共通コアのバージョンもここ）
 ├── Sources/
-│   ├── ScreenCore/        # ViewModel/ Fetch/ Screen/
+│   ├── ScreenCore/        # ViewModel/ Fetch/ Screen/ Resources/
 │   ├── SharedCore/
-│   ├── FeatureHome/
+│   ├── FeatureHome/       # 画面と Resources/
 │   └── AppRoot/
 └── Tests/
+    ├── ScreenCoreTests/
     └── FeatureHomeTests/
 ```
 

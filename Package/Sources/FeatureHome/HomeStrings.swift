@@ -1,13 +1,38 @@
+import Foundation
+
 enum HomeStrings {
-    static let title = "ポケモン"
-    static let searchPrompt = "名前で絞り込む"
-    static let emptyTitle = "ポケモンがいません"
-    static let emptyDescription = "取得できましたが 1 件もありませんでした"
-    static let reload = "再取得"
-    static let offline = "接続を確認してください"
-    static let unreadable = "データを読み取れませんでした"
+    static var title: String {
+        String(localized: "home.title", bundle: .module)
+    }
+
+    static var searchPrompt: String {
+        String(localized: "home.search_prompt", bundle: .module)
+    }
+
+    static var emptyTitle: String {
+        String(localized: "home.empty_title", bundle: .module)
+    }
+
+    static var emptyDescription: String {
+        String(localized: "home.empty_description", bundle: .module)
+    }
+
+    static var reload: String {
+        String(localized: "home.reload", bundle: .module)
+    }
+
+    static var offline: String {
+        String(localized: "home.offline", bundle: .module)
+    }
+
+    static var unreadable: String {
+        String(localized: "home.unreadable", bundle: .module)
+    }
 
     static func serverError(statusCode: Int) -> String {
-        "サーバーが応答しませんでした（\(statusCode)）"
+        String(
+            format: String(localized: "home.server_error", bundle: .module),
+            statusCode
+        )
     }
 }
