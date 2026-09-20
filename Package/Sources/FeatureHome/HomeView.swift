@@ -9,7 +9,7 @@ public struct HomeView: View {
         ScreenView(source) { viewState, pokemon in
             HomeContent(viewState: viewState, pokemon: pokemon)
         }
-        .navigationTitle("ポケモン")
+        .navigationTitle(HomeStrings.title)
     }
 }
 
@@ -59,11 +59,11 @@ private struct HomeContent: View {
         .overlay {
             if pokemon.isEmpty {
                 ContentUnavailableView {
-                    Label("ポケモンがいません", systemImage: "tray")
+                    Label(HomeStrings.emptyTitle, systemImage: "tray")
                 } description: {
-                    Text("取得できましたが 1 件もありませんでした")
+                    Text(HomeStrings.emptyDescription)
                 } actions: {
-                    Button("再取得") {
+                    Button(HomeStrings.reload) {
                         reload()
                     }
                 }
@@ -71,9 +71,12 @@ private struct HomeContent: View {
                 ContentUnavailableView.search(text: viewState.query)
             }
         }
-        .searchable(text: $viewState.query, prompt: "名前で絞り込む")
+        .searchable(
+            text: $viewState.query,
+            prompt: HomeStrings.searchPrompt
+        )
         .toolbar {
-            Button("再取得", systemImage: "arrow.clockwise") {
+            Button(HomeStrings.reload, systemImage: "arrow.clockwise") {
                 reload()
             }
         }

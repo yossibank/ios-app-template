@@ -64,13 +64,13 @@ private extension PokemonListResultFailed {
     var message: String {
         switch onEnum(of: self) {
         case .offline:
-            "接続を確認してください"
+            HomeStrings.offline
 
         case let .server(server):
-            "サーバーが応答しませんでした（\(server.statusCode)）"
+            HomeStrings.serverError(statusCode: Int(server.statusCode))
 
         case .unexpected:
-            "データを読み取れませんでした"
+            HomeStrings.unreadable
         }
     }
 }

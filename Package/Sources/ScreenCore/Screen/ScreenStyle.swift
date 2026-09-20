@@ -6,7 +6,7 @@ public struct ScreenStyle {
         public let retry: () -> Void
 
         public var message: String {
-            error.localizedDescription
+            (error as? FetchFailure)?.message ?? ScreenStrings.unexpectedError
         }
 
         public var canRetry: Bool {
@@ -37,12 +37,18 @@ public struct ScreenStyle {
             },
             failure: { failure in
                 ContentUnavailableView {
-                    Label("読み込めませんでした", systemImage: "exclamationmark.triangle")
+                    Label(
+                        ScreenStrings.loadFailed,
+                        systemImage: "exclamationmark.triangle"
+                    )
                 } description: {
                     Text(failure.message)
                 } actions: {
                     if failure.canRetry {
-                        Button("再試行", action: failure.retry)
+                        Button(
+                            ScreenStrings.retry,
+                            action: failure.retry
+                        )
                     }
                 }
             }
@@ -66,7 +72,9 @@ public extension View {
 
 #Preview("失敗") {
     ScreenStyle.standard.failure(
-        ScreenStyle.Failure(error: FetchFailure("ネットワークに接続できません")) {}
+        ScreenStyle.Failure(
+            error: FetchFailure("ネットワークに接続できません")
+        ) {}
     )
 }
 
