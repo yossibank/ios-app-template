@@ -52,3 +52,14 @@ custom_rules:
     excluded:
       - ".*/Package/Sources/SharedCore/.*"
 
+  # 型の外に書かれた func を拾う。extension 内はインデントされるので当たらない。
+  global_function:
+    name: "グローバル関数"
+    regex: '^(?:@\w+(?:\([^)]*\))?[ \t]+)*(?:(?:private|fileprivate|internal|public|open)[ \t]+)*func[ \t]'
+    message: "グローバル関数を作らない。型のメソッドか、対象の型への extension にする"
+    severity: error
+    excluded_match_kinds:
+      - comment
+      - doccomment
+      - string
+
