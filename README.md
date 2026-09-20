@@ -77,10 +77,12 @@ Package/
 
 ## 環境
 
-| 項目 | バージョン |
+バージョンはここに書き写さない。写した値は必ず古くなる。
+
+| 項目 | 出所 |
 | --- | --- |
-| Xcode | 26.x |
-| Swift 言語モード | 6（アプリターゲット・`Package` とも） |
-| Deployment Target | iOS 26.5（`Package.swift` は `.iOS(.v26)`） |
-| lint ツール | Mint 経由。版は [Mintfile](Mintfile) で固定 |
+| Swift 言語モード・Deployment Target | [project.pbxproj](App/AppTemplate.xcodeproj/project.pbxproj) の `SWIFT_VERSION` / `IPHONEOS_DEPLOYMENT_TARGET` |
+| Package の対象 OS・共通コア | [Package/Package.swift](Package/Package.swift) |
+| SwiftFormat / SwiftLint | [Mintfile](Mintfile) |
+| Xcode | リポジトリでは固定していない。CI は [verify.yml](.github/workflows/verify.yml) のランナー任せ |
 | 認証 | `~/.netrc` に `api.github.com` の資格情報（共通コアの取得に必要） |

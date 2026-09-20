@@ -17,7 +17,7 @@ kmp-app-template（共通ロジック）・android-app-template と合わせた 
 | テスト | Swift Testing |
 | 依存管理 | Swift Package Manager |
 
-バージョンは [README.md](README.md)。
+バージョンの出所は [README.md](README.md) の「環境」。
 
 ## プロジェクト構成
 
