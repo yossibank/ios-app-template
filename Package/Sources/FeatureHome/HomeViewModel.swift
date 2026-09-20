@@ -21,22 +21,21 @@ final class HomeViewModel: ScreenViewModel {
 extension HomeViewModel {
     func fetch() async throws -> [PokemonSummary] {
         try await dependency.paging.reset()
-        return try await nextPage()
+        return try await nextPage().value
     }
 
-    func fetchMore() async throws -> [PokemonSummary]? {
-        guard viewState.hasMore else {
-            return nil
-        }
-
-        return try await nextPage()
+    func fetchMore() async throws -> FetchMore<[PokemonSummary]>? {
+        try await nextPage()
     }
 
-    private func nextPage() async throws -> [PokemonSummary] {
+    private func nextPage() async throws -> FetchMore<[PokemonSummary]> {
         switch try await onEnum(of: dependency.paging.loadNext()) {
         case let .loaded(loaded):
-            viewState.hasMore = loaded.hasMore
-            return loaded.pokemon
+            if loaded.hasMore {
+                .more(loaded.pokemon)
+            } else {
+                .last(loaded.pokemon)
+            }
 
         case let .failed(failed):
             throw failed.asFetchFailure
@@ -48,7 +47,6 @@ extension HomeViewModel {
     @Observable
     final class State: ViewState {
         var query = ""
-        var hasMore = true
     }
 
     struct Dependency {

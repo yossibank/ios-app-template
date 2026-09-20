@@ -63,15 +63,15 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View>: View {
         }
         .environment(
             \.screenReload,
-            ScreenAction(.reload, screenID: screenID) { model.reload() }
+            ScreenAction(.reload, screenID: screenID) {
+                model.reload()
+            }
         )
         .environment(
             \.screenLoadMore,
-            ScreenAction(.loadMore, screenID: screenID) { model.requestLoadMore() }
-        )
-        .environment(
-            \.screenIsLoadingMore,
-            model.fetchState.isLoadingMore
+            ScreenAction(.loadMore, screenID: screenID) {
+                model.requestLoadMore()
+            }
         )
         .task(id: model.fetchState.reloadID) {
             await model.load()
@@ -117,8 +117,11 @@ private struct PhaseContent<Value, Success: View>: View {
         case .idle, .loading:
             style.loading()
 
-        case let .loaded(value):
-            success(value)
+        case let .loaded(value), let .loadingMore(value):
+            success(value).environment(
+                \.screenIsLoadingMore,
+                phase.isLoadingMore
+            )
 
         case let .failed(error):
             style.failure(

@@ -5,12 +5,12 @@ import Observation
 @Observable
 public final class FetchState<Value> {
     public private(set) var phase: FetchPhase<Value> = .idle
-    public private(set) var isLoadingMore = false
 
     private(set) var reloadID = UUID()
     private(set) var loadMoreID = UUID()
 
     @ObservationIgnored private var activeRequest: UUID?
+    @ObservationIgnored private var reachedEnd = false
 
     public init() {}
 
@@ -20,7 +20,10 @@ public final class FetchState<Value> {
     }
 
     func requestLoadMore() {
-        guard case .loaded = phase, !isLoadingMore else {
+        guard
+            case .loaded = phase,
+            !reachedEnd
+        else {
             return
         }
 
@@ -32,38 +35,47 @@ public final class FetchState<Value> {
             return
         }
 
+        reachedEnd = false
         phase = .loading
 
         await settle(operation) { value in
-            if let value {
-                phase = .loaded(value)
-            }
+            phase = .loaded(value)
         } failed: { error in
             phase = .failed(error)
         }
     }
 
-    func runMore(_ operation: @MainActor () async throws -> Value?) async {
-        guard case .loaded = phase, !Task.isCancelled, !isLoadingMore else {
+    func runMore(_ operation: @MainActor () async throws -> FetchMore<Value>?) async {
+        guard
+            case let .loaded(current) = phase,
+            !Task.isCancelled
+        else {
             return
         }
 
-        isLoadingMore = true
+        phase = .loadingMore(current)
 
-        await settle(operation) { value in
-            isLoadingMore = false
-
-            if let value {
+        await settle(operation) { result in
+            switch result {
+            case let .more(value)?:
                 phase = .loaded(value)
+
+            case let .last(value)?:
+                reachedEnd = true
+                phase = .loaded(value)
+
+            case nil:
+                reachedEnd = true
+                phase = .loaded(current)
             }
         } failed: { _ in
-            isLoadingMore = false
+            phase = .loaded(current)
         }
     }
 
-    private func settle(
-        _ operation: @MainActor () async throws -> Value?,
-        succeeded: @MainActor (Value?) -> Void,
+    private func settle<Result>(
+        _ operation: @MainActor () async throws -> Result,
+        succeeded: @MainActor (Result) -> Void,
         failed: @MainActor (any Error) -> Void
     ) async {
         let request = UUID()

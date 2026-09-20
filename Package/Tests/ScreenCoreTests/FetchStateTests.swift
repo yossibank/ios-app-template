@@ -59,7 +59,7 @@ struct FetchStateTests {
         await state.runMore { throw Boom() }
 
         #expect(state.phase.loaded == [1, 2])
-        #expect(state.isLoadingMore == false)
+        #expect(state.phase.isLoadingMore == false)
     }
 
     @Test("続きが無いと返ったら一覧はそのまま")
@@ -70,7 +70,58 @@ struct FetchStateTests {
         await state.runMore { nil }
 
         #expect(state.phase.loaded == [1, 2])
-        #expect(state.isLoadingMore == false)
+        #expect(state.phase.isLoadingMore == false)
+    }
+
+    @Test("続きの取得中に再取得しても、読み込み中の表示が残らない")
+    func reloadDuringLoadMoreClearsLoadingMore() async {
+        let state = FetchState<[Int]>()
+        await state.run { [1] }
+
+        let gate = Gate()
+        let more = Task { await state.runMore { await gate.wait(); return .more([1, 2]) } }
+        await gate.waitUntilEntered()
+
+        state.requestReload()
+        await state.run { [9] }
+
+        gate.open()
+        await more.value
+
+        #expect(state.phase.loaded == [9])
+        #expect(state.phase.isLoadingMore == false)
+
+        let before = state.loadMoreID
+        state.requestLoadMore()
+        #expect(state.loadMoreID != before, "続きを読めなくなっている")
+    }
+
+    @Test("終端を受け取ったら、もう続きを要求しない")
+    func stopsAskingAfterTheLastPage() async {
+        let state = FetchState<[Int]>()
+        await state.run { [1] }
+
+        await state.runMore { .last([1, 2]) }
+
+        let before = state.loadMoreID
+        state.requestLoadMore()
+
+        #expect(state.loadMoreID == before)
+        #expect(state.phase.loaded == [1, 2])
+    }
+
+    @Test("再取得すると終端の記憶は消える")
+    func reloadForgetsTheEnd() async {
+        let state = FetchState<[Int]>()
+        await state.run { [1] }
+        await state.runMore { .last([1, 2]) }
+
+        await state.run { [1] }
+
+        let before = state.loadMoreID
+        state.requestLoadMore()
+
+        #expect(state.loadMoreID != before)
     }
 
     @Test("読み込めていないうちは続きを取りにいかない")
@@ -80,7 +131,7 @@ struct FetchStateTests {
 
         await state.runMore {
             asked = true
-            return [9]
+            return .more([9])
         }
 
         #expect(asked == false)

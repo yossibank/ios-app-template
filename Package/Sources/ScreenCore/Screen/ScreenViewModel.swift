@@ -5,11 +5,11 @@ public protocol ScreenViewModel: ViewModel {
     var fetchState: FetchState<Value> { get }
 
     func fetch() async throws -> Value
-    func fetchMore() async throws -> Value?
+    func fetchMore() async throws -> FetchMore<Value>?
 }
 
 public extension ScreenViewModel {
-    func fetchMore() async throws -> Value? {
+    func fetchMore() async throws -> FetchMore<Value>? {
         nil
     }
 }

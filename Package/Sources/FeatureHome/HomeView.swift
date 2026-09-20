@@ -95,6 +95,21 @@ private struct HomeContent: View {
     )
 }
 
+#Preview("続きを読み込み中") {
+    HomeView(
+        source: .snapshot(
+            .loadingMore([
+                PokemonSummary(name: "bulbasaur", url: "1"),
+                PokemonSummary(name: "ivysaur", url: "2")
+            ])
+        )
+    )
+}
+
 #Preview("空") {
-    HomeView(source: .snapshot(.loaded([])))
+    HomeView(
+        source: .snapshot(
+            .loaded([])
+        )
+    )
 }
