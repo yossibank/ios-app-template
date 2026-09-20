@@ -6,8 +6,8 @@ protocol PokemonPaging: Sendable {
     func reset() async throws(FetchFailure)
 }
 
-struct SharedPokemonPaging: PokemonPaging, @unchecked Sendable {
-    private let pager = PokemonPager()
+struct SharedPokemonPaging: PokemonPaging {
+    private nonisolated(unsafe) let pager = PokemonPager()
 
     func loadNext() async throws(FetchFailure) -> any PokemonListResult {
         try await unexpected {

@@ -97,11 +97,11 @@ struct HomeViewModelTests {
     }
 }
 
-private final class StubPaging: PokemonPaging, @unchecked Sendable {
-    private let pages: [any PokemonListResult]
-    private var index = 0
+private final class StubPaging: PokemonPaging {
+    private nonisolated(unsafe) let pages: [any PokemonListResult]
+    private nonisolated(unsafe) var index = 0
 
-    private(set) var calls = 0
+    private(set) nonisolated(unsafe) var calls = 0
 
     init(_ pages: [any PokemonListResult]) {
         self.pages = pages
