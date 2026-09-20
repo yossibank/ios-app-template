@@ -3,6 +3,16 @@
   extends: ["config:recommended"],
   timezone: "Asia/Tokyo",
   schedule: ["before 9am on monday"],
+  // Mintfile を読む標準マネージャが無いので、行の形を直接見る。
+  // 固定したまま腐らせないために、ここから更新 PR を出す。
+  customManagers: [
+    {
+      customType: "regex",
+      managerFilePatterns: ["/^Mintfile$/"],
+      matchStrings: ["(?<depName>[\\w.-]+/[\\w.-]+)@(?<currentValue>\\S+)"],
+      datasourceTemplate: "github-tags",
+    },
+  ],
   packageRules: [
     {
       matchUpdateTypes: ["major"],

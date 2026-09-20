@@ -35,7 +35,7 @@ Package/                    画面とロジック。モジュールはここに�
 | | |
 | --- | --- |
 | `Shared`（kmp-app-template） | 共通コア。唯一の依存。`Package.swift` で `exact` 指定 |
-| SwiftFormat / SwiftLint | 書式と規約のチェック |
+| SwiftFormat / SwiftLint | 書式と規約のチェック。版は `Mintfile` で固定し、Mint 経由で呼ぶ |
 | Renovate | 依存の更新 PR（毎週月曜） |
 
 ## コーディング規約
@@ -51,4 +51,6 @@ Package/                    画面とロジック。モジュールはここに�
 - 変更したら `make verify` を通す。通らないものは完了ではない。
 - 共通ロジックは kmp-app-template 側に置く。ここには iOS 固有のものだけ。
 - 共通コアのバージョンを `Package.swift` 以外で指定しない。
+- lint ツールのバージョンを `Mintfile` 以外で指定しない。素の `swiftlint` /
+  `swiftformat` を直接呼ばない（PATH 上の版が何かに依存してしまう）。
 - 警告を数えるときは DerivedData を捨てる。増分ビルドでは再コンパイルされず 0 件に見える。

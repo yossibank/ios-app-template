@@ -48,10 +48,16 @@ jobs:
             password ${SHARED_CORE_TOKEN}
           NETRC
 
+      - name: Cache lint tools
+        uses: actions/cache@v6
+        with:
+          path: ~/.mint
+          key: ${{ runner.os }}-mint-${{ hashFiles('Mintfile') }}
+
       - name: Install lint tools
         run: |
-          command -v swiftformat >/dev/null || brew install swiftformat
-          command -v swiftlint   >/dev/null || brew install swiftlint
+          command -v mint >/dev/null || brew install mint
+          mint bootstrap
 
       - name: Wait for the simulator
         run: make boot-wait

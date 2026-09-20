@@ -6,20 +6,23 @@ DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO
 TEST_SCHEMES := ScreenCore FeatureHomeTests
 
-.PHONY: open verify lint format test build clean boot boot-wait
+.PHONY: open verify bootstrap lint format test build clean boot boot-wait
 
 open:
 	open $(WORKSPACE)
 
 verify: lint test build
 
+bootstrap:
+	mint bootstrap
+
 lint:
-	swiftformat --lint .
-	swiftlint lint
+	mint run swiftformat --lint .
+	mint run swiftlint lint
 
 format:
-	swiftformat .
-	swiftlint --fix
+	mint run swiftformat .
+	mint run swiftlint --fix
 
 boot:
 	xcrun simctl boot '$(SIMULATOR)' || true

@@ -67,6 +67,7 @@ Package/
 | コマンド | 内容 |
 | --- | --- |
 | `make open` | Xcode で `AppTemplate.xcworkspace` を開く |
+| `make bootstrap` | `Mintfile` の版で SwiftFormat / SwiftLint を用意する |
 | `make verify` | lint + ユニットテスト + ビルド（変更後はこれを通す） |
 | `make verify SIMULATOR='iPhone 17'` | シミュレータを指定して実行 |
 | `make build` | ビルドのみ |
@@ -81,4 +82,5 @@ Package/
 | Xcode | 26.x |
 | Swift 言語モード | 6（アプリターゲット・`Package` とも） |
 | Deployment Target | iOS 26.5（`Package.swift` は `.iOS(.v26)`） |
+| lint ツール | Mint 経由。版は [Mintfile](Mintfile) で固定 |
 | 認証 | `~/.netrc` に `api.github.com` の資格情報（共通コアの取得に必要） |
