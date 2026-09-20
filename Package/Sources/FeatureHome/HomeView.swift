@@ -28,6 +28,8 @@ private struct HomeContent: View {
 
     let pokemon: [PokemonSummary]
 
+    private static let prefetchDistance = 3
+
     private var filtered: [PokemonSummary] {
         guard !viewState.query.isEmpty else {
             return pokemon
@@ -39,11 +41,14 @@ private struct HomeContent: View {
     }
 
     var body: some View {
+        let items = filtered
+        let prefetch = Set(items.suffix(Self.prefetchDistance).map(\.url))
+
         List {
-            ForEach(filtered, id: \.url) { item in
+            ForEach(items, id: \.url) { item in
                 Text(item.name)
                     .onAppear {
-                        guard viewState.query.isEmpty, item.url == pokemon.last?.url else {
+                        guard viewState.query.isEmpty, prefetch.contains(item.url) else {
                             return
                         }
 
