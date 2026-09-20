@@ -42,13 +42,35 @@ struct FetchStateTests {
         #expect(state.phase.loaded == nil)
     }
 
+    @Test("取り消された後に失敗が返っても、失敗として出さない")
+    func cancelledFailureIsDropped() async {
+        let state = FetchState<[Int]>()
+        let gate = Gate()
+
+        let running = Task {
+            await state.run { () async throws(FetchFailure) -> [Int] in
+                await gate.wait()
+                throw FetchFailure("取り消した後の失敗")
+            }
+        }
+        await gate.waitUntilEntered()
+
+        running.cancel()
+        gate.open()
+        await running.value
+
+        #expect(state.phase.failure == nil)
+    }
+
     @Test("取得が失敗したら失敗状態になる")
     func failureBecomesFailed() async {
         let state = FetchState<[Int]>()
 
-        await state.run { throw Boom() }
+        await state.run { () async throws(FetchFailure) -> [Int] in
+            throw FetchFailure("取得に失敗しました")
+        }
 
-        #expect(state.phase.failure is Boom)
+        #expect(state.phase.failure?.message == "取得に失敗しました")
     }
 
     @Test("続きの取得が失敗しても、読み込めている分は消えない")
@@ -56,7 +78,9 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         await state.run { [1, 2] }
 
-        await state.runMore { throw Boom() }
+        await state.runMore { () async throws(FetchFailure) -> FetchMore<[Int]>? in
+            throw FetchFailure("取得に失敗しました")
+        }
 
         #expect(state.phase.loaded == [1, 2])
         #expect(state.phase.isLoadingMore == false)
@@ -139,8 +163,6 @@ struct FetchStateTests {
     }
 }
 
-private struct Boom: Error {}
-
 @MainActor
 private final class Gate {
     private var continuation: CheckedContinuation<Void, Never>?
@@ -174,11 +196,11 @@ private extension FetchPhase {
         return value
     }
 
-    var failure: (any Error)? {
-        guard case let .failed(error) = self else {
+    var failure: FetchFailure? {
+        guard case let .failed(failure) = self else {
             return nil
         }
 
-        return error
+        return failure
     }
 }

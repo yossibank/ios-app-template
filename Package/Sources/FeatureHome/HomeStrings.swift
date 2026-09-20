@@ -29,6 +29,10 @@ enum HomeStrings {
         String(localized: "home.unreadable", bundle: .module)
     }
 
+    static var unexpected: String {
+        String(localized: "home.unexpected", bundle: .module)
+    }
+
     static func serverError(statusCode: Int) -> String {
         String(
             format: String(localized: "home.server_error", bundle: .module),

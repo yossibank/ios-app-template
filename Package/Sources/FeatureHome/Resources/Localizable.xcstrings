@@ -78,6 +78,17 @@
         }
       }
     },
+    "home.unexpected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予期しないエラーが発生しました"
+          }
+        }
+      }
+    },
     "home.unreadable" : {
       "extractionState" : "manual",
       "localizations" : {

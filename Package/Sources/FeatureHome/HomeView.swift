@@ -6,8 +6,22 @@ public struct HomeView: View {
     let source: ScreenSource<HomeViewModel>
 
     public var body: some View {
-        ScreenView(source) { viewState, pokemon in
-            HomeContent(viewState: viewState, pokemon: pokemon)
+        ScreenView(source) { viewState, pokemon, actions in
+            HomeContent(
+                viewState: viewState,
+                pokemon: pokemon,
+                actions: actions
+            )
+        } empty: { actions in
+            ContentUnavailableView {
+                Label(HomeStrings.emptyTitle, systemImage: "tray")
+            } description: {
+                Text(HomeStrings.emptyDescription)
+            } actions: {
+                Button(HomeStrings.reload) {
+                    actions.reload()
+                }
+            }
         }
         .navigationTitle(HomeStrings.title)
     }
@@ -20,13 +34,10 @@ public extension HomeView {
 }
 
 private struct HomeContent: View {
-    @Environment(\.screenReload) private var reload
-    @Environment(\.screenLoadMore) private var loadMore
-    @Environment(\.screenIsLoadingMore) private var isLoadingMore
-
     @Bindable var viewState: HomeViewModel.State
 
     let pokemon: [PokemonSummary]
+    let actions: ScreenActions
 
     private static let prefetchDistance = 3
 
@@ -52,27 +63,17 @@ private struct HomeContent: View {
                             return
                         }
 
-                        loadMore()
+                        actions.loadMore()
                     }
             }
 
-            if isLoadingMore {
+            if actions.isLoadingMore {
                 ProgressView()
                     .frame(maxWidth: .infinity)
             }
         }
         .overlay {
-            if pokemon.isEmpty {
-                ContentUnavailableView {
-                    Label(HomeStrings.emptyTitle, systemImage: "tray")
-                } description: {
-                    Text(HomeStrings.emptyDescription)
-                } actions: {
-                    Button(HomeStrings.reload) {
-                        reload()
-                    }
-                }
-            } else if filtered.isEmpty {
+            if items.isEmpty {
                 ContentUnavailableView.search(text: viewState.query)
             }
         }
@@ -82,7 +83,7 @@ private struct HomeContent: View {
         )
         .toolbar {
             Button(HomeStrings.reload, systemImage: "arrow.clockwise") {
-                reload()
+                actions.reload()
             }
         }
     }

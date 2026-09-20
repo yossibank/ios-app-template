@@ -18,18 +18,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "再試行"
-          }
-        }
-      }
-    },
-    "screen.unexpected_error" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "予期しないエラーが発生しました"
+            "value" : "再取得"
           }
         }
       }

@@ -8,8 +8,4 @@ enum ScreenStrings {
     static var retry: String {
         String(localized: "screen.retry", bundle: .module)
     }
-
-    static var unexpectedError: String {
-        String(localized: "screen.unexpected_error", bundle: .module)
-    }
 }

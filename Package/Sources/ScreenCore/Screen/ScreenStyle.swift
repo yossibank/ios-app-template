@@ -2,15 +2,15 @@ import SwiftUI
 
 public struct ScreenStyle {
     public struct Failure {
-        public let error: any Error
+        public let error: FetchFailure
         public let retry: () -> Void
 
         public var message: String {
-            (error as? FetchFailure)?.message ?? ScreenStrings.unexpectedError
+            error.message
         }
 
         public var canRetry: Bool {
-            (error as? FetchFailure)?.canRetry ?? true
+            error.canRetry
         }
     }
 

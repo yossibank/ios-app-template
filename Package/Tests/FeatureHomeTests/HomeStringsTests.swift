@@ -11,6 +11,7 @@ struct HomeStringsTests {
         #expect(HomeStrings.reload == "再取得")
         #expect(HomeStrings.offline == "接続を確認してください")
         #expect(HomeStrings.unreadable == "データを読み取れませんでした")
+        #expect(HomeStrings.unexpected == "予期しないエラーが発生しました")
     }
 
     @Test("サーバーエラーは状態コードを文言に含める")

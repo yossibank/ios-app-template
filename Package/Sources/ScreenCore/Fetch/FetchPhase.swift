@@ -3,7 +3,7 @@ public enum FetchPhase<Value> {
     case loading
     case loaded(Value)
     case loadingMore(Value)
-    case failed(any Error)
+    case failed(FetchFailure)
 }
 
 extension FetchPhase {

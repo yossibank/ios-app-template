@@ -30,7 +30,7 @@ public final class FetchState<Value> {
         loadMoreID = UUID()
     }
 
-    func run(_ operation: @MainActor () async throws -> Value) async {
+    func run(_ operation: @MainActor () async throws(FetchFailure) -> Value) async {
         guard !Task.isCancelled else {
             return
         }
@@ -40,12 +40,12 @@ public final class FetchState<Value> {
 
         await settle(operation) { value in
             phase = .loaded(value)
-        } failed: { error in
-            phase = .failed(error)
+        } failed: { failure in
+            phase = .failed(failure)
         }
     }
 
-    func runMore(_ operation: @MainActor () async throws -> FetchMore<Value>?) async {
+    func runMore(_ operation: @MainActor () async throws(FetchFailure) -> FetchMore<Value>?) async {
         guard
             case let .loaded(current) = phase,
             !Task.isCancelled
@@ -74,9 +74,9 @@ public final class FetchState<Value> {
     }
 
     private func settle<Result>(
-        _ operation: @MainActor () async throws -> Result,
+        _ operation: @MainActor () async throws(FetchFailure) -> Result,
         succeeded: @MainActor (Result) -> Void,
-        failed: @MainActor (any Error) -> Void
+        failed: @MainActor (FetchFailure) -> Void
     ) async {
         let request = UUID()
         activeRequest = request
@@ -84,18 +84,18 @@ public final class FetchState<Value> {
         do {
             let value = try await operation()
 
-            try Task.checkCancellation()
-
-            guard activeRequest == request else {
+            guard
+                !Task.isCancelled,
+                activeRequest == request
+            else {
                 return
             }
 
             succeeded(value)
         } catch {
             guard
-                activeRequest == request,
                 !Task.isCancelled,
-                !(error is CancellationError)
+                activeRequest == request
             else {
                 return
             }

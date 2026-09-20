@@ -9,10 +9,22 @@ let package = Package(
         .iOS(.v26)
     ],
     products: [
-        .library(name: "ScreenCore", targets: ["ScreenCore"]),
-        .library(name: "SharedCore", targets: ["SharedCore"]),
-        .library(name: "FeatureHome", targets: ["FeatureHome"]),
-        .library(name: "AppRoot", targets: ["AppRoot"])
+        .library(
+            name: "ScreenCore",
+            targets: ["ScreenCore"]
+        ),
+        .library(
+            name: "SharedCore",
+            targets: ["SharedCore"]
+        ),
+        .library(
+            name: "FeatureHome",
+            targets: ["FeatureHome"]
+        ),
+        .library(
+            name: "AppRoot",
+            targets: ["AppRoot"]
+        )
     ],
     dependencies: [
         .package(
@@ -30,7 +42,10 @@ let package = Package(
         .target(
             name: "SharedCore",
             dependencies: [
-                .product(name: "Shared", package: "kmp-app-template")
+                .product(
+                    name: "Shared",
+                    package: "kmp-app-template"
+                )
             ]
         ),
         .target(

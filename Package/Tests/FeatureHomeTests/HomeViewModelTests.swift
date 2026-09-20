@@ -78,6 +78,23 @@ struct HomeViewModelTests {
             _ = try await model(result).fetch()
         }
     }
+
+    private func loaded(
+        _ names: [String],
+        hasMore: Bool = false
+    ) -> any PokemonListResult {
+        PokemonListResultLoaded(
+            pokemon: names.map { PokemonSummary(name: $0, url: "u/\($0)") },
+            hasMore: hasMore
+        )
+    }
+
+    /// ジェネリック文脈から呼ぶ。プロトコル要求になっていなければ既定の nil が返る。
+    private func fetchMoreGenerically<Model: ScreenViewModel>(
+        _ model: Model
+    ) async throws -> FetchMore<Model.Value>? {
+        try await model.fetchMore()
+    }
 }
 
 private final class StubPaging: PokemonPaging, @unchecked Sendable {
@@ -90,31 +107,13 @@ private final class StubPaging: PokemonPaging, @unchecked Sendable {
         self.pages = pages
     }
 
-    func loadNext() async throws -> any PokemonListResult {
+    func loadNext() async throws(FetchFailure) -> any PokemonListResult {
         calls += 1
         defer { index += 1 }
         return pages[min(index, pages.count - 1)]
     }
 
-    func reset() async throws {
+    func reset() async throws(FetchFailure) {
         index = 0
     }
-}
-
-private func loaded(
-    _ names: [String],
-    hasMore: Bool = false
-) -> any PokemonListResult {
-    PokemonListResultLoaded(
-        pokemon: names.map { PokemonSummary(name: $0, url: "u/\($0)") },
-        hasMore: hasMore
-    )
-}
-
-/// ジェネリック文脈から呼ぶ。プロトコル要求になっていなければ既定の nil が返る。
-@MainActor
-private func fetchMoreGenerically<Model: ScreenViewModel>(
-    _ model: Model
-) async throws -> FetchMore<Model.Value>? {
-    try await model.fetchMore()
 }

@@ -19,16 +19,16 @@ final class HomeViewModel: ScreenViewModel {
 }
 
 extension HomeViewModel {
-    func fetch() async throws -> [PokemonSummary] {
+    func fetch() async throws(FetchFailure) -> [PokemonSummary] {
         try await dependency.paging.reset()
         return try await nextPage().value
     }
 
-    func fetchMore() async throws -> FetchMore<[PokemonSummary]>? {
+    func fetchMore() async throws(FetchFailure) -> FetchMore<[PokemonSummary]>? {
         try await nextPage()
     }
 
-    private func nextPage() async throws -> FetchMore<[PokemonSummary]> {
+    private func nextPage() async throws(FetchFailure) -> FetchMore<[PokemonSummary]> {
         switch try await onEnum(of: dependency.paging.loadNext()) {
         case let .loaded(loaded):
             if loaded.hasMore {
@@ -50,7 +50,7 @@ extension HomeViewModel {
     }
 
     struct Dependency {
-        var paging: any PokemonPaging = PokemonPager()
+        var paging: any PokemonPaging = SharedPokemonPaging()
     }
 }
 
