@@ -51,6 +51,43 @@ struct HomeViewModelTests {
         #expect(more?.value.map(\.name) == ["a", "b"], "プロトコル既定の nil が返っている")
     }
 
+    @Test("追加取得が失敗したら知らせを立てて追い読みを止める")
+    func fetchMoreSurfacesItsFailure() async throws {
+        let model = model(
+            loaded(["a"], hasMore: true),
+            failed(PokemonListFailureOffline.shared, ["a"])
+        )
+
+        _ = try await model.fetch()
+        let more = try await model.fetchMore()
+
+        #expect(model.viewState.notice != nil, "追加取得の失敗が握り潰されている")
+
+        guard case .last? = more else {
+            Issue.record("失敗したのに続きを読もうとしている")
+            return
+        }
+    }
+
+    @Test("詳細を取れなかった件数が出る")
+    func incompleteRowsAreCounted() async throws {
+        let model = model(loaded(["a", "b"], hasDetail: false))
+
+        _ = try await model.fetch()
+
+        #expect(model.viewState.incompleteCount == 2)
+    }
+
+    @Test("閉じると共通コアも閉じる")
+    func closeReachesTheSharedCore() {
+        let stub = StubPaging([loaded(["a"])])
+        let model = HomeViewModel(dependency: .init(paging: stub))
+
+        model.close()
+
+        #expect(stub.closed)
+    }
+
     @Test("接続できないときは再試行できる失敗になる")
     func offlineCanBeRetried() async throws {
         #expect(try await failure(from: failed(PokemonListFailureOffline.shared)).canRetry)
@@ -81,12 +118,12 @@ struct HomeViewModelTests {
 
     private func loaded(
         _ names: [String],
-        hasMore: Bool = false
+        hasMore: Bool = false,
+        hasDetail: Bool = true
     ) -> PokemonListResult {
-        PokemonListResult(
-            pokemon: entries(names),
-            hasMore: hasMore,
-            failure: nil
+        PokemonListResultLoaded(
+            pokemon: entries(names, hasDetail: hasDetail),
+            hasMore: hasMore
         )
     }
 
@@ -94,18 +131,19 @@ struct HomeViewModelTests {
         _ failure: any PokemonListFailure,
         _ names: [String] = []
     ) -> PokemonListResult {
-        PokemonListResult(
+        PokemonListResultFailed(
             pokemon: entries(names),
             hasMore: true,
             failure: failure
         )
     }
 
-    private func entries(_ names: [String]) -> [PokemonEntry] {
+    private func entries(_ names: [String], hasDetail: Bool = true) -> [PokemonEntry] {
         names.enumerated().map { index, name in
             PokemonEntry(
                 id: Int32(index + 1),
                 name: name,
+                hasDetail: hasDetail,
                 spriteUrl: "https://img.example/\(index + 1).png",
                 types: [.grass],
                 baseStats: [PokemonBaseStat(kind: .hp, value: 45)]
@@ -126,6 +164,8 @@ private final class StubPaging: PokemonPaging {
 
     private(set) nonisolated(unsafe) var calls = 0
 
+    private(set) nonisolated(unsafe) var closed = false
+
     init(_ pages: [PokemonListResult]) {
         self.pages = pages
     }
@@ -138,5 +178,9 @@ private final class StubPaging: PokemonPaging {
 
     func reset() async throws {
         index = 0
+    }
+
+    func close() {
+        closed = true
     }
 }

@@ -58,6 +58,10 @@ private struct HomeContent: View {
         )
 
         List {
+            if viewState.incompleteCount > 0 {
+                Banner(text: HomeStrings.incomplete(viewState.incompleteCount))
+            }
+
             ForEach(items, id: \.id) { item in
                 PokemonRow(pokemon: item)
                     .onAppear {
@@ -72,6 +76,12 @@ private struct HomeContent: View {
             if actions.isLoadingMore {
                 ProgressView()
                     .frame(maxWidth: .infinity)
+            }
+
+            if let notice = viewState.notice {
+                Banner(text: notice.message, color: .red) {
+                    actions.reload()
+                }
             }
         }
         .listStyle(.plain)
@@ -89,6 +99,30 @@ private struct HomeContent: View {
                 actions.reload()
             }
         }
+    }
+}
+
+private struct Banner: View {
+    let text: String
+
+    var color: Color = .secondary
+
+    var retry: (() -> Void)?
+
+    var body: some View {
+        HStack {
+            Text(text)
+                .font(.footnote)
+                .foregroundStyle(color)
+
+            Spacer()
+
+            if let retry {
+                Button(HomeStrings.reload, action: retry)
+                    .font(.footnote)
+            }
+        }
+        .listRowSeparator(.hidden)
     }
 }
 
@@ -185,6 +219,7 @@ private enum PreviewData {
         PokemonEntry(
             id: 132,
             name: "ditto",
+            hasDetail: false,
             spriteUrl: nil,
             types: [],
             baseStats: []
@@ -204,6 +239,7 @@ private enum PreviewData {
         return PokemonEntry(
             id: id,
             name: name,
+            hasDetail: true,
             spriteUrl: nil,
             types: types,
             baseStats: zip(kinds, stats).map { PokemonBaseStat(kind: $0, value: $1) }
