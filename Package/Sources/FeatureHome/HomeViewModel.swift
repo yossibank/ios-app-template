@@ -24,17 +24,42 @@ extension HomeViewModel {
 
         let result = try await nextPage()
 
-        if let failure = result.failure, result.pokemon.isEmpty {
-            throw failure.asFetchFailure
-        }
+        switch onEnum(of: result) {
+        case let .loaded(loaded):
+            record(incomplete: loaded.incompleteCount, notice: nil)
+            return loaded.pokemon
 
-        return result.pokemon
+        case let .failed(failed):
+            guard !failed.pokemon.isEmpty else {
+                throw failed.failure.asFetchFailure
+            }
+
+            record(incomplete: failed.incompleteCount, notice: failed.failure.asFetchFailure)
+            return failed.pokemon
+        }
     }
 
     func fetchMore() async throws(FetchFailure) -> FetchMore<[PokemonEntry]>? {
         let result = try await nextPage()
 
-        return result.hasMore ? .more(result.pokemon) : .last(result.pokemon)
+        switch onEnum(of: result) {
+        case let .loaded(loaded):
+            record(incomplete: loaded.incompleteCount, notice: nil)
+            return loaded.hasMore ? .more(loaded.pokemon) : .last(loaded.pokemon)
+
+        case let .failed(failed):
+            record(incomplete: failed.incompleteCount, notice: failed.failure.asFetchFailure)
+            return .last(failed.pokemon)
+        }
+    }
+
+    func close() {
+        dependency.paging.close()
+    }
+
+    private func record(incomplete: Int32, notice: FetchFailure?) {
+        viewState.incompleteCount = Int(incomplete)
+        viewState.notice = notice
     }
 
     private func nextPage() async throws(FetchFailure) -> PokemonListResult {
@@ -58,6 +83,8 @@ extension HomeViewModel {
     @Observable
     final class State: ViewState {
         var query = ""
+        var incompleteCount = 0
+        var notice: FetchFailure?
     }
 
     struct Dependency {

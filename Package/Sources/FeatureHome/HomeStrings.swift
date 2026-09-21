@@ -41,6 +41,13 @@ enum HomeStrings {
         )
     }
 
+    static func incomplete(_ count: Int) -> String {
+        String(
+            format: String(localized: "home.incomplete", bundle: .module),
+            count
+        )
+    }
+
     static func number(_ id: Int) -> String {
         String(
             format: String(localized: "home.number", bundle: .module),

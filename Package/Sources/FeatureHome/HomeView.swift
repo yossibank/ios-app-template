@@ -45,8 +45,7 @@ private struct HomeContent: View {
         }
 
         return pokemon.filter {
-            $0.displayName.localizedStandardContains(viewState.query)
-                || $0.name.localizedStandardContains(viewState.query)
+            $0.name.localizedStandardContains(viewState.query)
         }
     }
 
@@ -59,6 +58,10 @@ private struct HomeContent: View {
         )
 
         List {
+            if viewState.incompleteCount > 0 {
+                Banner(text: HomeStrings.incomplete(viewState.incompleteCount))
+            }
+
             ForEach(items, id: \.id) { item in
                 PokemonRow(pokemon: item)
                     .onAppear {
@@ -73,6 +76,12 @@ private struct HomeContent: View {
             if actions.isLoadingMore {
                 ProgressView()
                     .frame(maxWidth: .infinity)
+            }
+
+            if let notice = viewState.notice {
+                Banner(text: notice.message, color: .red) {
+                    actions.reload()
+                }
             }
         }
         .listStyle(.plain)
@@ -93,6 +102,30 @@ private struct HomeContent: View {
     }
 }
 
+private struct Banner: View {
+    let text: String
+
+    var color: Color = .secondary
+
+    var retry: (() -> Void)?
+
+    var body: some View {
+        HStack {
+            Text(text)
+                .font(.footnote)
+                .foregroundStyle(color)
+
+            Spacer()
+
+            if let retry {
+                Button(HomeStrings.reload, action: retry)
+                    .font(.footnote)
+            }
+        }
+        .listRowSeparator(.hidden)
+    }
+}
+
 private struct PokemonRow: View {
     let pokemon: PokemonEntry
 
@@ -101,7 +134,7 @@ private struct PokemonRow: View {
             Sprite(pokemon: pokemon)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(pokemon.displayName)
+                Text(pokemon.name)
                     .font(.headline)
 
                 if !pokemon.types.isEmpty {
@@ -149,7 +182,7 @@ private struct Sprite: View {
                     ProgressView()
                 }
             } else {
-                Text(pokemon.displayName.prefix(1))
+                Text(pokemon.name.prefix(1))
                     .font(.headline)
                     .foregroundStyle(.secondary)
             }
@@ -174,17 +207,11 @@ private struct TypeBadge: View {
 private enum PreviewData {
     static var pokemon: [PokemonEntry] {
         [
-            entry(
-                id: 1,
-                japanese: "フシギダネ",
-                name: "bulbasaur",
-                types: [.grass, .poison],
-                stats: [45, 49, 49, 65, 65, 45]
-            ),
-            entry(id: 4, japanese: "ヒトカゲ", name: "charmander", types: [.fire], stats: [39, 52, 43, 60, 50, 65]),
-            entry(id: 7, japanese: "ゼニガメ", name: "squirtle", types: [.water], stats: [44, 48, 65, 50, 64, 43]),
-            entry(id: 10, japanese: "キャタピー", name: "caterpie", types: [.bug], stats: [45, 30, 35, 20, 20, 45]),
-            entry(id: 25, japanese: "ピカチュウ", name: "pikachu", types: [.electric], stats: [35, 55, 40, 50, 50, 90])
+            entry(id: 1, name: "bulbasaur", types: [.grass, .poison], stats: [45, 49, 49, 65, 65, 45]),
+            entry(id: 4, name: "charmander", types: [.fire], stats: [39, 52, 43, 60, 50, 65]),
+            entry(id: 7, name: "squirtle", types: [.water], stats: [44, 48, 65, 50, 64, 43]),
+            entry(id: 10, name: "caterpie", types: [.bug], stats: [45, 30, 35, 20, 20, 45]),
+            entry(id: 25, name: "pikachu", types: [.electric], stats: [35, 55, 40, 50, 50, 90])
         ]
     }
 
@@ -192,7 +219,7 @@ private enum PreviewData {
         PokemonEntry(
             id: 132,
             name: "ditto",
-            japaneseName: nil,
+            hasDetail: false,
             spriteUrl: nil,
             types: [],
             baseStats: []
@@ -201,7 +228,6 @@ private enum PreviewData {
 
     private static func entry(
         id: Int32,
-        japanese: String,
         name: String,
         types: [PokemonTypeKind],
         stats: [Int32]
@@ -213,7 +239,7 @@ private enum PreviewData {
         return PokemonEntry(
             id: id,
             name: name,
-            japaneseName: japanese,
+            hasDetail: true,
             spriteUrl: nil,
             types: types,
             baseStats: zip(kinds, stats).map { PokemonBaseStat(kind: $0, value: $1) }

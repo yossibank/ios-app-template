@@ -23,6 +23,17 @@
         }
       }
     },
+    "home.incomplete": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 件の詳細を取得できませんでした"
+          }
+        }
+      }
+    },
     "home.number": {
       "extractionState": "manual",
       "localizations": {
