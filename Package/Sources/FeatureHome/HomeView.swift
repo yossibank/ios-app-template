@@ -129,6 +129,13 @@ private struct Banner: View {
 private struct PokemonRow: View {
     let pokemon: PokemonEntry
 
+    private var detail: PokemonEntryDetailLoaded? {
+        guard case let .loaded(detail) = onEnum(of: pokemon.detail) else {
+            return nil
+        }
+        return detail
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             Sprite(pokemon: pokemon)
@@ -137,9 +144,9 @@ private struct PokemonRow: View {
                 Text(pokemon.name)
                     .font(.headline)
 
-                if !pokemon.types.isEmpty {
+                if let detail, !detail.types.isEmpty {
                     HStack(spacing: 6) {
-                        ForEach(pokemon.types, id: \.self) { type in
+                        ForEach(detail.types, id: \.self) { type in
                             TypeBadge(type: type)
                         }
                     }
@@ -154,8 +161,8 @@ private struct PokemonRow: View {
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
 
-                if !pokemon.baseStats.isEmpty {
-                    Text(HomeStrings.total(Int(pokemon.totalBaseStat)))
+                if let detail, !detail.baseStats.isEmpty {
+                    Text(HomeStrings.total(Int(detail.totalBaseStat)))
                         .font(.subheadline.weight(.semibold))
                         .monospacedDigit()
                 }
@@ -168,12 +175,19 @@ private struct PokemonRow: View {
 private struct Sprite: View {
     let pokemon: PokemonEntry
 
+    private var spriteUrl: URL? {
+        guard case let .loaded(detail) = onEnum(of: pokemon.detail) else {
+            return nil
+        }
+        return detail.spriteUrl.flatMap(URL.init(string:))
+    }
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
                 .fill(.quaternary)
 
-            if let url = pokemon.spriteUrl.flatMap(URL.init(string:)) {
+            if let url = spriteUrl {
                 AsyncImage(url: url) { image in
                     image
                         .resizable()
@@ -219,10 +233,7 @@ private enum PreviewData {
         PokemonEntry(
             id: 132,
             name: "ditto",
-            hasDetail: false,
-            spriteUrl: nil,
-            types: [],
-            baseStats: []
+            detail: PokemonEntryDetailMissing(failure: PokemonFailureServer(statusCode: 500))
         )
     }
 
@@ -239,10 +250,11 @@ private enum PreviewData {
         return PokemonEntry(
             id: id,
             name: name,
-            hasDetail: true,
-            spriteUrl: nil,
-            types: types,
-            baseStats: zip(kinds, stats).map { PokemonBaseStat(kind: $0, value: $1) }
+            detail: PokemonEntryDetailLoaded(
+                spriteUrl: nil,
+                types: types,
+                baseStats: zip(kinds, stats).map { PokemonBaseStat(kind: $0, value: $1) }
+            )
         )
     }
 }
