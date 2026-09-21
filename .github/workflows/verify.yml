@@ -48,12 +48,6 @@ jobs:
             password ${SHARED_CORE_TOKEN}
           NETRC
 
-      - name: Cache lint tools
-        uses: actions/cache@v6
-        with:
-          path: ${{ runner.temp }}/lint-tools
-          key: lint-tools-${{ runner.os }}-${{ hashFiles('Mintfile') }}
-
       - name: Install lint tools
         run: |
           set -euo pipefail
@@ -64,16 +58,14 @@ jobs:
             sed -n "s|^$1@||p" Mintfile
           }
 
-          if [ ! -x "$tools/swiftformat" ] || [ ! -x "$tools/swiftlint" ]; then
-            curl -fsSL -o "$RUNNER_TEMP/swiftformat.zip" \
-              "https://github.com/nicklockwood/SwiftFormat/releases/download/$(version nicklockwood/SwiftFormat)/swiftformat.zip"
-            curl -fsSL -o "$RUNNER_TEMP/swiftlint.zip" \
-              "https://github.com/realm/SwiftLint/releases/download/$(version realm/SwiftLint)/portable_swiftlint.zip"
+          curl -fsSL -o "$RUNNER_TEMP/swiftformat.zip" \
+            "https://github.com/nicklockwood/SwiftFormat/releases/download/$(version nicklockwood/SwiftFormat)/swiftformat.zip"
+          curl -fsSL -o "$RUNNER_TEMP/swiftlint.zip" \
+            "https://github.com/realm/SwiftLint/releases/download/$(version realm/SwiftLint)/portable_swiftlint.zip"
 
-            unzip -oq "$RUNNER_TEMP/swiftformat.zip" swiftformat -d "$tools"
-            unzip -oq "$RUNNER_TEMP/swiftlint.zip" swiftlint -d "$tools"
-            chmod +x "$tools/swiftformat" "$tools/swiftlint"
-          fi
+          unzip -oq "$RUNNER_TEMP/swiftformat.zip" swiftformat -d "$tools"
+          unzip -oq "$RUNNER_TEMP/swiftlint.zip" swiftlint -d "$tools"
+          chmod +x "$tools/swiftformat" "$tools/swiftlint"
 
           echo "$tools" >> "$GITHUB_PATH"
           echo "SWIFTFORMAT=swiftformat" >> "$GITHUB_ENV"
