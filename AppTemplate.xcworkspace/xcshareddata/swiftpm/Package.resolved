@@ -1,13 +1,13 @@
 {
-  "originHash" : "32df58d6716bf5b9d6c725b5f7bf0f90c6ec8906e0fb0f1ed65a1383ad43065d",
+  "originHash" : "ab6cf81950c8bb42d2fcb6675bdcf1564925dbad10306b3938d031fa99227395",
   "pins" : [
     {
       "identity" : "kmp-app-template",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/yossibank/kmp-app-template.git",
       "state" : {
-        "revision" : "76f2a3d8d9d5784e986fcb04237f05e587cc211a",
-        "version" : "0.13.0"
+        "revision" : "415dd92cafe04e1ddcaef3c50813ef007793c5d8",
+        "version" : "0.14.0"
       }
     }
   ],
