@@ -55,7 +55,7 @@ struct HomeViewModelTests {
     func fetchMoreSurfacesItsFailure() async throws {
         let model = model(
             loaded(["a"], hasMore: true),
-            failed(PokemonListFailureOffline.shared, ["a"])
+            failed(PokemonFailureOffline.shared, ["a"])
         )
 
         _ = try await model.fetch()
@@ -90,12 +90,21 @@ struct HomeViewModelTests {
 
     @Test("接続できないときは再試行できる失敗になる")
     func offlineCanBeRetried() async throws {
-        #expect(try await failure(from: failed(PokemonListFailureOffline.shared)).canRetry)
+        #expect(try await failure(from: failed(PokemonFailureOffline.shared)).canRetry)
+    }
+
+    @Test("応答が遅いときは接続断とは別の文言になる")
+    func timeoutIsNotReportedAsOffline() async throws {
+        let failure = try await failure(from: failed(PokemonFailureTimeout.shared))
+
+        #expect(failure.message == HomeStrings.timeout)
+        #expect(failure.message != HomeStrings.offline)
+        #expect(failure.canRetry)
     }
 
     @Test("サーバーエラーは状態コードを文言に含める")
     func serverFailureCarriesStatusCode() async throws {
-        let failure = try await failure(from: failed(PokemonListFailureServer(statusCode: 503)))
+        let failure = try await failure(from: failed(PokemonFailureServer(statusCode: 503)))
 
         #expect(failure.message.contains("503"))
         #expect(failure.canRetry)
@@ -103,7 +112,7 @@ struct HomeViewModelTests {
 
     @Test("解釈できない応答は再試行できない失敗になる")
     func unreadableBodyCannotBeRetried() async throws {
-        #expect(try await !failure(from: failed(PokemonListFailureUnexpected.shared)).canRetry)
+        #expect(try await !failure(from: failed(PokemonFailureUnexpected.shared)).canRetry)
     }
 
     private func model(_ pages: PokemonListResult...) -> HomeViewModel {
@@ -128,7 +137,7 @@ struct HomeViewModelTests {
     }
 
     private func failed(
-        _ failure: any PokemonListFailure,
+        _ failure: any PokemonFailure,
         _ names: [String] = []
     ) -> PokemonListResult {
         PokemonListResultFailed(
