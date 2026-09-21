@@ -3,13 +3,11 @@ included:
   - App/AppTemplate
 
 disabled_rules:
-  # --- SwiftFormat が担当する書式。二重に強制すると衝突する ---
   - line_length            # SwiftFormat の --maxwidth 120
   - colon
   - opening_brace
   - trailing_comma         # SwiftFormat の --commas inline
 
-  # --- 規模の指標。SwiftUI では自然に長くなり、指摘の大半が実害なし ---
   - cyclomatic_complexity
   - nesting
   - file_length
@@ -19,16 +17,12 @@ disabled_rules:
 
   - todo
 
-# 命名は無効化せず、長さの上限だけ緩める。
-# 下線や記号の混入は検出したい（Xcode 生成の型名はこれで見つかった）。
 type_name:
   max_length: 60
 identifier_name:
   min_length: 1
   max_length: 60
 
-# force_cast / force_try は既定のまま有効にする。
-# 個別に必要な箇所は // swiftlint:disable:next で意図を残す。
 opt_in_rules:
   - empty_count
   - closure_spacing
@@ -37,8 +31,6 @@ opt_in_rules:
   - first_where
   - toggle_bool
 
-# 共通コアの入口は Core だけ、という規約を機械的に検出する。
-# ビルドシステムでは強制できない（依存に宣言していなくても import は通る）。
 custom_rules:
   shared_import_outside_core:
     name: "共通コアの直接 import"
@@ -52,7 +44,6 @@ custom_rules:
     excluded:
       - ".*/Package/Sources/SharedCore/.*"
 
-  # 型の外に書かれた func を拾う。extension 内はインデントされるので当たらない。
   global_function:
     name: "グローバル関数"
     regex: '^(?:@\w+(?:\([^)]*\))?[ \t]+)*(?:(?:private|fileprivate|internal|public|open)[ \t]+)*func[ \t]'

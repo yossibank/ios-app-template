@@ -48,7 +48,6 @@ jobs:
             password ${SHARED_CORE_TOKEN}
           NETRC
 
-      # 版は Mintfile が出所。CI はソースからビルドせず、同じ版の配布バイナリを取る。
       - name: Install lint tools
         run: |
           set -euo pipefail

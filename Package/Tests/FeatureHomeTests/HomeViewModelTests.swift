@@ -106,7 +106,6 @@ struct HomeViewModelTests {
             PokemonEntry(
                 id: Int32(index + 1),
                 name: name,
-                japaneseName: nil,
                 spriteUrl: "https://img.example/\(index + 1).png",
                 types: [.grass],
                 baseStats: [PokemonBaseStat(kind: .hp, value: 45)]
@@ -114,7 +113,6 @@ struct HomeViewModelTests {
         }
     }
 
-    /// ジェネリック文脈から呼ぶ。プロトコル要求になっていなければ既定の nil が返る。
     private func fetchMoreGenerically<Model: ScreenViewModel>(
         _ model: Model
     ) async throws -> FetchMore<Model.Value>? {
