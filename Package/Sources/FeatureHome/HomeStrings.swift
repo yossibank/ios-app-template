@@ -26,6 +26,10 @@ enum HomeStrings {
         String(localized: "home.offline", bundle: .module)
     }
 
+    static var timeout: String {
+        String(localized: "home.timeout", bundle: .module)
+    }
+
     static var unreadable: String {
         String(localized: "home.unreadable", bundle: .module)
     }

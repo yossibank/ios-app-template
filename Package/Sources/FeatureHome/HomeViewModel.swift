@@ -92,7 +92,7 @@ extension HomeViewModel {
     }
 }
 
-private extension PokemonListFailure {
+private extension PokemonFailure {
     var asFetchFailure: FetchFailure {
         FetchFailure(message, canRetry: canRetry)
     }
@@ -101,6 +101,9 @@ private extension PokemonListFailure {
         switch onEnum(of: self) {
         case .offline:
             HomeStrings.offline
+
+        case .timeout:
+            HomeStrings.timeout
 
         case let .server(server):
             HomeStrings.serverError(statusCode: Int(server.statusCode))
