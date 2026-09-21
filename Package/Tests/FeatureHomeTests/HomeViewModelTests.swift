@@ -149,14 +149,17 @@ struct HomeViewModelTests {
 
     private func entries(_ names: [String], hasDetail: Bool = true) -> [PokemonEntry] {
         names.enumerated().map { index, name in
-            PokemonEntry(
-                id: Int32(index + 1),
-                name: name,
-                hasDetail: hasDetail,
-                spriteUrl: "https://img.example/\(index + 1).png",
-                types: [.grass],
-                baseStats: [PokemonBaseStat(kind: .hp, value: 45)]
-            )
+            let detail: any PokemonEntryDetail = if hasDetail {
+                PokemonEntryDetailLoaded(
+                    spriteUrl: "https://img.example/\(index + 1).png",
+                    types: [.grass],
+                    baseStats: [PokemonBaseStat(kind: .hp, value: 45)]
+                )
+            } else {
+                PokemonEntryDetailMissing(failure: PokemonFailureServer(statusCode: 500))
+            }
+
+            return PokemonEntry(id: Int32(index + 1), name: name, detail: detail)
         }
     }
 
