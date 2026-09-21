@@ -8,12 +8,12 @@ SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO
 SWIFTFORMAT ?= mint run swiftformat
 SWIFTLINT   ?= mint run swiftlint
 
-.PHONY: open verify bootstrap lint format test build clean boot boot-wait
+.PHONY: open verify bootstrap lint format test build build-test clean boot boot-wait
 
 open:
 	open $(WORKSPACE)
 
-verify: lint test build
+verify: lint build-test
 
 bootstrap:
 	mint bootstrap
@@ -33,7 +33,10 @@ boot-wait:
 	xcrun simctl bootstatus '$(SIMULATOR)' -b
 
 test:
-	xcodebuild test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)'
+	xcodebuild test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
+
+build-test:
+	xcodebuild build test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
 
 build:
 	xcodebuild build -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)

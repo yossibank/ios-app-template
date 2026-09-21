@@ -48,6 +48,12 @@ jobs:
             password ${SHARED_CORE_TOKEN}
           NETRC
 
+      - name: Cache lint tools
+        uses: actions/cache@v6
+        with:
+          path: ${{ runner.temp }}/lint-tools
+          key: lint-tools-${{ runner.os }}-${{ hashFiles('Mintfile') }}
+
       - name: Install lint tools
         run: |
           set -euo pipefail
@@ -58,14 +64,16 @@ jobs:
             sed -n "s|^$1@||p" Mintfile
           }
 
-          curl -fsSL -o "$RUNNER_TEMP/swiftformat.zip" \
-            "https://github.com/nicklockwood/SwiftFormat/releases/download/$(version nicklockwood/SwiftFormat)/swiftformat.zip"
-          curl -fsSL -o "$RUNNER_TEMP/swiftlint.zip" \
-            "https://github.com/realm/SwiftLint/releases/download/$(version realm/SwiftLint)/portable_swiftlint.zip"
+          if [ ! -x "$tools/swiftformat" ] || [ ! -x "$tools/swiftlint" ]; then
+            curl -fsSL -o "$RUNNER_TEMP/swiftformat.zip" \
+              "https://github.com/nicklockwood/SwiftFormat/releases/download/$(version nicklockwood/SwiftFormat)/swiftformat.zip"
+            curl -fsSL -o "$RUNNER_TEMP/swiftlint.zip" \
+              "https://github.com/realm/SwiftLint/releases/download/$(version realm/SwiftLint)/portable_swiftlint.zip"
 
-          unzip -oq "$RUNNER_TEMP/swiftformat.zip" swiftformat -d "$tools"
-          unzip -oq "$RUNNER_TEMP/swiftlint.zip" swiftlint -d "$tools"
-          chmod +x "$tools/swiftformat" "$tools/swiftlint"
+            unzip -oq "$RUNNER_TEMP/swiftformat.zip" swiftformat -d "$tools"
+            unzip -oq "$RUNNER_TEMP/swiftlint.zip" swiftlint -d "$tools"
+            chmod +x "$tools/swiftformat" "$tools/swiftlint"
+          fi
 
           echo "$tools" >> "$GITHUB_PATH"
           echo "SWIFTFORMAT=swiftformat" >> "$GITHUB_ENV"
@@ -76,8 +84,11 @@ jobs:
           swiftformat --version
           swiftlint version
 
+      - name: Lint
+        run: make lint
+
       - name: Wait for the simulator
         run: make boot-wait
 
-      - name: Verify
-        run: make verify
+      - name: Build and test
+        run: make build-test
