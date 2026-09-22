@@ -76,14 +76,8 @@ jobs:
           swiftformat --version
           swiftlint version
 
-      - name: Build
-        run: make build
-
-      - name: Lint
-        run: make lint
-
       - name: Wait for the simulator
         run: make boot-wait
 
-      - name: Test
-        run: make test
+      - name: Verify
+        run: make verify
