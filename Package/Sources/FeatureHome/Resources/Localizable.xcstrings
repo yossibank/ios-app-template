@@ -67,6 +67,17 @@
         }
       }
     },
+    "home.retry_details": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "詳細だけ取り直す"
+          }
+        }
+      }
+    },
     "home.search_prompt": {
       "extractionState": "manual",
       "localizations": {
@@ -117,7 +128,18 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "合計 %lld"
+            "value": "%lld"
+          }
+        }
+      }
+    },
+    "home.total_caption": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "種族値"
           }
         }
       }

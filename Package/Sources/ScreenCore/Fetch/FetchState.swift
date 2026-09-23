@@ -6,8 +6,11 @@ import Observation
 public final class FetchState<Value> {
     public private(set) var phase: FetchPhase<Value> = .idle
 
+    public private(set) var isRefilling = false
+
     private(set) var reloadID = UUID()
     private(set) var loadMoreID = UUID()
+    private(set) var refillID = UUID()
 
     @ObservationIgnored private var activeRequest: UUID?
     @ObservationIgnored private var reachedEnd = false
@@ -28,6 +31,17 @@ public final class FetchState<Value> {
         }
 
         loadMoreID = UUID()
+    }
+
+    func requestRefill() {
+        guard
+            case .loaded = phase,
+            !isRefilling
+        else {
+            return
+        }
+
+        refillID = UUID()
     }
 
     func run(_ operation: @MainActor () async throws(FetchFailure) -> Value) async {
@@ -71,6 +85,25 @@ public final class FetchState<Value> {
         } failed: { _ in
             phase = .loaded(current)
         }
+    }
+
+    func runRefill(_ operation: @MainActor () async throws(FetchFailure) -> Value?) async {
+        guard
+            case let .loaded(current) = phase,
+            !Task.isCancelled
+        else {
+            return
+        }
+
+        isRefilling = true
+
+        await settle(operation) { value in
+            phase = .loaded(value ?? current)
+        } failed: { _ in
+            phase = .loaded(current)
+        }
+
+        isRefilling = false
     }
 
     private func settle<Result>(
