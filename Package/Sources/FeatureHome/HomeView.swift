@@ -48,6 +48,8 @@ private struct HomeContent: View {
 
     @State private var opened: PokemonEntry?
 
+    @Namespace private var cardNamespace
+
     let pokemon: [PokemonEntry]
     let actions: ScreenActions
 
@@ -120,6 +122,7 @@ private struct HomeContent: View {
                             PokemonCard(pokemon: item)
                         }
                         .buttonStyle(CardButtonStyle())
+                        .matchedTransitionSource(id: item.id, in: cardNamespace)
                         .onAppear {
                             guard !isFiltering, prefetch.contains(item.id) else {
                                 return
@@ -162,8 +165,9 @@ private struct HomeContent: View {
                 actions.reload()
             }
         }
-        .sheet(item: $opened) { entry in
-            PokemonSheet(pokemon: entry) { opened = nil }
+        .navigationDestination(item: $opened) { entry in
+            PokemonDetailView(pokemon: entry)
+                .navigationTransition(.zoom(sourceID: entry.id, in: cardNamespace))
         }
     }
 }
@@ -499,9 +503,8 @@ private struct Bar: View {
     }
 }
 
-private struct PokemonSheet: View {
+private struct PokemonDetailView: View {
     let pokemon: PokemonEntry
-    let onClose: () -> Void
 
     private var detail: PokemonEntryDetailLoaded? {
         guard case let .loaded(detail) = onEnum(of: pokemon.detail) else {
@@ -516,66 +519,78 @@ private struct PokemonSheet: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 12) {
-                Text(HomeStrings.number(Int(pokemon.id)))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-
-                Text(pokemon.name.capitalized)
-                    .font(.largeTitle.weight(.bold))
-
-                Artwork(detail: detail, fallback: pokemon.name, accent: accent)
-                    .aspectRatio(1, contentMode: .fit)
-                    .frame(maxWidth: 260)
-
-                if let detail, !detail.types.isEmpty {
-                    HStack(spacing: 8) {
-                        ForEach(detail.types, id: \.self) { type in
-                            TypeBadge(type: type)
-                        }
-                    }
-                }
-
-                if let detail {
-                    HStack {
-                        Text(HomeStrings.totalCaption)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-
-                        Spacer()
-
-                        Text(HomeStrings.total(Int(detail.totalBaseStat)))
-                            .font(.title3.weight(.bold))
-                            .monospacedDigit()
-                    }
-                    .padding(.top, 12)
-
-                    ForEach(Array(detail.baseStats.enumerated()), id: \.offset) { _, stat in
-                        StatRow(stat: stat)
-                    }
-                } else {
-                    Text(HomeStrings.detailMissing)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                        .padding(.top, 12)
-                }
-
-                Button(HomeStrings.close, action: onClose)
-                    .padding(.top, 16)
-            }
-            .padding(24)
-            .frame(maxWidth: .infinity)
-            .background(alignment: .top) {
-                LinearGradient(
-                    colors: [accent.opacity(0.26), accent.opacity(0.04), .clear],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(height: 320)
+            VStack(spacing: 0) {
+                hero
+                stats
             }
         }
-        .presentationDetents([.medium, .large])
+        .background(alignment: .top) {
+            LinearGradient(
+                colors: [accent.opacity(0.45), accent.opacity(0.14), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .frame(height: 440)
+            .ignoresSafeArea(edges: .top)
+        }
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
+        .navigationTitle(pokemon.name.capitalized)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+    }
+
+    private var hero: some View {
+        VStack(spacing: 10) {
+            Text(HomeStrings.number(Int(pokemon.id)))
+                .font(.headline)
+                .foregroundStyle(.secondary)
+                .monospacedDigit()
+
+            Artwork(detail: detail, fallback: pokemon.name, accent: accent)
+                .aspectRatio(1, contentMode: .fit)
+                .frame(maxWidth: 280)
+
+            if let detail, !detail.types.isEmpty {
+                HStack(spacing: 8) {
+                    ForEach(detail.types, id: \.self) { type in
+                        TypeBadge(type: type)
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 8)
+        .padding(.bottom, 28)
+    }
+
+    @ViewBuilder
+    private var stats: some View {
+        if let detail, !detail.baseStats.isEmpty {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    Text(HomeStrings.totalCaption)
+                        .font(.headline)
+
+                    Spacer()
+
+                    Text(HomeStrings.total(Int(detail.totalBaseStat)))
+                        .font(.title2.weight(.bold))
+                        .monospacedDigit()
+                }
+
+                ForEach(Array(detail.baseStats.enumerated()), id: \.offset) { _, stat in
+                    StatRow(stat: stat)
+                }
+            }
+            .padding(20)
+            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+            .padding(20)
+        } else {
+            Text(HomeStrings.detailMissing)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .padding(32)
+        }
     }
 }
 
