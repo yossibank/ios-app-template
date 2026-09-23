@@ -55,7 +55,7 @@ struct HomeViewModelTests {
     func fetchMoreSurfacesItsFailure() async throws {
         let model = model(
             loaded(["a"], hasMore: true),
-            failed(PokemonFailureOffline.shared, ["a"])
+            degraded(PokemonFailureOffline.shared, ["a"])
         )
 
         _ = try await model.fetch()
@@ -115,6 +115,53 @@ struct HomeViewModelTests {
         #expect(try await !failure(from: failed(PokemonFailureUnexpected.shared)).canRetry)
     }
 
+    @Test("詳細だけを取り直すとページを読み直さずに埋まる")
+    func refillFillsTheMissingRows() async throws {
+        let stub = StubPaging(
+            [loaded(["a", "b"], hasDetail: false)],
+            repaired: loaded(["a", "b"])
+        )
+        let model = HomeViewModel(dependency: .init(paging: stub))
+
+        _ = try await model.fetch()
+
+        #expect(model.viewState.incompleteCount == 2)
+
+        let refilled = try await model.fetchRefilled()
+
+        #expect(refilled?.map(\.name) == ["a", "b"])
+        #expect(model.viewState.incompleteCount == 0, "取り直しても欠けたままになっている")
+        #expect(stub.repairCalls == 1)
+        #expect(stub.calls == 1, "詳細の取り直しでページを読み直している")
+    }
+
+    @Test("取り直しても埋まらなければ理由を知らせる")
+    func refillReportsWhyNothingChanged() async throws {
+        let stub = StubPaging(
+            [loaded(["a"], hasDetail: false)],
+            repaired: degraded(PokemonFailureOffline.shared, ["a"])
+        )
+        let model = HomeViewModel(dependency: .init(paging: stub))
+
+        _ = try await model.fetch()
+        _ = try await model.fetchRefilled()
+
+        #expect(model.viewState.notice != nil, "取り直しの失敗が握り潰されている")
+    }
+
+    @Test("捨てられた結果は続きとして積まない")
+    func staleResultsAreNotAppended() async throws {
+        let model = model(
+            loaded(["a"], hasMore: true),
+            PokemonListResultStale.shared
+        )
+
+        _ = try await model.fetch()
+        let more = try await model.fetchMore()
+
+        #expect(more == nil, "捨てられた結果が続きとして積まれている")
+    }
+
     private func model(_ pages: PokemonListResult...) -> HomeViewModel {
         HomeViewModel(dependency: .init(paging: StubPaging(pages)))
     }
@@ -136,15 +183,19 @@ struct HomeViewModelTests {
         )
     }
 
-    private func failed(
+    private func degraded(
         _ failure: any PokemonFailure,
-        _ names: [String] = []
+        _ names: [String]
     ) -> PokemonListResult {
-        PokemonListResultFailed(
+        PokemonListResultDegraded(
             pokemon: entries(names),
             hasMore: true,
             failure: failure
         )
+    }
+
+    private func failed(_ failure: any PokemonFailure) -> PokemonListResult {
+        PokemonListResultFailed(failure: failure)
     }
 
     private func entries(_ names: [String], hasDetail: Bool = true) -> [PokemonEntry] {
@@ -172,20 +223,29 @@ struct HomeViewModelTests {
 
 private final class StubPaging: PokemonPaging {
     private nonisolated(unsafe) let pages: [PokemonListResult]
+    private nonisolated(unsafe) let repaired: PokemonListResult?
     private nonisolated(unsafe) var index = 0
 
     private(set) nonisolated(unsafe) var calls = 0
 
+    private(set) nonisolated(unsafe) var repairCalls = 0
+
     private(set) nonisolated(unsafe) var closed = false
 
-    init(_ pages: [PokemonListResult]) {
+    init(_ pages: [PokemonListResult], repaired: PokemonListResult? = nil) {
         self.pages = pages
+        self.repaired = repaired
     }
 
     func loadNext() async throws -> PokemonListResult {
         calls += 1
         defer { index += 1 }
         return pages[min(index, pages.count - 1)]
+    }
+
+    func retryMissingDetails() async throws -> PokemonListResult {
+        repairCalls += 1
+        return repaired ?? PokemonListResultLoaded(pokemon: [], hasMore: false)
     }
 
     func reset() async throws {

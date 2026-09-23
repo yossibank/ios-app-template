@@ -2,6 +2,8 @@ import ScreenCore
 import SharedCore
 import SwiftUI
 
+private let maxTotalBaseStat = 720.0
+
 public struct HomeView: View {
     let source: ScreenSource<HomeViewModel>
 
@@ -59,7 +61,13 @@ private struct HomeContent: View {
 
         List {
             if viewState.incompleteCount > 0 {
-                Banner(text: HomeStrings.incomplete(viewState.incompleteCount))
+                Banner(
+                    text: HomeStrings.incomplete(viewState.incompleteCount),
+                    action: HomeStrings.retryDetails,
+                    busy: actions.isRefilling
+                ) {
+                    actions.refill()
+                }
             }
 
             ForEach(items, id: \.id) { item in
@@ -106,6 +114,8 @@ private struct Banner: View {
     let text: String
 
     var color: Color = .secondary
+    var action: String = HomeStrings.reload
+    var busy = false
 
     var retry: (() -> Void)?
 
@@ -117,8 +127,11 @@ private struct Banner: View {
 
             Spacer()
 
-            if let retry {
-                Button(HomeStrings.reload, action: retry)
+            if busy {
+                ProgressView()
+                    .controlSize(.small)
+            } else if let retry {
+                Button(action, action: retry)
                     .font(.footnote)
             }
         }
@@ -136,44 +149,106 @@ private struct PokemonRow: View {
         return detail
     }
 
+    private var accent: Color {
+        detail?.types.first?.badgeColor ?? .secondary
+    }
+
     var body: some View {
-        HStack(spacing: 12) {
-            Sprite(pokemon: pokemon)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 14) {
+                Sprite(pokemon: pokemon, accent: accent)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text(pokemon.name)
-                    .font(.headline)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(HomeStrings.number(Int(pokemon.id)))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
 
-                if let detail, !detail.types.isEmpty {
-                    HStack(spacing: 6) {
-                        ForEach(detail.types, id: \.self) { type in
-                            TypeBadge(type: type)
+                    Text(pokemon.name.capitalized)
+                        .font(.headline)
+
+                    if let detail, !detail.types.isEmpty {
+                        HStack(spacing: 6) {
+                            ForEach(detail.types, id: \.self) { type in
+                                TypeBadge(type: type)
+                            }
                         }
+                        .padding(.top, 2)
+                    }
+                }
+
+                Spacer()
+
+                if let detail, !detail.baseStats.isEmpty {
+                    VStack(spacing: 0) {
+                        Text(HomeStrings.total(Int(detail.totalBaseStat)))
+                            .font(.title2.weight(.bold))
+                            .foregroundStyle(accent)
+                            .monospacedDigit()
+
+                        Text(HomeStrings.totalCaption)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
 
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(HomeStrings.number(Int(pokemon.id)))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .monospacedDigit()
-
-                if let detail, !detail.baseStats.isEmpty {
-                    Text(HomeStrings.total(Int(detail.totalBaseStat)))
-                        .font(.subheadline.weight(.semibold))
-                        .monospacedDigit()
-                }
+            if let detail, !detail.baseStats.isEmpty {
+                StatBar(stats: detail.baseStats, total: Int(detail.totalBaseStat))
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 12)
+        .background {
+            RoundedRectangle(cornerRadius: 18)
+                .fill(
+                    LinearGradient(
+                        colors: [accent.opacity(0.20), accent.opacity(0.04), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 18))
+        }
+        .listRowSeparator(.hidden)
+        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+    }
+}
+
+private struct StatBar: View {
+    let stats: [PokemonBaseStat]
+    let total: Int
+
+    private var fraction: Double {
+        min(max(Double(total) / maxTotalBaseStat, 0.04), 1)
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            let width = geometry.size.width * fraction
+            let spread = max(stats.reduce(0) { $0 + max(Int($1.value), 1) }, 1)
+
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(.quaternary)
+
+                HStack(spacing: 0) {
+                    ForEach(Array(stats.enumerated()), id: \.offset) { _, stat in
+                        Rectangle()
+                            .fill(stat.kind.barColor)
+                            .frame(width: width * Double(max(Int(stat.value), 1)) / Double(spread))
+                    }
+                }
+                .clipShape(Capsule())
+            }
+        }
+        .frame(height: 7)
     }
 }
 
 private struct Sprite: View {
     let pokemon: PokemonEntry
+    let accent: Color
 
     private var spriteUrl: URL? {
         guard case let .loaded(detail) = onEnum(of: pokemon.detail) else {
@@ -184,8 +259,15 @@ private struct Sprite: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 10)
-                .fill(.quaternary)
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [accent.opacity(0.38), accent.opacity(0.10)],
+                        center: .center,
+                        startRadius: 2,
+                        endRadius: 34
+                    )
+                )
 
             if let url = spriteUrl {
                 AsyncImage(url: url) { image in
@@ -195,13 +277,14 @@ private struct Sprite: View {
                 } placeholder: {
                     ProgressView()
                 }
+                .padding(4)
             } else {
-                Text(pokemon.name.prefix(1))
-                    .font(.headline)
+                Text(pokemon.name.prefix(1).uppercased())
+                    .font(.title3.weight(.bold))
                     .foregroundStyle(.secondary)
             }
         }
-        .frame(width: 56, height: 56)
+        .frame(width: 66, height: 66)
     }
 }
 
@@ -210,7 +293,7 @@ private struct TypeBadge: View {
 
     var body: some View {
         Text(HomeStrings.typeName(type))
-            .font(.caption2)
+            .font(.caption2.weight(.semibold))
             .foregroundStyle(.white)
             .padding(.horizontal, 10)
             .padding(.vertical, 3)
@@ -225,7 +308,8 @@ private enum PreviewData {
             entry(id: 4, name: "charmander", types: [.fire], stats: [39, 52, 43, 60, 50, 65]),
             entry(id: 7, name: "squirtle", types: [.water], stats: [44, 48, 65, 50, 64, 43]),
             entry(id: 10, name: "caterpie", types: [.bug], stats: [45, 30, 35, 20, 20, 45]),
-            entry(id: 25, name: "pikachu", types: [.electric], stats: [35, 55, 40, 50, 50, 90])
+            entry(id: 25, name: "pikachu", types: [.electric], stats: [35, 55, 40, 50, 50, 90]),
+            entry(id: 149, name: "dragonite", types: [.dragon, .flying], stats: [91, 134, 95, 100, 100, 80])
         ]
     }
 
@@ -273,7 +357,7 @@ private enum PreviewData {
 
 #Preview("詳細を引けなかった行") {
     NavigationStack {
-        HomeView(source: .snapshot(.loaded([PreviewData.degraded])))
+        HomeView(source: .snapshot(.loaded([PreviewData.degraded] + PreviewData.pokemon)))
     }
 }
 

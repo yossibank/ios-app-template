@@ -22,34 +22,64 @@ extension HomeViewModel {
     func fetch() async throws(FetchFailure) -> [PokemonEntry] {
         try await reset()
 
-        let result = try await nextPage()
+        let outcome = try await result(of: { try await dependency.paging.loadNext() })
 
-        switch onEnum(of: result) {
+        switch onEnum(of: outcome) {
         case let .loaded(loaded):
             record(incomplete: loaded.incompleteCount, notice: nil)
             return loaded.pokemon
 
-        case let .failed(failed):
-            guard !failed.pokemon.isEmpty else {
-                throw failed.failure.asFetchFailure
-            }
+        case let .degraded(degraded):
+            record(incomplete: degraded.incompleteCount, notice: degraded.failure.asFetchFailure)
+            return degraded.pokemon
 
-            record(incomplete: failed.incompleteCount, notice: failed.failure.asFetchFailure)
-            return failed.pokemon
+        case let .failed(failed):
+            throw failed.failure.asFetchFailure
+
+        case .stale:
+            return []
         }
     }
 
     func fetchMore() async throws(FetchFailure) -> FetchMore<[PokemonEntry]>? {
-        let result = try await nextPage()
+        let outcome = try await result(of: { try await dependency.paging.loadNext() })
 
-        switch onEnum(of: result) {
+        switch onEnum(of: outcome) {
         case let .loaded(loaded):
             record(incomplete: loaded.incompleteCount, notice: nil)
             return loaded.hasMore ? .more(loaded.pokemon) : .last(loaded.pokemon)
 
+        case let .degraded(degraded):
+            record(incomplete: degraded.incompleteCount, notice: degraded.failure.asFetchFailure)
+            return .last(degraded.pokemon)
+
         case let .failed(failed):
-            record(incomplete: failed.incompleteCount, notice: failed.failure.asFetchFailure)
-            return .last(failed.pokemon)
+            note(failed.failure.asFetchFailure)
+            return nil
+
+        case .stale:
+            return nil
+        }
+    }
+
+    func fetchRefilled() async throws(FetchFailure) -> [PokemonEntry]? {
+        let outcome = try await result(of: { try await dependency.paging.retryMissingDetails() })
+
+        switch onEnum(of: outcome) {
+        case let .loaded(loaded):
+            record(incomplete: loaded.incompleteCount, notice: nil)
+            return loaded.pokemon
+
+        case let .degraded(degraded):
+            record(incomplete: degraded.incompleteCount, notice: degraded.failure.asFetchFailure)
+            return degraded.pokemon
+
+        case let .failed(failed):
+            note(failed.failure.asFetchFailure)
+            return nil
+
+        case .stale:
+            return nil
         }
     }
 
@@ -62,9 +92,15 @@ extension HomeViewModel {
         viewState.notice = notice
     }
 
-    private func nextPage() async throws(FetchFailure) -> PokemonListResult {
+    private func note(_ notice: FetchFailure?) {
+        viewState.notice = notice
+    }
+
+    private func result(
+        of operation: () async throws -> PokemonListResult
+    ) async throws(FetchFailure) -> PokemonListResult {
         do {
-            return try await dependency.paging.loadNext()
+            return try await operation()
         } catch {
             throw FetchFailure(HomeStrings.unexpected)
         }
@@ -110,6 +146,9 @@ private extension PokemonFailure {
 
         case .unexpected:
             HomeStrings.unreadable
+
+        case .closed:
+            HomeStrings.unexpected
         }
     }
 }

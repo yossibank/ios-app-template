@@ -66,6 +66,14 @@ enum HomeStrings {
         )
     }
 
+    static var totalCaption: String {
+        String(localized: "home.total_caption", bundle: .module)
+    }
+
+    static var retryDetails: String {
+        String(localized: "home.retry_details", bundle: .module)
+    }
+
     static func typeName(_ kind: PokemonTypeKind) -> String {
         switch kind {
         case .normal: String(localized: "home.type.normal", bundle: .module)

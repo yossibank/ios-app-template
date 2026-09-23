@@ -113,6 +113,8 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View, EmptyContent: V
             isEmpty: isEmpty,
             reload: { model.reload() },
             loadMore: { model.requestLoadMore() },
+            refill: { model.requestRefill() },
+            isRefilling: model.fetchState.isRefilling,
             success: { value, actions in
                 success(model.viewState, value, actions)
             },
@@ -123,6 +125,9 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View, EmptyContent: V
         }
         .task(id: model.fetchState.loadMoreID) {
             await model.loadMore()
+        }
+        .task(id: model.fetchState.refillID) {
+            await model.refill()
         }
     }
 }
@@ -155,6 +160,8 @@ private struct SnapshotScreen<Model: ScreenViewModel, Success: View, EmptyConten
             isEmpty: isEmpty,
             reload: {},
             loadMore: {},
+            refill: {},
+            isRefilling: false,
             success: { value, actions in
                 success(viewState, value, actions)
             },
@@ -171,7 +178,9 @@ private struct PhaseContent<Value, Success: View, EmptyContent: View>: View {
         ScreenActions(
             reload: reload,
             loadMore: loadMore,
-            isLoadingMore: phase.isLoadingMore
+            refill: refill,
+            isLoadingMore: phase.isLoadingMore,
+            isRefilling: isRefilling
         )
     }
 
@@ -179,6 +188,8 @@ private struct PhaseContent<Value, Success: View, EmptyContent: View>: View {
     let isEmpty: (Value) -> Bool
     let reload: @MainActor () -> Void
     let loadMore: @MainActor () -> Void
+    let refill: @MainActor () -> Void
+    let isRefilling: Bool
     @ViewBuilder let success: (Value, ScreenActions) -> Success
     @ViewBuilder let empty: (ScreenActions) -> EmptyContent
 
