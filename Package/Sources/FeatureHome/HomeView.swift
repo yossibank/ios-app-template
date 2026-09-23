@@ -257,7 +257,7 @@ private struct PokemonCard: View {
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
 
-            Artwork(detail: detail, fallback: pokemon.name)
+            Artwork(detail: detail, fallback: pokemon.name, accent: accent)
                 .aspectRatio(1, contentMode: .fit)
                 .frame(maxWidth: .infinity)
 
@@ -307,43 +307,50 @@ private struct PokemonCard: View {
 private struct Artwork: View {
     let detail: PokemonEntryDetailLoaded?
     let fallback: String
-
-    private var sprite: URL? {
-        detail?.spriteUrl.flatMap(URL.init(string:))
-    }
+    let accent: Color
 
     private var large: URL? {
         (detail?.artworkUrl ?? detail?.spriteUrl).flatMap(URL.init(string:))
     }
 
     var body: some View {
-        ZStack {
-            if let sprite {
-                AsyncImage(url: sprite) { image in
+        if let large {
+            AsyncImage(
+                url: large,
+                transaction: Transaction(animation: .easeOut(duration: 0.2))
+            ) { phase in
+                if let image = phase.image {
                     image
                         .resizable()
                         .scaledToFit()
-                } placeholder: {
-                    Color.clear
+                        .transition(.opacity)
+                } else {
+                    Disc(accent: accent)
                 }
             }
-
-            if let large {
-                AsyncImage(url: large) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                } placeholder: {
-                    Color.clear
-                }
-            }
-
-            if detail == nil {
-                Text(fallback.prefix(1).uppercased())
-                    .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(.secondary)
-            }
+        } else {
+            Initial(text: fallback)
         }
+    }
+}
+
+private struct Disc: View {
+    let accent: Color
+
+    var body: some View {
+        Circle()
+            .fill(accent.opacity(0.12))
+            .padding(14)
+    }
+}
+
+private struct Initial: View {
+    let text: String
+
+    var body: some View {
+        Text(text.prefix(1).uppercased())
+            .font(.largeTitle.weight(.bold))
+            .foregroundStyle(.secondary)
     }
 }
 
@@ -404,7 +411,7 @@ private struct PokemonSheet: View {
                 Text(pokemon.name.capitalized)
                     .font(.largeTitle.weight(.bold))
 
-                Artwork(detail: detail, fallback: pokemon.name)
+                Artwork(detail: detail, fallback: pokemon.name, accent: accent)
                     .aspectRatio(1, contentMode: .fit)
                     .frame(maxWidth: 260)
 
