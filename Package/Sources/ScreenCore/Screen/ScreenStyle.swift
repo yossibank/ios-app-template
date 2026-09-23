@@ -14,8 +14,14 @@ public struct ScreenStyle {
         }
     }
 
-    let loading: () -> AnyView
+    var loading: () -> AnyView
     let failure: (Failure) -> AnyView
+
+    public func showingWhileLoading(@ViewBuilder _ placeholder: @escaping () -> some View) -> ScreenStyle {
+        var copy = self
+        copy.loading = { AnyView(placeholder()) }
+        return copy
+    }
 
     public init(
         @ViewBuilder loading: @escaping () -> some View,

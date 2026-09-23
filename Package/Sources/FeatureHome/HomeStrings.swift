@@ -74,6 +74,38 @@ enum HomeStrings {
         String(localized: "home.retry_details", bundle: .module)
     }
 
+    static var filterAll: String {
+        String(localized: "home.filter_all", bundle: .module)
+    }
+
+    static var noTypeMatch: String {
+        String(localized: "home.no_type_match", bundle: .module)
+    }
+
+    static var noTypeMatchDescription: String {
+        String(localized: "home.no_type_match_description", bundle: .module)
+    }
+
+    static var detailMissing: String {
+        String(localized: "home.detail_missing", bundle: .module)
+    }
+
+    static var close: String {
+        String(localized: "home.close", bundle: .module)
+    }
+
+    static func statName(_ kind: PokemonStatKind) -> String {
+        switch kind {
+        case .hp: String(localized: "home.stat.hp", bundle: .module)
+        case .attack: String(localized: "home.stat.attack", bundle: .module)
+        case .defense: String(localized: "home.stat.defense", bundle: .module)
+        case .specialAttack: String(localized: "home.stat.special_attack", bundle: .module)
+        case .specialDefense: String(localized: "home.stat.special_defense", bundle: .module)
+        case .speed: String(localized: "home.stat.speed", bundle: .module)
+        case .other: String(localized: "home.stat.other", bundle: .module)
+        }
+    }
+
     static func typeName(_ kind: PokemonTypeKind) -> String {
         switch kind {
         case .normal: String(localized: "home.type.normal", bundle: .module)

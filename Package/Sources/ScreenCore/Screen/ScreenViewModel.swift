@@ -40,6 +40,12 @@ extension ScreenViewModel {
         }
     }
 
+    func refresh() async {
+        await fetchState.runRefresh { () async throws(FetchFailure) -> Value in
+            try await fetch()
+        }
+    }
+
     func requestRefill() {
         fetchState.requestRefill()
     }

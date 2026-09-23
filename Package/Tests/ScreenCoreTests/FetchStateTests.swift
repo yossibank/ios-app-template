@@ -12,6 +12,33 @@ struct FetchStateTests {
         #expect(state.phase.loaded == [1, 2])
     }
 
+    @Test("プルして再取得している間も一覧は消えない")
+    func refreshKeepsTheListOnScreen() async {
+        let state = FetchState<[Int]>()
+        let gate = Gate()
+
+        await state.run { [1] }
+
+        let running = Task { await state.runRefresh { await gate.wait(); return [2] } }
+        await gate.waitUntilEntered()
+
+        #expect(state.phase.loaded == [1], "再取得の途中で一覧が消えている")
+
+        gate.open()
+        await running.value
+
+        #expect(state.phase.loaded == [2])
+    }
+
+    @Test("何も出ていないときの再取得は通常の取得として扱う")
+    func refreshWithNothingOnScreenLoads() async {
+        let state = FetchState<[Int]>()
+
+        await state.runRefresh { [1] }
+
+        #expect(state.phase.loaded == [1])
+    }
+
     @Test("再取得を頼むと、進行中の取得結果は捨てられる")
     func reloadDiscardsInFlightResult() async {
         let state = FetchState<[Int]>()

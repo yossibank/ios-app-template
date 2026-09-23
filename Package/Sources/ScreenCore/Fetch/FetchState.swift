@@ -87,6 +87,25 @@ public final class FetchState<Value> {
         }
     }
 
+    func runRefresh(_ operation: @MainActor () async throws(FetchFailure) -> Value) async {
+        guard case .loaded = phase else {
+            await run(operation)
+            return
+        }
+
+        guard !Task.isCancelled else {
+            return
+        }
+
+        reachedEnd = false
+
+        await settle(operation) { value in
+            phase = .loaded(value)
+        } failed: { failure in
+            phase = .failed(failure)
+        }
+    }
+
     func runRefill(_ operation: @MainActor () async throws(FetchFailure) -> Value?) async {
         guard
             case let .loaded(current) = phase,
