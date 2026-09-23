@@ -8,21 +8,30 @@ public final class FetchState<Value> {
 
     public private(set) var isRefilling = false
 
-    private(set) var reloadID = UUID()
-    private(set) var loadMoreID = UUID()
-    private(set) var refillID = UUID()
+    private var reload = FetchRequest()
+    private var loadMore = FetchRequest()
+    private var refill = FetchRequest()
 
     @ObservationIgnored private var activeRequest: UUID?
     @ObservationIgnored private var reachedEnd = false
-    @ObservationIgnored private var servedReloadID: UUID?
-    @ObservationIgnored private var servedLoadMoreID: UUID?
-    @ObservationIgnored private var servedRefillID: UUID?
+
+    var reloadID: UUID {
+        reload.id
+    }
+
+    var loadMoreID: UUID {
+        loadMore.id
+    }
+
+    var refillID: UUID {
+        refill.id
+    }
 
     public init() {}
 
     func requestReload() {
         activeRequest = nil
-        reloadID = UUID()
+        reload.renew()
     }
 
     func requestLoadMore() {
@@ -33,7 +42,7 @@ public final class FetchState<Value> {
             return
         }
 
-        loadMoreID = UUID()
+        loadMore.renew()
     }
 
     func requestRefill() {
@@ -44,18 +53,17 @@ public final class FetchState<Value> {
             return
         }
 
-        refillID = UUID()
+        refill.renew()
     }
 
     func run(_ operation: @MainActor () async throws(FetchFailure) -> Value) async {
         guard
             !Task.isCancelled,
-            servedReloadID != reloadID
+            reload.claim()
         else {
             return
         }
 
-        servedReloadID = reloadID
         reachedEnd = false
         phase = .loading
 
@@ -66,16 +74,14 @@ public final class FetchState<Value> {
         }
 
         if case .loading = phase {
-            servedReloadID = nil
+            reload.release()
         }
     }
 
     func runMore(_ operation: @MainActor () async throws(FetchFailure) -> FetchMore<Value>?) async {
-        guard servedLoadMoreID != loadMoreID else {
+        guard loadMore.claim() else {
             return
         }
-
-        servedLoadMoreID = loadMoreID
 
         guard
             case let .loaded(current) = phase,
@@ -104,14 +110,14 @@ public final class FetchState<Value> {
         }
 
         if case .loadingMore = phase {
-            servedLoadMoreID = nil
+            loadMore.release()
             phase = .loaded(current)
         }
     }
 
     func runRefresh(_ operation: @MainActor () async throws(FetchFailure) -> Value) async {
         guard case .loaded = phase else {
-            servedReloadID = nil
+            reload.release()
             await run(operation)
             return
         }
@@ -130,11 +136,9 @@ public final class FetchState<Value> {
     }
 
     func runRefill(_ operation: @MainActor () async throws(FetchFailure) -> Value?) async {
-        guard servedRefillID != refillID else {
+        guard refill.claim() else {
             return
         }
-
-        servedRefillID = refillID
 
         guard
             case let .loaded(current) = phase,
