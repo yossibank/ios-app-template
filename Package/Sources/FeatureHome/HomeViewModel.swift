@@ -119,6 +119,7 @@ extension HomeViewModel {
     @Observable
     final class State: ViewState {
         var query = ""
+        var selectedType: PokemonTypeKind?
         var incompleteCount = 0
         var notice: FetchFailure?
     }

@@ -1,6 +1,28 @@
 {
   "sourceLanguage": "ja",
   "strings": {
+    "home.close": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "閉じる"
+          }
+        }
+      }
+    },
+    "home.detail_missing": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このポケモンの詳細は取得できていません"
+          }
+        }
+      }
+    },
     "home.empty_description": {
       "extractionState": "manual",
       "localizations": {
@@ -23,6 +45,17 @@
         }
       }
     },
+    "home.filter_all": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すべて"
+          }
+        }
+      }
+    },
     "home.incomplete": {
       "extractionState": "manual",
       "localizations": {
@@ -30,6 +63,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld 件の詳細を取得できませんでした"
+          }
+        }
+      }
+    },
+    "home.no_type_match": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このタイプのポケモンは読み込み済みの中にいません"
+          }
+        }
+      }
+    },
+    "home.no_type_match_description": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下に進んで続きを読み込むと見つかるかもしれません"
           }
         }
       }
@@ -96,6 +151,83 @@
           "stringUnit": {
             "state": "translated",
             "value": "サーバーが応答しませんでした（%lld）"
+          }
+        }
+      }
+    },
+    "home.stat.attack": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "こうげき"
+          }
+        }
+      }
+    },
+    "home.stat.defense": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぼうぎょ"
+          }
+        }
+      }
+    },
+    "home.stat.hp": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HP"
+          }
+        }
+      }
+    },
+    "home.stat.other": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "その他"
+          }
+        }
+      }
+    },
+    "home.stat.special_attack": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とくこう"
+          }
+        }
+      }
+    },
+    "home.stat.special_defense": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "とくぼう"
+          }
+        }
+      }
+    },
+    "home.stat.speed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "すばやさ"
           }
         }
       }

@@ -203,6 +203,7 @@ struct HomeViewModelTests {
             let detail: any PokemonEntryDetail = if hasDetail {
                 PokemonEntryDetailLoaded(
                     spriteUrl: "https://img.example/\(index + 1).png",
+                    artworkUrl: "https://img.example/artwork/\(index + 1).png",
                     types: [.grass],
                     baseStats: [PokemonBaseStat(kind: .hp, value: 45)]
                 )
