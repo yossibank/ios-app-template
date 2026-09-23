@@ -26,11 +26,15 @@ extension HomeViewModel {
 
         switch onEnum(of: outcome) {
         case let .loaded(loaded):
-            record(incomplete: loaded.incompleteCount, notice: nil)
+            record(incomplete: loaded.incompleteCount, notice: nil, total: loaded.total)
             return loaded.pokemon
 
         case let .degraded(degraded):
-            record(incomplete: degraded.incompleteCount, notice: degraded.failure.asFetchFailure)
+            record(
+                incomplete: degraded.incompleteCount,
+                notice: degraded.failure.asFetchFailure,
+                total: degraded.total
+            )
             return degraded.pokemon
 
         case let .failed(failed):
@@ -46,11 +50,15 @@ extension HomeViewModel {
 
         switch onEnum(of: outcome) {
         case let .loaded(loaded):
-            record(incomplete: loaded.incompleteCount, notice: nil)
+            record(incomplete: loaded.incompleteCount, notice: nil, total: loaded.total)
             return loaded.hasMore ? .more(loaded.pokemon) : .last(loaded.pokemon)
 
         case let .degraded(degraded):
-            record(incomplete: degraded.incompleteCount, notice: degraded.failure.asFetchFailure)
+            record(
+                incomplete: degraded.incompleteCount,
+                notice: degraded.failure.asFetchFailure,
+                total: degraded.total
+            )
             return .last(degraded.pokemon)
 
         case let .failed(failed):
@@ -67,11 +75,15 @@ extension HomeViewModel {
 
         switch onEnum(of: outcome) {
         case let .loaded(loaded):
-            record(incomplete: loaded.incompleteCount, notice: nil)
+            record(incomplete: loaded.incompleteCount, notice: nil, total: loaded.total)
             return loaded.pokemon
 
         case let .degraded(degraded):
-            record(incomplete: degraded.incompleteCount, notice: degraded.failure.asFetchFailure)
+            record(
+                incomplete: degraded.incompleteCount,
+                notice: degraded.failure.asFetchFailure,
+                total: degraded.total
+            )
             return degraded.pokemon
 
         case let .failed(failed):
@@ -87,9 +99,10 @@ extension HomeViewModel {
         dependency.paging.close()
     }
 
-    private func record(incomplete: Int32, notice: FetchFailure?) {
+    private func record(incomplete: Int32, notice: FetchFailure?, total: Int32) {
         viewState.incompleteCount = Int(incomplete)
         viewState.notice = notice
+        viewState.total = Int(total)
     }
 
     private func note(_ notice: FetchFailure?) {
@@ -120,6 +133,8 @@ extension HomeViewModel {
     final class State: ViewState {
         var query = ""
         var selectedType: PokemonTypeKind?
+        var sort: PokemonSort = .number
+        var total = 0
         var incompleteCount = 0
         var notice: FetchFailure?
     }

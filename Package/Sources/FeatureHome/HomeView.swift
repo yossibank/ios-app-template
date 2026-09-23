@@ -68,12 +68,14 @@ private struct HomeContent: View {
     }
 
     private var filtered: [PokemonEntry] {
-        pokemon.filter { entry in
-            let matchesName = viewState.query.isEmpty
-                || entry.name.localizedStandardContains(viewState.query)
+        pokemon
+            .filter { entry in
+                let matchesName = viewState.query.isEmpty
+                    || entry.name.localizedStandardContains(viewState.query)
 
-            return matchesName && entry.matches(viewState.selectedType)
-        }
+                return matchesName && entry.matches(viewState.selectedType)
+            }
+            .sorted(by: viewState.sort.areInIncreasingOrder)
     }
 
     private var isFiltering: Bool {
@@ -90,6 +92,14 @@ private struct HomeContent: View {
 
         ScrollView {
             LazyVStack(spacing: 12) {
+                ListToolbar(
+                    shown: items.count,
+                    loaded: pokemon.count,
+                    total: viewState.total,
+                    filtering: isFiltering,
+                    sort: $viewState.sort
+                )
+
                 TypeFilters(types: availableTypes, selected: $viewState.selectedType)
 
                 if viewState.incompleteCount > 0 {
@@ -104,15 +114,19 @@ private struct HomeContent: View {
 
                 LazyVGrid(columns: gridColumns, spacing: 10) {
                     ForEach(items, id: \.id) { item in
-                        PokemonCard(pokemon: item)
-                            .onTapGesture { opened = item }
-                            .onAppear {
-                                guard !isFiltering, prefetch.contains(item.id) else {
-                                    return
-                                }
-
-                                actions.loadMore()
+                        Button {
+                            opened = item
+                        } label: {
+                            PokemonCard(pokemon: item)
+                        }
+                        .buttonStyle(CardButtonStyle())
+                        .onAppear {
+                            guard !isFiltering, prefetch.contains(item.id) else {
+                                return
                             }
+
+                            actions.loadMore()
+                        }
                     }
                 }
 
@@ -151,6 +165,82 @@ private struct HomeContent: View {
         .sheet(item: $opened) { entry in
             PokemonSheet(pokemon: entry) { opened = nil }
         }
+    }
+}
+
+private struct CardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.12), value: configuration.isPressed)
+    }
+}
+
+private struct ListToolbar: View {
+    let shown: Int
+    let loaded: Int
+    let total: Int
+    let filtering: Bool
+
+    @Binding var sort: PokemonSort
+
+    var body: some View {
+        HStack {
+            Text(
+                filtering
+                    ? HomeStrings.progressFiltered(shown: shown, total: total, loaded: loaded)
+                    : HomeStrings.progress(loaded: loaded, total: total)
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .monospacedDigit()
+
+            Spacer()
+
+            Menu {
+                Picker(HomeStrings.sortTitle, selection: $sort) {
+                    ForEach(PokemonSort.allCases, id: \.self) { option in
+                        Text(option.label).tag(option)
+                    }
+                }
+            } label: {
+                Text(sort.label)
+                    .font(.caption)
+            }
+        }
+        .padding(.horizontal, 4)
+    }
+}
+
+enum PokemonSort: CaseIterable {
+    case number
+    case total
+    case name
+
+    var label: String {
+        switch self {
+        case .number: HomeStrings.sortNumber
+        case .total: HomeStrings.sortTotal
+        case .name: HomeStrings.sortName
+        }
+    }
+
+    func areInIncreasingOrder(_ lhs: PokemonEntry, _ rhs: PokemonEntry) -> Bool {
+        switch self {
+        case .number: lhs.id < rhs.id
+        case .total: lhs.totalBaseStat > rhs.totalBaseStat
+        case .name: lhs.name < rhs.name
+        }
+    }
+}
+
+private extension PokemonEntry {
+    var totalBaseStat: Int {
+        guard case let .loaded(detail) = onEnum(of: detail) else {
+            return -1
+        }
+
+        return Int(detail.totalBaseStat)
     }
 }
 
@@ -263,7 +353,7 @@ private struct PokemonCard: View {
 
             Text(pokemon.name.capitalized)
                 .font(.headline)
-                .lineLimit(1)
+                .lineLimit(2)
 
             if let detail, !detail.types.isEmpty {
                 HStack(spacing: 4) {
@@ -275,20 +365,21 @@ private struct PokemonCard: View {
             }
 
             if let detail, !detail.baseStats.isEmpty {
-                HStack(spacing: 8) {
-                    StatBar(stats: detail.baseStats, total: Int(detail.totalBaseStat))
-
-                    Text(HomeStrings.total(Int(detail.totalBaseStat)))
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(accent)
-                        .monospacedDigit()
-                }
-                .padding(.top, 10)
+                TotalBar(total: Int(detail.totalBaseStat), accent: accent)
+                    .padding(.top, 10)
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .background(alignment: .topTrailing) {
+            Text(HomeStrings.numberPlain(Int(pokemon.id)))
+                .font(.system(size: 64, weight: .black, design: .rounded))
+                .foregroundStyle(accent.opacity(0.10))
+                .monospacedDigit()
+                .lineLimit(1)
+                .padding(.horizontal, 6)
+        }
         .background {
             RoundedRectangle(cornerRadius: 20)
                 .fill(
@@ -354,9 +445,39 @@ private struct Initial: View {
     }
 }
 
-private struct StatBar: View {
-    let stats: [PokemonBaseStat]
+private struct TotalBar: View {
     let total: Int
+    let accent: Color
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) {
+                Bar(total: total, accent: accent)
+                TotalText(total: total)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                TotalText(total: total)
+                Bar(total: total, accent: accent)
+            }
+        }
+    }
+}
+
+private struct TotalText: View {
+    let total: Int
+
+    var body: some View {
+        Text(HomeStrings.total(total))
+            .font(.subheadline.weight(.bold))
+            .monospacedDigit()
+            .lineLimit(1)
+    }
+}
+
+private struct Bar: View {
+    let total: Int
+    let accent: Color
 
     private var fraction: Double {
         min(max(Double(total) / maxTotalBaseStat, 0.04), 1)
@@ -364,24 +485,17 @@ private struct StatBar: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let width = geometry.size.width * fraction
-            let spread = max(stats.reduce(0) { $0 + max(Int($1.value), 1) }, 1)
-
             ZStack(alignment: .leading) {
                 Capsule()
                     .fill(.quaternary)
 
-                HStack(spacing: 0) {
-                    ForEach(Array(stats.enumerated()), id: \.offset) { _, stat in
-                        Rectangle()
-                            .fill(stat.kind.barColor)
-                            .frame(width: width * Double(max(Int(stat.value), 1)) / Double(spread))
-                    }
-                }
-                .clipShape(Capsule())
+                Capsule()
+                    .fill(accent)
+                    .frame(width: geometry.size.width * fraction)
             }
         }
         .frame(height: 7)
+        .frame(minWidth: 48)
     }
 }
 
@@ -433,7 +547,6 @@ private struct PokemonSheet: View {
 
                         Text(HomeStrings.total(Int(detail.totalBaseStat)))
                             .font(.title3.weight(.bold))
-                            .foregroundStyle(accent)
                             .monospacedDigit()
                     }
                     .padding(.top, 12)
@@ -452,6 +565,15 @@ private struct PokemonSheet: View {
                     .padding(.top, 16)
             }
             .padding(24)
+            .frame(maxWidth: .infinity)
+            .background(alignment: .top) {
+                LinearGradient(
+                    colors: [accent.opacity(0.26), accent.opacity(0.04), .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 320)
+            }
         }
         .presentationDetents([.medium, .large])
     }
@@ -569,7 +691,7 @@ private struct TypeBadge: View {
     var body: some View {
         Text(HomeStrings.typeName(type))
             .font(.caption2.weight(.semibold))
-            .foregroundStyle(.white)
+            .foregroundStyle(type.onBadgeColor)
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
             .background(type.badgeColor, in: Capsule())

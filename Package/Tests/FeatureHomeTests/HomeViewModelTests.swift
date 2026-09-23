@@ -179,7 +179,8 @@ struct HomeViewModelTests {
     ) -> PokemonListResult {
         PokemonListResultLoaded(
             pokemon: entries(names, hasDetail: hasDetail),
-            hasMore: hasMore
+            hasMore: hasMore,
+            total: 1351
         )
     }
 
@@ -190,6 +191,7 @@ struct HomeViewModelTests {
         PokemonListResultDegraded(
             pokemon: entries(names),
             hasMore: true,
+            total: 1351,
             failure: failure
         )
     }
@@ -246,7 +248,7 @@ private final class StubPaging: PokemonPaging {
 
     func retryMissingDetails() async throws -> PokemonListResult {
         repairCalls += 1
-        return repaired ?? PokemonListResultLoaded(pokemon: [], hasMore: false)
+        return repaired ?? PokemonListResultLoaded(pokemon: [], hasMore: false, total: 0)
     }
 
     func reset() async throws {

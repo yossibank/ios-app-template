@@ -74,6 +74,39 @@ enum HomeStrings {
         String(localized: "home.retry_details", bundle: .module)
     }
 
+    static func progress(loaded: Int, total: Int) -> String {
+        String(format: String(localized: "home.progress", bundle: .module), loaded, total)
+    }
+
+    static func progressFiltered(shown: Int, total: Int, loaded: Int) -> String {
+        String(
+            format: String(localized: "home.progress_filtered", bundle: .module),
+            shown,
+            total,
+            loaded
+        )
+    }
+
+    static func numberPlain(_ id: Int) -> String {
+        String(format: String(localized: "home.number_plain", bundle: .module), id)
+    }
+
+    static var sortTitle: String {
+        String(localized: "home.sort.number", bundle: .module)
+    }
+
+    static var sortNumber: String {
+        String(localized: "home.sort.number", bundle: .module)
+    }
+
+    static var sortTotal: String {
+        String(localized: "home.sort.total", bundle: .module)
+    }
+
+    static var sortName: String {
+        String(localized: "home.sort.name", bundle: .module)
+    }
+
     static var filterAll: String {
         String(localized: "home.filter_all", bundle: .module)
     }
