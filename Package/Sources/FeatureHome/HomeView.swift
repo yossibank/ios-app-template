@@ -317,33 +317,46 @@ private struct Artwork: View {
     }
 
     var body: some View {
-        ZStack {
-            if let sprite {
-                AsyncImage(url: sprite) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                } placeholder: {
-                    Color.clear
-                }
+        if let large {
+            AsyncImage(url: large) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+            } placeholder: {
+                SpritePreview(url: sprite, fallback: fallback)
             }
-
-            if let large {
-                AsyncImage(url: large) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                } placeholder: {
-                    Color.clear
-                }
-            }
-
-            if detail == nil {
-                Text(fallback.prefix(1).uppercased())
-                    .font(.largeTitle.weight(.bold))
-                    .foregroundStyle(.secondary)
-            }
+        } else {
+            Initial(text: fallback)
         }
+    }
+}
+
+private struct SpritePreview: View {
+    let url: URL?
+    let fallback: String
+
+    var body: some View {
+        if let url {
+            AsyncImage(url: url) { image in
+                image
+                    .resizable()
+                    .scaledToFit()
+            } placeholder: {
+                Initial(text: fallback)
+            }
+        } else {
+            Initial(text: fallback)
+        }
+    }
+}
+
+private struct Initial: View {
+    let text: String
+
+    var body: some View {
+        Text(text.prefix(1).uppercased())
+            .font(.largeTitle.weight(.bold))
+            .foregroundStyle(.secondary)
     }
 }
 
