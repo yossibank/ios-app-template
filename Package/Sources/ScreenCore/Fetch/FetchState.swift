@@ -14,6 +14,9 @@ public final class FetchState<Value> {
 
     @ObservationIgnored private var activeRequest: UUID?
     @ObservationIgnored private var reachedEnd = false
+    @ObservationIgnored private var servedReloadID: UUID?
+    @ObservationIgnored private var servedLoadMoreID: UUID?
+    @ObservationIgnored private var servedRefillID: UUID?
 
     public init() {}
 
@@ -45,10 +48,14 @@ public final class FetchState<Value> {
     }
 
     func run(_ operation: @MainActor () async throws(FetchFailure) -> Value) async {
-        guard !Task.isCancelled else {
+        guard
+            !Task.isCancelled,
+            servedReloadID != reloadID
+        else {
             return
         }
 
+        servedReloadID = reloadID
         reachedEnd = false
         phase = .loading
 
@@ -57,9 +64,19 @@ public final class FetchState<Value> {
         } failed: { failure in
             phase = .failed(failure)
         }
+
+        if case .loading = phase {
+            servedReloadID = nil
+        }
     }
 
     func runMore(_ operation: @MainActor () async throws(FetchFailure) -> FetchMore<Value>?) async {
+        guard servedLoadMoreID != loadMoreID else {
+            return
+        }
+
+        servedLoadMoreID = loadMoreID
+
         guard
             case let .loaded(current) = phase,
             !Task.isCancelled
@@ -85,10 +102,16 @@ public final class FetchState<Value> {
         } failed: { _ in
             phase = .loaded(current)
         }
+
+        if case .loadingMore = phase {
+            servedLoadMoreID = nil
+            phase = .loaded(current)
+        }
     }
 
     func runRefresh(_ operation: @MainActor () async throws(FetchFailure) -> Value) async {
         guard case .loaded = phase else {
+            servedReloadID = nil
             await run(operation)
             return
         }
@@ -107,6 +130,12 @@ public final class FetchState<Value> {
     }
 
     func runRefill(_ operation: @MainActor () async throws(FetchFailure) -> Value?) async {
+        guard servedRefillID != refillID else {
+            return
+        }
+
+        servedRefillID = refillID
+
         guard
             case let .loaded(current) = phase,
             !Task.isCancelled

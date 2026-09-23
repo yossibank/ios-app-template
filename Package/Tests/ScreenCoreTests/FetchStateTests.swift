@@ -12,6 +12,68 @@ struct FetchStateTests {
         #expect(state.phase.loaded == [1, 2])
     }
 
+    @Test("画面に戻っただけでは取得し直さない")
+    func reappearingDoesNotRefetch() async {
+        let state = FetchState<[Int]>()
+        var calls = 0
+
+        await state.run {
+            calls += 1
+            return [1]
+        }
+
+        await state.run {
+            calls += 1
+            return [2]
+        }
+
+        #expect(calls == 1, "画面に戻るたびに取得し直している")
+        #expect(state.phase.loaded == [1])
+    }
+
+    @Test("再取得を頼めば走り直す")
+    func reloadRunsAgain() async {
+        let state = FetchState<[Int]>()
+        var calls = 0
+
+        await state.run {
+            calls += 1
+            return [1]
+        }
+
+        state.requestReload()
+
+        await state.run {
+            calls += 1
+            return [2]
+        }
+
+        #expect(calls == 2, "再取得を頼んだのに走っていない")
+        #expect(state.phase.loaded == [2])
+    }
+
+    @Test("画面に戻っただけでは続きを読まない")
+    func reappearingDoesNotLoadMore() async {
+        let state = FetchState<[Int]>()
+        var calls = 0
+
+        await state.run { [1] }
+        state.requestLoadMore()
+
+        await state.runMore {
+            calls += 1
+            return .more([1, 2])
+        }
+
+        await state.runMore {
+            calls += 1
+            return .more([1, 2, 3])
+        }
+
+        #expect(calls == 1, "画面に戻るたびに次のページを読んでいる")
+        #expect(state.phase.loaded == [1, 2])
+    }
+
     @Test("プルして再取得している間も一覧は消えない")
     func refreshKeepsTheListOnScreen() async {
         let state = FetchState<[Int]>()
@@ -167,6 +229,7 @@ struct FetchStateTests {
         await state.run { [1] }
         await state.runMore { .last([1, 2]) }
 
+        state.requestReload()
         await state.run { [1] }
 
         let before = state.loadMoreID
