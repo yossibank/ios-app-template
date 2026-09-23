@@ -257,7 +257,7 @@ private struct PokemonCard: View {
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
 
-            Artwork(detail: detail, fallback: pokemon.name)
+            Artwork(detail: detail, fallback: pokemon.name, accent: accent)
                 .aspectRatio(1, contentMode: .fit)
                 .frame(maxWidth: .infinity)
 
@@ -307,10 +307,7 @@ private struct PokemonCard: View {
 private struct Artwork: View {
     let detail: PokemonEntryDetailLoaded?
     let fallback: String
-
-    private var sprite: URL? {
-        detail?.spriteUrl.flatMap(URL.init(string:))
-    }
+    let accent: Color
 
     private var large: URL? {
         (detail?.artworkUrl ?? detail?.spriteUrl).flatMap(URL.init(string:))
@@ -318,12 +315,18 @@ private struct Artwork: View {
 
     var body: some View {
         if let large {
-            AsyncImage(url: large) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-            } placeholder: {
-                SpritePreview(url: sprite, fallback: fallback)
+            AsyncImage(
+                url: large,
+                transaction: Transaction(animation: .easeOut(duration: 0.2))
+            ) { phase in
+                if let image = phase.image {
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .transition(.opacity)
+                } else {
+                    Disc(accent: accent)
+                }
             }
         } else {
             Initial(text: fallback)
@@ -331,22 +334,13 @@ private struct Artwork: View {
     }
 }
 
-private struct SpritePreview: View {
-    let url: URL?
-    let fallback: String
+private struct Disc: View {
+    let accent: Color
 
     var body: some View {
-        if let url {
-            AsyncImage(url: url) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-            } placeholder: {
-                Initial(text: fallback)
-            }
-        } else {
-            Initial(text: fallback)
-        }
+        Circle()
+            .fill(accent.opacity(0.12))
+            .padding(14)
     }
 }
 
@@ -417,7 +411,7 @@ private struct PokemonSheet: View {
                 Text(pokemon.name.capitalized)
                     .font(.largeTitle.weight(.bold))
 
-                Artwork(detail: detail, fallback: pokemon.name)
+                Artwork(detail: detail, fallback: pokemon.name, accent: accent)
                     .aspectRatio(1, contentMode: .fit)
                     .frame(maxWidth: 260)
 
