@@ -67,3 +67,14 @@ flowchart LR
 1. `make bootstrap` で SwiftFormat / SwiftLint を用意する
 2. `make open` で `AppTemplate.xcworkspace` を開く
 3. 変更したら `make verify` を通す
+
+<details>
+<summary>共通コアを手元のものに差し替える</summary>
+
+kmp-app-template で `make build-ios` してから、そのディレクトリを絶対パスで渡します。
+
+```sh
+SHARED_DIR=/path/to/kmp-app-template make verify
+```
+
+</details>

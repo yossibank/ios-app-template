@@ -5,6 +5,10 @@ SIMULATOR ?= $(DEFAULT_SIMULATOR)
 DEST      := platform=iOS Simulator,name=$(SIMULATOR)
 SETTINGS  := SWIFT_SUPPRESS_WARNINGS=NO SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
 
+ifdef SHARED_DIR
+DERIVED_DATA := -derivedDataPath $(HOME)/Library/Developer/Xcode/DerivedData/$(SCHEME)-local-shared
+endif
+
 SWIFTFORMAT ?= mint run swiftformat
 SWIFTLINT   ?= mint run swiftlint
 
@@ -36,13 +40,13 @@ boot-wait:
 	xcrun simctl bootstatus '$(SIMULATOR)' -b
 
 test:
-	xcodebuild test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
+	xcodebuild test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS) $(DERIVED_DATA)
 
 build-test:
-	xcodebuild build test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
+	xcodebuild build test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS) $(DERIVED_DATA)
 
 build:
-	xcodebuild build -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS)
+	xcodebuild build -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS) $(DERIVED_DATA)
 
 clean:
-	xcodebuild clean -workspace $(WORKSPACE) -scheme $(SCHEME)
+	xcodebuild clean -workspace $(WORKSPACE) -scheme $(SCHEME) $(DERIVED_DATA)

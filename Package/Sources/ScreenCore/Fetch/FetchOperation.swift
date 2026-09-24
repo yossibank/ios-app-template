@@ -1,5 +1,5 @@
-public enum FetchOperation: Hashable, CaseIterable, Sendable {
+public enum FetchOperation: Hashable, Sendable {
     case reload
     case loadMore
-    case repair
+    case update
 }

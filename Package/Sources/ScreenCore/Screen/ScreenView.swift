@@ -120,14 +120,8 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View, EmptyContent: V
                 isRunning: { model.fetchState.isRunning($0) }
             )
         )
-        .task(id: model.fetchState.id(of: .reload)) {
-            await model.run(.reload)
-        }
-        .task(id: model.fetchState.id(of: .loadMore)) {
-            await model.run(.loadMore)
-        }
-        .task(id: model.fetchState.id(of: .repair)) {
-            await model.run(.repair)
+        .task {
+            model.start()
         }
     }
 }

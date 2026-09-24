@@ -35,6 +35,8 @@ public extension HomeView {
 }
 
 private struct HomeContent: View {
+    private static let prefetchDistance = 8
+
     @Bindable var viewState: HomeViewModel.State
 
     @Namespace private var cardNamespace
@@ -58,7 +60,7 @@ private struct HomeContent: View {
         let items = filtered
         let prefetch = Set(
             items
-                .suffix(PokemonList.prefetchDistance)
+                .suffix(Self.prefetchDistance)
                 .map(\.id)
         )
 
@@ -78,9 +80,9 @@ private struct HomeContent: View {
                     Banner(
                         text: HomeStrings.incomplete(viewState.incompleteCount),
                         actionTitle: HomeStrings.retryDetails,
-                        isBusy: actions.isRunning(.repair)
+                        isBusy: actions.isRunning(.update)
                     ) {
-                        actions.request(.repair)
+                        actions.request(.update)
                     }
                 }
 

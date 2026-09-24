@@ -8,6 +8,8 @@ public final class PokemonPagerListing: PokemonListing, @unchecked Sendable {
     public func reload() async -> PokemonListPage {
         do {
             try await pager.reset()
+        } catch is CancellationError {
+            return .stale
         } catch {
             return .failed(.interrupted)
         }
@@ -30,6 +32,8 @@ public final class PokemonPagerListing: PokemonListing, @unchecked Sendable {
     private func page(_ work: () async throws -> PokemonListResult) async -> PokemonListPage {
         do {
             return try await PokemonListPage(work())
+        } catch is CancellationError {
+            return .stale
         } catch {
             return .failed(.interrupted)
         }
