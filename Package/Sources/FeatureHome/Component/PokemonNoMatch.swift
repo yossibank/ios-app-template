@@ -3,7 +3,7 @@ import SwiftUI
 
 struct PokemonNoMatch: View {
     let query: String
-    let selectedType: PokemonTypeKind?
+    let selectedType: PokemonType?
 
     var body: some View {
         if selectedType != nil {

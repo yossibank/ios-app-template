@@ -37,38 +37,17 @@ public extension HomeView {
 private struct HomeContent: View {
     @Bindable var viewState: HomeViewModel.State
 
-    @State private var opened: PokemonEntry?
-
     @Namespace private var cardNamespace
 
-    let pokemon: [PokemonEntry]
+    let pokemon: [Pokemon]
     let actions: ScreenActions
 
-    private var availableTypes: [PokemonTypeKind] {
-        var seen: [PokemonTypeKind] = []
-
-        for entry in pokemon {
-            guard let detail = entry.loadedDetail else {
-                continue
-            }
-
-            for type in detail.types where !seen.contains(type) {
-                seen.append(type)
-            }
-        }
-
-        return seen
-    }
-
-    private var filtered: [PokemonEntry] {
-        pokemon
-            .filter { entry in
-                let matchesName = viewState.query.isEmpty
-                    || entry.name.localizedStandardContains(viewState.query)
-
-                return matchesName && entry.matches(viewState.selectedType)
-            }
-            .sorted(by: viewState.sort.areInIncreasingOrder)
+    private var filtered: [Pokemon] {
+        pokemon.filtered(
+            query: viewState.query,
+            type: viewState.selectedType,
+            sort: viewState.sort
+        )
     }
 
     private var isFiltering: Bool {
@@ -79,12 +58,12 @@ private struct HomeContent: View {
         let items = filtered
         let prefetch = Set(
             items
-                .suffix(Int(PokemonPager.companion.PREFETCH_DISTANCE))
+                .suffix(PokemonList.prefetchDistance)
                 .map(\.id)
         )
 
         ScrollView {
-            LazyVStack(spacing: 12) {
+            LazyVStack(spacing: PokemonMetrics.contentInset) {
                 PokemonListToolbar(
                     shown: items.count,
                     loaded: pokemon.count,
@@ -93,26 +72,26 @@ private struct HomeContent: View {
                     sort: $viewState.sort
                 )
 
-                PokemonFilterBar(types: availableTypes, selected: $viewState.selectedType)
+                PokemonFilterBar(types: pokemon.availableTypes, selected: $viewState.selectedType)
 
                 if viewState.incompleteCount > 0 {
                     Banner(
                         text: HomeStrings.incomplete(viewState.incompleteCount),
-                        action: HomeStrings.retryDetails,
-                        busy: actions.isRunning(.repair)
+                        actionTitle: HomeStrings.retryDetails,
+                        isBusy: actions.isRunning(.repair)
                     ) {
                         actions.request(.repair)
                     }
                 }
 
-                LazyVGrid(columns: PokemonMetrics.gridColumns, spacing: 10) {
-                    ForEach(items, id: \.id) { item in
+                PokemonGrid {
+                    ForEach(items) { item in
                         Button {
-                            opened = item
+                            viewState.route = .detail(item)
                         } label: {
                             PokemonCard(pokemon: item)
                         }
-                        .buttonStyle(CardButtonStyle())
+                        .buttonStyle(.card)
                         .matchedTransitionSource(id: item.id, in: cardNamespace)
                         .onAppear {
                             guard !isFiltering, prefetch.contains(item.id) else {
@@ -127,17 +106,16 @@ private struct HomeContent: View {
                 if actions.isRunning(.loadMore) {
                     ProgressView()
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
+                        .padding(.vertical, PokemonMetrics.contentInset)
                 }
 
                 if let notice = viewState.notice {
-                    Banner(text: notice.message, color: .red, action: HomeStrings.reload) {
+                    Banner(text: notice.message, tint: .red, actionTitle: HomeStrings.reload) {
                         actions.request(.reload)
                     }
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .pokemonContentInsets()
         }
         .refreshable {
             await actions.refresh()
@@ -156,9 +134,9 @@ private struct HomeContent: View {
                 actions.request(.reload)
             }
         }
-        .navigationDestination(item: $opened) { entry in
-            PokemonDetailView(pokemon: entry)
-                .navigationTransition(.zoom(sourceID: entry.id, in: cardNamespace))
+        .navigationDestination(item: $viewState.route) { route in
+            PokemonDetailView(pokemon: route.pokemon)
+                .navigationTransition(.zoom(sourceID: route.pokemon.id, in: cardNamespace))
         }
     }
 }

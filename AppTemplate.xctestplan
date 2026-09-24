@@ -23,6 +23,13 @@
     {
       "target" : {
         "containerPath" : "container:..\/Package",
+        "identifier" : "SharedCoreTests",
+        "name" : "SharedCoreTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/Package",
         "identifier" : "FeatureHomeTests",
         "name" : "FeatureHomeTests"
       }

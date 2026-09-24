@@ -2,7 +2,7 @@ import SharedCore
 import SwiftUI
 import UIKit
 
-extension PokemonTypeKind {
+extension PokemonType {
     var badgeColor: Color {
         switch self {
         case .normal: Color(red: 0.62, green: 0.63, blue: 0.62)
@@ -28,15 +28,15 @@ extension PokemonTypeKind {
     }
 }
 
-extension PokemonTypeKind {
+extension PokemonType {
     var onBadgeColor: Color {
         badgeColor.wcagLuminance > 0.18 ? Color(white: 0.1) : .white
     }
 }
 
-extension PokemonEntry {
+extension Pokemon {
     var accentColor: Color {
-        loadedDetail?.types.first?.badgeColor ?? .secondary
+        profile?.types.first?.badgeColor ?? .secondary
     }
 }
 

@@ -1,27 +1,28 @@
+import ScreenCore
 import SharedCore
 import SwiftUI
 
 struct PokemonFilterBar: View {
-    let types: [PokemonTypeKind]
+    let types: [PokemonType]
 
-    @Binding var selected: PokemonTypeKind?
+    @Binding var selected: PokemonType?
 
     var body: some View {
         if !types.isEmpty {
             ScrollView(.horizontal) {
                 HStack(spacing: 8) {
-                    FilterChip(
+                    Chip(
                         text: HomeStrings.filterAll,
-                        color: .secondary,
+                        tint: .secondary,
                         isOn: selected == nil
                     ) {
                         selected = nil
                     }
 
                     ForEach(types, id: \.self) { type in
-                        FilterChip(
+                        Chip(
                             text: HomeStrings.typeName(type),
-                            color: type.badgeColor,
+                            tint: type.badgeColor,
                             isOn: selected == type
                         ) {
                             selected = selected == type ? nil : type
@@ -32,24 +33,5 @@ struct PokemonFilterBar: View {
             }
             .scrollIndicators(.hidden)
         }
-    }
-}
-
-private struct FilterChip: View {
-    let text: String
-    let color: Color
-    let isOn: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(text)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(isOn ? .white : Color.primary)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 6)
-                .background(isOn ? color : Color.secondary.opacity(0.15), in: Capsule())
-        }
-        .buttonStyle(.plain)
     }
 }

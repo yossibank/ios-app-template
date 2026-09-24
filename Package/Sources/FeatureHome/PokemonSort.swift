@@ -13,7 +13,7 @@ enum PokemonSort: CaseIterable {
         }
     }
 
-    func areInIncreasingOrder(_ lhs: PokemonEntry, _ rhs: PokemonEntry) -> Bool {
+    func areInIncreasingOrder(_ lhs: Pokemon, _ rhs: Pokemon) -> Bool {
         switch self {
         case .number: lhs.id < rhs.id
         case .total: lhs.totalBaseStat > rhs.totalBaseStat

@@ -2,7 +2,7 @@ import SharedCore
 import SwiftUI
 
 struct PokemonTypeBadge: View {
-    let type: PokemonTypeKind
+    let type: PokemonType
 
     var body: some View {
         Text(HomeStrings.typeName(type))

@@ -2,18 +2,14 @@ import SharedCore
 import SwiftUI
 
 struct PokemonArtwork: View {
-    let detail: PokemonEntryDetailLoaded?
+    let artwork: URL?
     let fallback: String
     let accent: Color
 
-    private var large: URL? {
-        (detail?.artworkUrl ?? detail?.spriteUrl).flatMap(URL.init(string:))
-    }
-
     var body: some View {
-        if let large {
+        if let artwork {
             AsyncImage(
-                url: large,
+                url: artwork,
                 transaction: Transaction(animation: .easeOut(duration: 0.2))
             ) { phase in
                 if let image = phase.image {

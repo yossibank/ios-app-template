@@ -84,7 +84,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "#%03d"
+            "value": "#%03lld"
           }
         }
       }

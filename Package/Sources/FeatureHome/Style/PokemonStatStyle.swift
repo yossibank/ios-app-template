@@ -1,7 +1,7 @@
 import SharedCore
 import SwiftUI
 
-extension PokemonStatKind {
+extension PokemonStat {
     var barColor: Color {
         switch self {
         case .hp: Color(red: 0.42, green: 0.75, blue: 0.35)

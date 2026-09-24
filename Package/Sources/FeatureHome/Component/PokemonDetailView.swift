@@ -2,10 +2,10 @@ import SharedCore
 import SwiftUI
 
 struct PokemonDetailView: View {
-    let pokemon: PokemonEntry
+    let pokemon: Pokemon
 
-    private var detail: PokemonEntryDetailLoaded? {
-        pokemon.loadedDetail
+    private var profile: PokemonProfile? {
+        pokemon.profile
     }
 
     private var accent: Color {
@@ -36,21 +36,23 @@ struct PokemonDetailView: View {
 
     private var hero: some View {
         VStack(spacing: 10) {
-            Text(HomeStrings.number(Int(pokemon.id)))
+            Text(HomeStrings.number(pokemon.id))
                 .font(.headline)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
 
-            PokemonArtwork(detail: detail, fallback: pokemon.name, accent: accent)
+            PokemonArtwork(artwork: profile?.artwork, fallback: pokemon.name, accent: accent)
                 .aspectRatio(1, contentMode: .fit)
                 .frame(maxWidth: 280)
+                .accessibilityHidden(true)
 
-            if let detail, !detail.types.isEmpty {
+            if let profile, !profile.types.isEmpty {
                 HStack(spacing: 8) {
-                    ForEach(detail.types, id: \.self) { type in
+                    ForEach(profile.types, id: \.self) { type in
                         PokemonTypeBadge(type: type)
                     }
                 }
+                .accessibilityElement(children: .combine)
             }
         }
         .frame(maxWidth: .infinity)
@@ -60,7 +62,7 @@ struct PokemonDetailView: View {
 
     @ViewBuilder
     private var stats: some View {
-        if let detail, !detail.baseStats.isEmpty {
+        if let profile, !profile.baseStats.isEmpty {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
                     Text(HomeStrings.totalCaption)
@@ -68,17 +70,17 @@ struct PokemonDetailView: View {
 
                     Spacer()
 
-                    Text(HomeStrings.total(Int(detail.totalBaseStat)))
+                    Text(HomeStrings.total(profile.totalBaseStat))
                         .font(.title2.weight(.bold))
                         .monospacedDigit()
                 }
 
-                ForEach(Array(detail.baseStats.enumerated()), id: \.offset) { _, stat in
+                ForEach(Array(profile.baseStats.enumerated()), id: \.offset) { _, stat in
                     PokemonStatRow(stat: stat)
                 }
             }
             .padding(20)
-            .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 20))
+            .background(Color(.secondarySystemGroupedBackground), in: PokemonMetrics.cardShape)
             .padding(20)
         } else {
             Text(HomeStrings.detailMissing)
@@ -90,6 +92,9 @@ struct PokemonDetailView: View {
 }
 
 private struct PokemonStatRow: View {
+    @ScaledMetric(relativeTo: .caption) private var nameWidth = 60
+    @ScaledMetric(relativeTo: .subheadline) private var valueWidth = 36
+
     let stat: PokemonBaseStat
 
     private var fraction: Double {
@@ -101,12 +106,12 @@ private struct PokemonStatRow: View {
             Text(HomeStrings.statName(stat.kind))
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .frame(width: 60, alignment: .leading)
+                .frame(width: nameWidth, alignment: .leading)
 
-            Text("\(Int(stat.value))")
+            Text("\(stat.value)")
                 .font(.subheadline.weight(.semibold))
                 .monospacedDigit()
-                .frame(width: 36, alignment: .trailing)
+                .frame(width: valueWidth, alignment: .trailing)
 
             GeometryReader { geometry in
                 ZStack(alignment: .leading) {
@@ -119,7 +124,9 @@ private struct PokemonStatRow: View {
                 }
             }
             .frame(height: 8)
+            .accessibilityHidden(true)
         }
         .padding(.vertical, 3)
+        .accessibilityElement(children: .combine)
     }
 }

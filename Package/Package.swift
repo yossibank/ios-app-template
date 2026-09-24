@@ -64,6 +64,10 @@ let package = Package(
             dependencies: ["ScreenCore"]
         ),
         .testTarget(
+            name: "SharedCoreTests",
+            dependencies: ["SharedCore"]
+        ),
+        .testTarget(
             name: "FeatureHomeTests",
             dependencies: ["FeatureHome"]
         )

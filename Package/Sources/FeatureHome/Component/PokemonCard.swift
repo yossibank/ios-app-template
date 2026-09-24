@@ -2,10 +2,10 @@ import SharedCore
 import SwiftUI
 
 struct PokemonCard: View {
-    let pokemon: PokemonEntry
+    let pokemon: Pokemon
 
-    private var detail: PokemonEntryDetailLoaded? {
-        pokemon.loadedDetail
+    private var profile: PokemonProfile? {
+        pokemon.profile
     }
 
     private var accent: Color {
@@ -14,12 +14,12 @@ struct PokemonCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(HomeStrings.number(Int(pokemon.id)))
+            Text(HomeStrings.number(pokemon.id))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
 
-            PokemonArtwork(detail: detail, fallback: pokemon.name, accent: accent)
+            PokemonArtwork(artwork: profile?.artwork, fallback: pokemon.name, accent: accent)
                 .aspectRatio(1, contentMode: .fit)
                 .frame(maxWidth: .infinity)
 
@@ -27,33 +27,34 @@ struct PokemonCard: View {
                 .font(.headline)
                 .lineLimit(2)
 
-            if let detail, !detail.types.isEmpty {
+            if let profile, !profile.types.isEmpty {
                 HStack(spacing: 4) {
-                    ForEach(detail.types, id: \.self) { type in
+                    ForEach(profile.types, id: \.self) { type in
                         PokemonTypeBadge(type: type)
                     }
                 }
                 .padding(.top, 6)
             }
 
-            if let detail, !detail.baseStats.isEmpty {
-                PokemonStatBar(total: Int(detail.totalBaseStat), accent: accent)
+            if let profile, !profile.baseStats.isEmpty {
+                PokemonStatBar(total: profile.totalBaseStat, accent: accent)
                     .padding(.top, 10)
             }
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, PokemonMetrics.contentInset)
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(alignment: .topTrailing) {
-            Text(HomeStrings.numberPlain(Int(pokemon.id)))
+            Text(HomeStrings.numberPlain(pokemon.id))
                 .font(.system(size: 64, weight: .black, design: .rounded))
                 .foregroundStyle(accent.opacity(0.10))
                 .monospacedDigit()
                 .lineLimit(1)
                 .padding(.horizontal, 6)
+                .accessibilityHidden(true)
         }
         .background {
-            RoundedRectangle(cornerRadius: 20)
+            PokemonMetrics.cardShape
                 .fill(
                     LinearGradient(
                         colors: [accent.opacity(0.28), accent.opacity(0.06), .clear],
@@ -61,8 +62,25 @@ struct PokemonCard: View {
                         endPoint: .bottom
                     )
                 )
-                .background(.quaternary.opacity(0.4), in: RoundedRectangle(cornerRadius: 20))
+                .background(.quaternary.opacity(0.4), in: PokemonMetrics.cardShape)
         }
-        .contentShape(RoundedRectangle(cornerRadius: 20))
+        .contentShape(PokemonMetrics.cardShape)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var accessibilityLabel: String {
+        var parts = [HomeStrings.number(pokemon.id), pokemon.name.capitalized]
+
+        if let profile {
+            parts += profile.types.map(HomeStrings.typeName)
+
+            if !profile.baseStats.isEmpty {
+                parts.append(HomeStrings.totalCaption)
+                parts.append(HomeStrings.total(profile.totalBaseStat))
+            }
+        }
+
+        return parts.joined(separator: "、")
     }
 }
