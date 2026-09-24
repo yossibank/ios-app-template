@@ -12,7 +12,10 @@ SwiftUI と Kotlin Multiplatform で作る、ポケモン図鑑アプリのテ�
 ![Swift Testing](https://img.shields.io/badge/Swift_Testing-555555?logo=swift&logoColor=white)
 ![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin_Multiplatform-7F52FF?logo=kotlin&logoColor=white)
 
-<img src="docs/images/demo.gif" width="260" alt="起動して一覧を読み込むまで">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/demo-dark.gif">
+  <img src="docs/images/demo.gif" width="260" alt="起動して一覧を読み込むまで">
+</picture>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/list-dark.png">
   <img src="docs/images/list-light.png" width="260" alt="ポケモンの一覧">
