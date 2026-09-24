@@ -1,8 +1,43 @@
+import Observation
 @testable import ScreenCore
 import Testing
 
 @MainActor
 struct FetchStateTests {
+    @Test("取得が走っただけでは .task のきっかけを作り直さない")
+    func runningDoesNotRenewTheRequestID() async {
+        let state = FetchState<[Int]>()
+        let renewed = Flag()
+
+        withObservationTracking {
+            _ = state.id(of: .reload)
+        } onChange: {
+            renewed.raise()
+        }
+
+        await state.runReload { [1] }
+
+        #expect(renewed.isRaised == false, "取得しただけで .task が作り直されている")
+    }
+
+    @Test("再取得を頼んだときは .task のきっかけを作り直す")
+    func requestingRenewsTheRequestID() async {
+        let state = FetchState<[Int]>()
+        await state.runReload { [1] }
+
+        let renewed = Flag()
+
+        withObservationTracking {
+            _ = state.id(of: .reload)
+        } onChange: {
+            renewed.raise()
+        }
+
+        state.request(.reload)
+
+        #expect(renewed.isRaised, "再取得を頼んだのに .task が作り直されない")
+    }
+
     @Test("取得に成功したら一覧になる")
     func loads() async {
         let state = FetchState<[Int]>()
@@ -251,6 +286,29 @@ struct FetchStateTests {
         #expect(asked == false)
         #expect(state.phase.loaded == nil)
     }
+
+    @Test("詳細の取り直しが重なっても、読み込めた続きは消えない")
+    func loadMoreSurvivesAConcurrentRepair() async {
+        let state = FetchState<[Int]>()
+        await state.runReload { [1] }
+
+        let more = Gate()
+        let repair = Gate()
+
+        let loadingMore = Task { await state.runMore { await more.wait(); return .more([1, 2]) } }
+        await more.waitUntilEntered()
+
+        let repairing = Task { await state.runRepair { await repair.wait(); return nil } }
+        await repair.waitUntilEntered()
+
+        more.open()
+        await loadingMore.value
+
+        repair.open()
+        await repairing.value
+
+        #expect(state.phase.loaded == [1, 2], "重なった取り直しに続きが押し流されている")
+    }
 }
 
 @MainActor
@@ -292,5 +350,13 @@ private extension FetchPhase {
         }
 
         return failure
+    }
+}
+
+private final class Flag: @unchecked Sendable {
+    private(set) var isRaised = false
+
+    func raise() {
+        isRaised = true
     }
 }

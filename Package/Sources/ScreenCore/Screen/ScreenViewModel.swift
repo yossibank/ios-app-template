@@ -6,7 +6,7 @@ public protocol ScreenViewModel: ViewModel {
 
     func fetch() async throws(FetchFailure) -> Value
     func fetchMore() async throws(FetchFailure) -> FetchMore<Value>?
-    func fetchRefilled() async throws(FetchFailure) -> Value?
+    func fetchRepaired() async throws(FetchFailure) -> Value?
 }
 
 public extension ScreenViewModel {
@@ -14,7 +14,7 @@ public extension ScreenViewModel {
         nil
     }
 
-    func fetchRefilled() async throws(FetchFailure) -> Value? {
+    func fetchRepaired() async throws(FetchFailure) -> Value? {
         nil
     }
 }
@@ -36,9 +36,9 @@ extension ScreenViewModel {
                 try await fetchMore()
             }
 
-        case .refill:
-            await fetchState.runRefill { () async throws(FetchFailure) -> Value? in
-                try await fetchRefilled()
+        case .repair:
+            await fetchState.runRepair { () async throws(FetchFailure) -> Value? in
+                try await fetchRepaired()
             }
         }
     }

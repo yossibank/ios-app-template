@@ -129,7 +129,7 @@ struct HomeViewModelTests {
     }
 
     @Test("詳細だけを取り直すとページを読み直さずに埋まる")
-    func refillFillsTheMissingRows() async throws {
+    func repairFillsTheMissingRows() async throws {
         let stub = StubPaging(
             [loaded(["a", "b"], hasDetail: false)],
             repaired: loaded(["a", "b"])
@@ -140,16 +140,16 @@ struct HomeViewModelTests {
 
         #expect(model.viewState.incompleteCount == 2)
 
-        let refilled = try await model.fetchRefilled()
+        let repaired = try await model.fetchRepaired()
 
-        #expect(refilled?.map(\.name) == ["a", "b"])
+        #expect(repaired?.map(\.name) == ["a", "b"])
         #expect(model.viewState.incompleteCount == 0, "取り直しても欠けたままになっている")
         #expect(stub.repairCalls == 1)
         #expect(stub.calls == 1, "詳細の取り直しでページを読み直している")
     }
 
     @Test("取り直しても埋まらなければ理由を知らせる")
-    func refillReportsWhyNothingChanged() async throws {
+    func repairReportsWhyNothingChanged() async throws {
         let stub = StubPaging(
             [loaded(["a"], hasDetail: false)],
             repaired: degraded(PokemonFailureOffline.shared, ["a"])
@@ -157,7 +157,7 @@ struct HomeViewModelTests {
         let model = HomeViewModel(dependency: .init(paging: stub))
 
         _ = try await model.fetch()
-        _ = try await model.fetchRefilled()
+        _ = try await model.fetchRepaired()
 
         #expect(model.viewState.notice != nil, "取り直しの失敗が握り潰されている")
     }

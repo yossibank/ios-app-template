@@ -99,9 +99,9 @@ private struct HomeContent: View {
                     Banner(
                         text: HomeStrings.incomplete(viewState.incompleteCount),
                         action: HomeStrings.retryDetails,
-                        busy: actions.isRunning(.refill)
+                        busy: actions.isRunning(.repair)
                     ) {
-                        actions.request(.refill)
+                        actions.request(.repair)
                     }
                 }
 

@@ -131,8 +131,8 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View, EmptyContent: V
         .task(id: model.fetchState.id(of: .loadMore)) {
             await model.run(.loadMore)
         }
-        .task(id: model.fetchState.id(of: .refill)) {
-            await model.run(.refill)
+        .task(id: model.fetchState.id(of: .repair)) {
+            await model.run(.repair)
         }
     }
 }

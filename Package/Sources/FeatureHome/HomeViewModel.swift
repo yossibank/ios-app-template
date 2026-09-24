@@ -52,7 +52,7 @@ extension HomeViewModel {
         }
     }
 
-    func fetchRefilled() async throws(FetchFailure) -> [PokemonEntry]? {
+    func fetchRepaired() async throws(FetchFailure) -> [PokemonEntry]? {
         switch try await outcome(of: { try await dependency.paging.retryMissingDetails() }) {
         case let .ready(pokemon, _):
             return pokemon

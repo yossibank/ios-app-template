@@ -6,21 +6,23 @@ import Observation
 public final class FetchState<Value> {
     public private(set) var phase: FetchPhase<Value> = .idle
 
-    private var requests: [FetchOperation: FetchRequest]
+    private var ids: [FetchOperation: UUID]
     private var running: Set<FetchOperation> = []
 
-    @ObservationIgnored private var activeRequest: UUID?
+    @ObservationIgnored private var served: [FetchOperation: UUID] = [:]
+    @ObservationIgnored private var activeRequests: [FetchOperation: UUID] = [:]
+    @ObservationIgnored private var generation = 0
     @ObservationIgnored private var reachedEnd = false
     @ObservationIgnored private let unstarted = UUID()
 
     public init() {
-        self.requests = Dictionary(
-            uniqueKeysWithValues: FetchOperation.allCases.map { ($0, FetchRequest()) }
+        self.ids = Dictionary(
+            uniqueKeysWithValues: FetchOperation.allCases.map { ($0, UUID()) }
         )
     }
 
     func id(of operation: FetchOperation) -> UUID {
-        requests[operation]?.id ?? unstarted
+        ids[operation] ?? unstarted
     }
 
     func isRunning(_ operation: FetchOperation) -> Bool {
@@ -33,10 +35,10 @@ public final class FetchState<Value> {
         }
 
         if operation == .reload {
-            activeRequest = nil
+            generation += 1
         }
 
-        requests[operation]?.renew()
+        ids[operation] = UUID()
     }
 
     func runReload(_ work: @MainActor () async throws(FetchFailure) -> Value) async {
@@ -63,7 +65,7 @@ public final class FetchState<Value> {
         }
 
         guard
-            case let .loaded(current) = phase,
+            case .loaded = phase,
             !Task.isCancelled
         else {
             release(.loadMore)
@@ -81,30 +83,29 @@ public final class FetchState<Value> {
 
             case nil:
                 reachedEnd = true
-                phase = .loaded(current)
             }
-        } failed: { _ in
-            phase = .loaded(current)
         }
     }
 
-    func runRefill(_ work: @MainActor () async throws(FetchFailure) -> Value?) async {
-        guard claim(.refill) else {
+    func runRepair(_ work: @MainActor () async throws(FetchFailure) -> Value?) async {
+        guard claim(.repair) else {
             return
         }
 
         guard
-            case let .loaded(current) = phase,
+            case .loaded = phase,
             !Task.isCancelled
         else {
-            release(.refill)
+            release(.repair)
             return
         }
 
-        await settle(.refill, work) { value in
-            phase = .loaded(value ?? current)
-        } failed: { _ in
-            phase = .loaded(current)
+        await settle(.repair, work) { value in
+            guard let value else {
+                return
+            }
+
+            phase = .loaded(value)
         }
     }
 
@@ -119,6 +120,7 @@ public final class FetchState<Value> {
             return
         }
 
+        generation += 1
         reachedEnd = false
 
         await settle(.reload, work) { value in
@@ -140,32 +142,42 @@ public final class FetchState<Value> {
 
             return !reachedEnd && !isRunning(.loadMore)
 
-        case .refill:
+        case .repair:
             guard case .loaded = phase else {
                 return false
             }
 
-            return !isRunning(.refill)
+            return !isRunning(.repair)
         }
     }
 
     private func claim(_ operation: FetchOperation) -> Bool {
-        requests[operation]?.claim() ?? false
+        guard
+            let id = ids[operation],
+            served[operation] != id
+        else {
+            return false
+        }
+
+        served[operation] = id
+
+        return true
     }
 
     private func release(_ operation: FetchOperation) {
-        requests[operation]?.release()
+        served[operation] = nil
     }
 
     private func settle<Result>(
         _ operation: FetchOperation,
         _ work: @MainActor () async throws(FetchFailure) -> Result,
         succeeded: @MainActor (Result) -> Void,
-        failed: @MainActor (FetchFailure) -> Void
+        failed: @MainActor (FetchFailure) -> Void = { _ in }
     ) async {
         let request = UUID()
+        let startedAt = generation
 
-        activeRequest = request
+        activeRequests[operation] = request
         running.insert(operation)
 
         defer {
@@ -175,25 +187,25 @@ public final class FetchState<Value> {
         do {
             let value = try await work()
 
-            guard
-                !Task.isCancelled,
-                activeRequest == request
-            else {
+            guard stillCurrent(operation, request, startedAt) else {
                 release(operation)
                 return
             }
 
             succeeded(value)
         } catch {
-            guard
-                !Task.isCancelled,
-                activeRequest == request
-            else {
+            guard stillCurrent(operation, request, startedAt) else {
                 release(operation)
                 return
             }
 
             failed(error)
         }
+    }
+
+    private func stillCurrent(_ operation: FetchOperation, _ request: UUID, _ startedAt: Int) -> Bool {
+        !Task.isCancelled
+            && generation == startedAt
+            && activeRequests[operation] == request
     }
 }
