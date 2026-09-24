@@ -48,7 +48,9 @@ flowchart LR
 
 ```
 AppTemplate.xcworkspace     # 入口
-AppTemplate.xctestplan      # テスト対象。増やしたらここに足す
+AppTemplate.xctestplan      # テスト対象。Package.swift と突き合わせて検査される
+Scripts/
+└── check-testplan.sh      # テスト対象のずれを検出する（make verify に含まれる）
 App/
 ├── AppTemplate.xcodeproj
 └── AppTemplate/           # @main と Assets
@@ -73,12 +75,15 @@ Package/
 | --- | --- |
 | `make open` | Xcode で `AppTemplate.xcworkspace` を開く |
 | `make bootstrap` | `Mintfile` の版で SwiftFormat / SwiftLint を用意する |
-| `make verify` | lint + ユニットテスト + ビルド（変更後はこれを通す） |
+| `make verify` | lint + テスト対象の突き合わせ + ユニットテスト + ビルド（変更後はこれを通す） |
 | `make verify SIMULATOR='iPhone 17'` | シミュレータを指定して実行 |
 | `make build` | ビルドのみ |
 | `make test` | ユニットテストのみ（`AppTemplate.xctestplan` の全ターゲット） |
-| `make lint` | SwiftFormat / SwiftLint によるチェック（`make verify` に含まれる） |
+| `make lint` | SwiftFormat / SwiftLint によるチェック（`--strict`。`make verify` に含まれる） |
+| `make testplan` | `Package.swift` と `AppTemplate.xctestplan` のずれを検出する |
 | `make format` | SwiftFormat / SwiftLint で自動修正 |
+
+警告はエラーとして扱う。`make verify` と CI は同じ設定なので、手元で通れば CI でも通る。
 
 ## 環境
 

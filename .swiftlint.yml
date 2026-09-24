@@ -1,5 +1,6 @@
 included:
   - Package/Sources
+  - Package/Tests
   - App/AppTemplate
 
 disabled_rules:
@@ -43,6 +44,7 @@ custom_rules:
       - string
     excluded:
       - ".*/Package/Sources/SharedCore/.*"
+      - ".*/Package/Tests/SharedCoreTests/.*"
 
   global_function:
     name: "グローバル関数"
