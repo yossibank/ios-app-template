@@ -92,7 +92,7 @@ enum HomeStrings {
     }
 
     static var sortTitle: String {
-        String(localized: "home.sort.number", bundle: .module)
+        String(localized: "home.sort.title", bundle: .module)
     }
 
     static var sortNumber: String {
@@ -121,10 +121,6 @@ enum HomeStrings {
 
     static var detailMissing: String {
         String(localized: "home.detail_missing", bundle: .module)
-    }
-
-    static var close: String {
-        String(localized: "home.close", bundle: .module)
     }
 
     static func statName(_ kind: PokemonStatKind) -> String {

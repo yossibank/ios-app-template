@@ -1,5 +1,3 @@
-import ScreenCore
-import SharedCore
 import SwiftUI
 
 struct PokemonStatBar: View {

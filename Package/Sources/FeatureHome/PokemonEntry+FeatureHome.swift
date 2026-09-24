@@ -1,6 +1,4 @@
-import ScreenCore
 import SharedCore
-import SwiftUI
 
 extension PokemonEntry {
     func matches(_ type: PokemonTypeKind?) -> Bool {

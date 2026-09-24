@@ -1,6 +1,4 @@
-import ScreenCore
 import SharedCore
-import SwiftUI
 
 enum PokemonSort: CaseIterable {
     case number

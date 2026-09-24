@@ -1,17 +1,6 @@
 {
   "sourceLanguage": "ja",
   "strings": {
-    "home.close": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "閉じる"
-          }
-        }
-      }
-    },
     "home.detail_missing": {
       "extractionState": "manual",
       "localizations": {
@@ -206,6 +195,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "図鑑番号"
+          }
+        }
+      }
+    },
+    "home.sort.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "並び替え"
           }
         }
       }
