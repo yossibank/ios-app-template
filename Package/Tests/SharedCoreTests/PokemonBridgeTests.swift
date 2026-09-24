@@ -11,8 +11,7 @@ struct PokemonBridgeTests {
                 id: 25,
                 name: "pikachu",
                 detail: PokemonEntryDetailLoaded(
-                    spriteUrl: "https://img.example/25.png",
-                    artworkUrl: "https://img.example/artwork/25.png",
+                    imageUrl: "https://img.example/artwork/25.png",
                     types: [.electric],
                     baseStats: [Shared.PokemonBaseStat(kind: .speed, value: 90)]
                 )
@@ -38,21 +37,16 @@ struct PokemonBridgeTests {
         #expect(pokemon.profile == nil)
     }
 
-    @Test("原画があればそれを使う")
-    func artworkIsPreferredOverTheSprite() {
-        #expect(profile(sprite: "https://img.example/1.png", artwork: "https://img.example/art/1.png")?.artwork
-            == URL(string: "https://img.example/art/1.png"))
+    @Test("共通コアが選んだ画像が URL になる")
+    func theImageBecomesAURL() {
+        let image = "https://img.example/art/1.png"
+
+        #expect(profile(image: image)?.artwork == URL(string: image))
     }
 
-    @Test("原画が無ければスプライトに落とす")
-    func theSpriteIsUsedWhenThereIsNoArtwork() {
-        #expect(profile(sprite: "https://img.example/1.png", artwork: nil)?.artwork
-            == URL(string: "https://img.example/1.png"))
-    }
-
-    @Test("画像がどちらも無ければ URL は無い")
+    @Test("画像が無ければ URL は無い")
     func noImageMeansNoURL() {
-        #expect(profile(sprite: nil, artwork: nil)?.artwork == nil)
+        #expect(profile(image: nil)?.artwork == nil)
     }
 
     @Test("合計は各能力の和になる")
@@ -62,7 +56,7 @@ struct PokemonBridgeTests {
             Shared.PokemonBaseStat(kind: .attack, value: 49)
         ]
 
-        #expect(profile(sprite: nil, artwork: nil, baseStats: stats)?.totalBaseStat == 94)
+        #expect(profile(image: nil, baseStats: stats)?.totalBaseStat == 94)
     }
 
     @Test("失敗の種類が共通コアから引き継がれる")
@@ -91,7 +85,8 @@ struct PokemonBridgeTests {
             PokemonListResultLoaded(
                 pokemon: [entry(id: 1, name: "bulbasaur")],
                 hasMore: true,
-                total: 1351
+                total: 1351,
+                failure: nil
             )
         )
 
@@ -108,7 +103,7 @@ struct PokemonBridgeTests {
     @Test("一部だけ失敗したページは理由を連れてくる")
     func degradedResultsCarryTheirFailure() {
         let page = PokemonListPage(
-            PokemonListResultDegraded(
+            PokemonListResultLoaded(
                 pokemon: [entry(id: 1, name: "bulbasaur")],
                 hasMore: true,
                 total: 1351,
@@ -166,8 +161,7 @@ struct PokemonBridgeTests {
             id: id,
             name: name,
             detail: PokemonEntryDetailLoaded(
-                spriteUrl: nil,
-                artworkUrl: nil,
+                imageUrl: nil,
                 types: [.grass],
                 baseStats: []
             )
@@ -175,8 +169,7 @@ struct PokemonBridgeTests {
     }
 
     private func profile(
-        sprite: String?,
-        artwork: String?,
+        image: String?,
         baseStats: [Shared.PokemonBaseStat] = []
     ) -> PokemonProfile? {
         Pokemon(
@@ -184,8 +177,7 @@ struct PokemonBridgeTests {
                 id: 1,
                 name: "bulbasaur",
                 detail: PokemonEntryDetailLoaded(
-                    spriteUrl: sprite,
-                    artworkUrl: artwork,
+                    imageUrl: image,
                     types: [],
                     baseStats: baseStats
                 )
