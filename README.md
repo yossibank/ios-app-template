@@ -1,13 +1,26 @@
+<div align="center">
+
 # ios-app-template
 
-SwiftUI で作った iOS アプリのテンプレートです。題材は PokeAPI のポケモン一覧で、無限スクロール・絞り込み・並び替え・詳細画面を備えています。
+SwiftUI と Kotlin Multiplatform で作る、ポケモン図鑑アプリのテンプレート
 
-データの取得とページングは Kotlin Multiplatform の共通コアが担い、このリポジトリは iOS 固有の画面と状態管理だけを持ちます。
+[![Verify](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml/badge.svg)](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml)
+[![License](https://img.shields.io/github/license/yossibank/ios-app-template)](LICENSE)
 
-<p>
-  <img src="docs/images/list-light.png" width="280" alt="一覧（ライト）">
-  <img src="docs/images/list-dark.png" width="280" alt="一覧（ダーク）">
-</p>
+![Swift](https://img.shields.io/badge/Swift-F05138?logo=swift&logoColor=white)
+![SwiftUI](https://img.shields.io/badge/SwiftUI-0D96F6?logo=swift&logoColor=white)
+![Swift Testing](https://img.shields.io/badge/Swift_Testing-555555?logo=swift&logoColor=white)
+![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin_Multiplatform-7F52FF?logo=kotlin&logoColor=white)
+
+<img src="docs/images/demo.gif" width="260" alt="起動して一覧を読み込むまで">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/list-dark.png">
+  <img src="docs/images/list-light.png" width="260" alt="ポケモンの一覧">
+</picture>
+
+</div>
+
+PokeAPI のポケモンを、無限スクロール・タイプでの絞り込み・並び替え・詳細画面で見られます。データの取得とページングは共通コア（Kotlin Multiplatform）が担い、このリポジトリは iOS の画面と状態管理だけを持ちます。
 
 ## 3 つのリポジトリ
 
@@ -20,12 +33,9 @@ flowchart LR
     KMP -->|"Shared.xcframework"| IOS
 ```
 
-- [kmp-app-template](https://github.com/yossibank/kmp-app-template) — 通信・ページング・エラーの分類
-- [android-app-template](https://github.com/yossibank/android-app-template) — 同じ画面の Android 版
+[kmp-app-template](https://github.com/yossibank/kmp-app-template) ・ [android-app-template](https://github.com/yossibank/android-app-template)
 
 ## モジュール構成
-
-画面とロジックはローカルの Swift Package に分け、依存は一方向にしています。
 
 ```mermaid
 flowchart LR
@@ -46,20 +56,16 @@ flowchart LR
 | `FeatureHome` | 一覧と詳細の画面 |
 | `AppRoot` | 画面の組み立て |
 
-## 技術スタック
-
-| | |
-| --- | --- |
-| UI / 状態管理 | SwiftUI / Observation |
-| 並行性 | Swift Concurrency（言語モード 6） |
-| テスト | Swift Testing |
-| 依存管理 | Swift Package Manager（共通コアは GitHub Releases の XCFramework） |
-| 書式・静的解析 | SwiftFormat / SwiftLint（Mint で版を固定） |
-
 ## 動かし方
 
-1. `~/.netrc` に `api.github.com` の資格情報を置く（共通コアの取得に必要）
-2. `make bootstrap` で SwiftFormat / SwiftLint を用意する
-3. `make open` で `AppTemplate.xcworkspace` を開く
+> [!NOTE]
+> 共通コアを GitHub から取得するため、`~/.netrc` に `api.github.com` の資格情報が必要です。
 
-変更したら `make verify` を通します。
+<details>
+<summary>手順</summary>
+
+1. `make bootstrap` で SwiftFormat / SwiftLint を用意する
+2. `make open` で `AppTemplate.xcworkspace` を開く
+3. 変更したら `make verify` を通す
+
+</details>
