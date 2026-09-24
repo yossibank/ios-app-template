@@ -7,7 +7,7 @@ struct FetchStateTests {
     func loads() async {
         let state = FetchState<[Int]>()
 
-        await state.run { [1, 2] }
+        await state.runReload { [1, 2] }
 
         #expect(state.phase.loaded == [1, 2])
     }
@@ -17,12 +17,12 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         var calls = 0
 
-        await state.run {
+        await state.runReload {
             calls += 1
             return [1]
         }
 
-        await state.run {
+        await state.runReload {
             calls += 1
             return [2]
         }
@@ -36,14 +36,14 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         var calls = 0
 
-        await state.run {
+        await state.runReload {
             calls += 1
             return [1]
         }
 
-        state.requestReload()
+        state.request(.reload)
 
-        await state.run {
+        await state.runReload {
             calls += 1
             return [2]
         }
@@ -57,8 +57,8 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         var calls = 0
 
-        await state.run { [1] }
-        state.requestLoadMore()
+        await state.runReload { [1] }
+        state.request(.loadMore)
 
         await state.runMore {
             calls += 1
@@ -79,7 +79,7 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         let gate = Gate()
 
-        await state.run { [1] }
+        await state.runReload { [1] }
 
         let running = Task { await state.runRefresh { await gate.wait(); return [2] } }
         await gate.waitUntilEntered()
@@ -106,10 +106,10 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         let gate = Gate()
 
-        let running = Task { await state.run { await gate.wait(); return [1] } }
+        let running = Task { await state.runReload { await gate.wait(); return [1] } }
         await gate.waitUntilEntered()
 
-        state.requestReload()
+        state.request(.reload)
         gate.open()
         await running.value
 
@@ -121,7 +121,7 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         let gate = Gate()
 
-        let running = Task { await state.run { await gate.wait(); return [1] } }
+        let running = Task { await state.runReload { await gate.wait(); return [1] } }
         await gate.waitUntilEntered()
 
         running.cancel()
@@ -137,7 +137,7 @@ struct FetchStateTests {
         let gate = Gate()
 
         let running = Task {
-            await state.run { () async throws(FetchFailure) -> [Int] in
+            await state.runReload { () async throws(FetchFailure) -> [Int] in
                 await gate.wait()
                 throw FetchFailure("取り消した後の失敗")
             }
@@ -155,7 +155,7 @@ struct FetchStateTests {
     func failureBecomesFailed() async {
         let state = FetchState<[Int]>()
 
-        await state.run { () async throws(FetchFailure) -> [Int] in
+        await state.runReload { () async throws(FetchFailure) -> [Int] in
             throw FetchFailure("取得に失敗しました")
         }
 
@@ -165,77 +165,77 @@ struct FetchStateTests {
     @Test("続きの取得が失敗しても、読み込めている分は消えない")
     func loadMoreFailureKeepsWhatWasLoaded() async {
         let state = FetchState<[Int]>()
-        await state.run { [1, 2] }
+        await state.runReload { [1, 2] }
 
         await state.runMore { () async throws(FetchFailure) -> FetchMore<[Int]>? in
             throw FetchFailure("取得に失敗しました")
         }
 
         #expect(state.phase.loaded == [1, 2])
-        #expect(state.phase.isLoadingMore == false)
+        #expect(state.isRunning(.loadMore) == false)
     }
 
     @Test("続きが無いと返ったら一覧はそのまま")
     func loadMoreNilKeepsList() async {
         let state = FetchState<[Int]>()
-        await state.run { [1, 2] }
+        await state.runReload { [1, 2] }
 
         await state.runMore { nil }
 
         #expect(state.phase.loaded == [1, 2])
-        #expect(state.phase.isLoadingMore == false)
+        #expect(state.isRunning(.loadMore) == false)
     }
 
     @Test("続きの取得中に再取得しても、読み込み中の表示が残らない")
     func reloadDuringLoadMoreClearsLoadingMore() async {
         let state = FetchState<[Int]>()
-        await state.run { [1] }
+        await state.runReload { [1] }
 
         let gate = Gate()
         let more = Task { await state.runMore { await gate.wait(); return .more([1, 2]) } }
         await gate.waitUntilEntered()
 
-        state.requestReload()
-        await state.run { [9] }
+        state.request(.reload)
+        await state.runReload { [9] }
 
         gate.open()
         await more.value
 
         #expect(state.phase.loaded == [9])
-        #expect(state.phase.isLoadingMore == false)
+        #expect(state.isRunning(.loadMore) == false)
 
-        let before = state.loadMoreID
-        state.requestLoadMore()
-        #expect(state.loadMoreID != before, "続きを読めなくなっている")
+        let before = state.id(of: .loadMore)
+        state.request(.loadMore)
+        #expect(state.id(of: .loadMore) != before, "続きを読めなくなっている")
     }
 
     @Test("終端を受け取ったら、もう続きを要求しない")
     func stopsAskingAfterTheLastPage() async {
         let state = FetchState<[Int]>()
-        await state.run { [1] }
+        await state.runReload { [1] }
 
         await state.runMore { .last([1, 2]) }
 
-        let before = state.loadMoreID
-        state.requestLoadMore()
+        let before = state.id(of: .loadMore)
+        state.request(.loadMore)
 
-        #expect(state.loadMoreID == before)
+        #expect(state.id(of: .loadMore) == before)
         #expect(state.phase.loaded == [1, 2])
     }
 
     @Test("再取得すると終端の記憶は消える")
     func reloadForgetsTheEnd() async {
         let state = FetchState<[Int]>()
-        await state.run { [1] }
+        await state.runReload { [1] }
         await state.runMore { .last([1, 2]) }
 
-        state.requestReload()
-        await state.run { [1] }
+        state.request(.reload)
+        await state.runReload { [1] }
 
-        let before = state.loadMoreID
-        state.requestLoadMore()
+        let before = state.id(of: .loadMore)
+        state.request(.loadMore)
 
-        #expect(state.loadMoreID != before)
+        #expect(state.id(of: .loadMore) != before)
     }
 
     @Test("読み込めていないうちは続きを取りにいかない")

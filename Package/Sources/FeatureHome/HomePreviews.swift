@@ -59,7 +59,7 @@ private enum PreviewData {
 
 #Preview("続きを読み込み中") {
     NavigationStack {
-        HomeView(source: .snapshot(.loadingMore(PreviewData.pokemon)))
+        HomeView(source: .snapshot(.loaded(PreviewData.pokemon), running: [.loadMore]))
     }
 }
 

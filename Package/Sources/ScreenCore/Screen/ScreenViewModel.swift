@@ -20,39 +20,32 @@ public extension ScreenViewModel {
 }
 
 extension ScreenViewModel {
-    func load() async {
-        await fetchState.run { () async throws(FetchFailure) -> Value in
-            try await fetch()
-        }
+    func request(_ operation: FetchOperation) {
+        fetchState.request(operation)
     }
 
-    func reload() {
-        fetchState.requestReload()
-    }
+    func run(_ operation: FetchOperation) async {
+        switch operation {
+        case .reload:
+            await fetchState.runReload { () async throws(FetchFailure) -> Value in
+                try await fetch()
+            }
 
-    func requestLoadMore() {
-        fetchState.requestLoadMore()
-    }
+        case .loadMore:
+            await fetchState.runMore { () async throws(FetchFailure) -> FetchMore<Value>? in
+                try await fetchMore()
+            }
 
-    func loadMore() async {
-        await fetchState.runMore { () async throws(FetchFailure) -> FetchMore<Value>? in
-            try await fetchMore()
+        case .refill:
+            await fetchState.runRefill { () async throws(FetchFailure) -> Value? in
+                try await fetchRefilled()
+            }
         }
     }
 
     func refresh() async {
         await fetchState.runRefresh { () async throws(FetchFailure) -> Value in
             try await fetch()
-        }
-    }
-
-    func requestRefill() {
-        fetchState.requestRefill()
-    }
-
-    func refill() async {
-        await fetchState.runRefill { () async throws(FetchFailure) -> Value? in
-            try await fetchRefilled()
         }
     }
 }

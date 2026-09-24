@@ -19,7 +19,7 @@ public struct HomeView: View {
                 Text(HomeStrings.emptyDescription)
             } actions: {
                 Button(HomeStrings.reload) {
-                    actions.reload()
+                    actions.request(.reload)
                 }
             }
         }
@@ -99,9 +99,9 @@ private struct HomeContent: View {
                     Banner(
                         text: HomeStrings.incomplete(viewState.incompleteCount),
                         action: HomeStrings.retryDetails,
-                        busy: actions.isRefilling
+                        busy: actions.isRunning(.refill)
                     ) {
-                        actions.refill()
+                        actions.request(.refill)
                     }
                 }
 
@@ -119,12 +119,12 @@ private struct HomeContent: View {
                                 return
                             }
 
-                            actions.loadMore()
+                            actions.request(.loadMore)
                         }
                     }
                 }
 
-                if actions.isLoadingMore {
+                if actions.isRunning(.loadMore) {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -132,7 +132,7 @@ private struct HomeContent: View {
 
                 if let notice = viewState.notice {
                     Banner(text: notice.message, color: .red, action: HomeStrings.reload) {
-                        actions.reload()
+                        actions.request(.reload)
                     }
                 }
             }
@@ -153,7 +153,7 @@ private struct HomeContent: View {
         )
         .toolbar {
             Button(HomeStrings.reload, systemImage: "arrow.clockwise") {
-                actions.reload()
+                actions.request(.reload)
             }
         }
         .navigationDestination(item: $opened) { entry in
