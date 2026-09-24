@@ -35,7 +35,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/yossibank/kmp-app-template.git",
-            exact: "0.18.1"
+            exact: "0.19.0"
         )
     ],
     targets: [

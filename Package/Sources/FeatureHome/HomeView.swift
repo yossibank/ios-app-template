@@ -94,7 +94,7 @@ private struct HomeContent: View {
                         .buttonStyle(.card)
                         .matchedTransitionSource(id: item.id, in: cardNamespace)
                         .onAppear {
-                            guard !isFiltering, prefetch.contains(item.id) else {
+                            guard !isFiltering, viewState.notice == nil, prefetch.contains(item.id) else {
                                 return
                             }
 
@@ -110,8 +110,8 @@ private struct HomeContent: View {
                 }
 
                 if let notice = viewState.notice {
-                    Banner(text: notice.message, tint: .red, actionTitle: HomeStrings.reload) {
-                        actions.request(.reload)
+                    Banner(text: notice.failure.message, tint: .red, actionTitle: HomeStrings.reload) {
+                        actions.request(notice.failure.canRetry ? notice.retry : .reload)
                     }
                 }
             }

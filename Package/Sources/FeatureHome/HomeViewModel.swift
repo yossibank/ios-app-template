@@ -24,7 +24,9 @@ final class HomeViewModel: ScreenViewModel {
 
 extension HomeViewModel {
     func fetch() async throws(FetchFailure) -> [Pokemon] {
-        switch await outcome(of: dependency.listing.reload()) {
+        viewState.notice = nil
+
+        switch await outcome(of: dependency.listing.reload(), retry: .loadMore) {
         case let .ready(pokemon, _):
             return pokemon
 
@@ -37,28 +39,32 @@ extension HomeViewModel {
     }
 
     func fetchMore() async throws(FetchFailure) -> FetchMore<[Pokemon]>? {
-        await ready(from: dependency.listing.loadNext()).map { page in
+        viewState.notice = nil
+
+        return await ready(from: dependency.listing.loadNext(), retry: .loadMore).map { page in
             page.hasMore ? .more(page.pokemon) : .last(page.pokemon)
         }
     }
 
     func fetchRepaired() async throws(FetchFailure) -> [Pokemon]? {
-        await ready(from: dependency.listing.retryMissingDetails())?.pokemon
+        viewState.notice = nil
+
+        return await ready(from: dependency.listing.retryMissingDetails(), retry: .repair)?.pokemon
     }
 
     nonisolated func close() {
         dependency.listing.close()
     }
 
-    private func outcome(of page: PokemonListPage) -> Outcome {
+    private func outcome(of page: PokemonListPage, retry: FetchOperation) -> Outcome {
         switch page {
         case let .loaded(snapshot):
             record(snapshot, notice: nil)
             return .ready(pokemon: snapshot.pokemon, hasMore: snapshot.hasMore)
 
         case let .degraded(snapshot, failure):
-            record(snapshot, notice: failure.asFetchFailure)
-            return .ready(pokemon: snapshot.pokemon, hasMore: false)
+            record(snapshot, notice: Notice(failure: failure.asFetchFailure, retry: retry))
+            return .ready(pokemon: snapshot.pokemon, hasMore: snapshot.hasMore)
 
         case let .failed(failure):
             return .failed(failure.asFetchFailure)
@@ -68,13 +74,16 @@ extension HomeViewModel {
         }
     }
 
-    private func ready(from page: PokemonListPage) -> (pokemon: [Pokemon], hasMore: Bool)? {
-        switch outcome(of: page) {
+    private func ready(
+        from page: PokemonListPage,
+        retry: FetchOperation
+    ) -> (pokemon: [Pokemon], hasMore: Bool)? {
+        switch outcome(of: page, retry: retry) {
         case let .ready(pokemon, hasMore):
             return (pokemon, hasMore)
 
         case let .failed(failure):
-            viewState.notice = failure
+            viewState.notice = Notice(failure: failure, retry: retry)
             return nil
 
         case .stale:
@@ -82,7 +91,7 @@ extension HomeViewModel {
         }
     }
 
-    private func record(_ snapshot: PokemonListSnapshot, notice: FetchFailure?) {
+    private func record(_ snapshot: PokemonListSnapshot, notice: Notice?) {
         viewState.incompleteCount = snapshot.incompleteCount
         viewState.notice = notice
         viewState.total = snapshot.total
@@ -96,6 +105,11 @@ extension HomeViewModel {
         case stale
     }
 
+    struct Notice {
+        let failure: FetchFailure
+        let retry: FetchOperation
+    }
+
     @Observable
     final class State: ViewState {
         var query = ""
@@ -104,7 +118,7 @@ extension HomeViewModel {
         var route: HomeRoute?
         var total = 0
         var incompleteCount = 0
-        var notice: FetchFailure?
+        var notice: Notice?
     }
 
     struct Dependency {

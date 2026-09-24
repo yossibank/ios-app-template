@@ -53,7 +53,7 @@ extension PokemonBaseStat {
 extension PokemonProfile {
     init(_ detail: PokemonEntryDetailLoaded) {
         self.init(
-            artwork: (detail.artworkUrl ?? detail.spriteUrl).flatMap(URL.init(string:)),
+            artwork: detail.imageUrl.flatMap(URL.init(string:)),
             types: detail.types.map(PokemonType.init),
             baseStats: detail.baseStats.map(PokemonBaseStat.init)
         )
@@ -103,31 +103,25 @@ extension PokemonListSnapshot {
 
 extension PokemonListPage {
     init(_ result: PokemonListResult) {
-        self = switch onEnum(of: result) {
+        switch onEnum(of: result) {
         case let .loaded(loaded):
-            .loaded(
-                PokemonListSnapshot(
-                    pokemon: loaded.pokemon,
-                    hasMore: loaded.hasMore,
-                    total: loaded.total
-                )
+            let snapshot = PokemonListSnapshot(
+                pokemon: loaded.pokemon,
+                hasMore: loaded.hasMore,
+                total: loaded.total
             )
 
-        case let .degraded(degraded):
-            .degraded(
-                PokemonListSnapshot(
-                    pokemon: degraded.pokemon,
-                    hasMore: degraded.hasMore,
-                    total: degraded.total
-                ),
-                PokemonLoadFailure(degraded.failure)
-            )
+            self = if let failure = loaded.failure {
+                .degraded(snapshot, PokemonLoadFailure(failure))
+            } else {
+                .loaded(snapshot)
+            }
 
         case let .failed(failed):
-            .failed(PokemonLoadFailure(failed.failure))
+            self = .failed(PokemonLoadFailure(failed.failure))
 
         case .stale:
-            .stale
+            self = .stale
         }
     }
 }
