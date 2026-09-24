@@ -51,13 +51,14 @@ struct FetchStateTests {
 
         await state.reload { [1] }?.value
 
-        let running = Task { await state.refresh { await gate.wait(); return [2] } }
+        let running = state.refresh { await gate.wait(); return [2] }
         await gate.waitUntilEntered()
 
         #expect(state.phase.loaded == [1], "再取得の途中で一覧が消えている")
+        #expect(state.isRunning(.refresh))
 
         gate.open()
-        await running.value
+        await running?.value
 
         #expect(state.phase.loaded == [2])
     }
@@ -66,7 +67,7 @@ struct FetchStateTests {
     func refreshWithNothingOnScreenLoads() async {
         let state = FetchState<[Int]>()
 
-        await state.refresh { [1] }
+        await state.refresh { [1] }?.value
 
         #expect(state.phase.loaded == [1])
     }
@@ -208,48 +209,27 @@ struct FetchStateTests {
         #expect(state.phase.loaded == nil)
     }
 
-    @Test("更新が返した値で一覧を置き換える")
-    func updateReplacesTheList() async {
-        let state = FetchState<[Int]>()
-        await state.reload { [1] }?.value
-
-        await state.update { [10] }?.value
-
-        #expect(state.phase.loaded == [10])
-        #expect(state.isRunning(.update) == false)
-    }
-
-    @Test("更新が値を返さなければ一覧はそのまま")
-    func updateNilKeepsTheList() async {
-        let state = FetchState<[Int]>()
-        await state.reload { [1] }?.value
-
-        await state.update { nil }?.value
-
-        #expect(state.phase.loaded == [1])
-    }
-
-    @Test("続きの取得中は更新を始めず、読み込めた続きも消えない")
-    func updateWaitsForLoadMore() async {
+    @Test("プルして再取得している間は続きを取りにいかない")
+    func loadMoreWaitsForRefresh() async {
         let state = FetchState<[Int]>()
         await state.reload { [1] }?.value
 
         let gate = Gate()
-        let more = state.loadMore { await gate.wait(); return .more([1, 2]) }
+        let refreshing = state.refresh { await gate.wait(); return [2] }
         await gate.waitUntilEntered()
 
-        var updated = false
-        let update = state.update {
-            updated = true
-            return [0]
+        var asked = false
+        let more = state.loadMore {
+            asked = true
+            return .more([2, 3])
         }
 
         gate.open()
-        await more?.value
+        await refreshing?.value
 
-        #expect(update == nil)
-        #expect(updated == false, "続きの取得と更新が重なっている")
-        #expect(state.phase.loaded == [1, 2], "重なった更新に続きが押し流されている")
+        #expect(more == nil)
+        #expect(asked == false, "再取得と続きの取得が重なっている")
+        #expect(state.phase.loaded == [2])
     }
 }
 

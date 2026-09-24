@@ -12,6 +12,17 @@
         }
       }
     },
+    "screen.offline" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続を確認してください"
+          }
+        }
+      }
+    },
     "screen.retry" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19,6 +30,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "再取得"
+          }
+        }
+      }
+    },
+    "screen.server_error" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サーバーが応答しませんでした（%lld）"
+          }
+        }
+      }
+    },
+    "screen.timeout" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間内に応答がありませんでした"
+          }
+        }
+      }
+    },
+    "screen.unexpected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "予期しないエラーが発生しました"
+          }
+        }
+      }
+    },
+    "screen.unreadable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "データを読み取れませんでした"
           }
         }
       }

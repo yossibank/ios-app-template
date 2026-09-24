@@ -1,3 +1,4 @@
+import ScreenCore
 import Shared
 
 public final class PokemonPagerListing: PokemonListing, @unchecked Sendable {
@@ -11,31 +12,23 @@ public final class PokemonPagerListing: PokemonListing, @unchecked Sendable {
         } catch is CancellationError {
             return .stale
         } catch {
-            return .failed(.interrupted)
+            return .failed(.unexpected(canRetry: true))
         }
 
         return await loadNext()
     }
 
     public func loadNext() async -> PokemonListPage {
-        await page { try await pager.loadNext() }
-    }
-
-    public func retryMissingDetails() async -> PokemonListPage {
-        await page { try await pager.retryMissingDetails() }
+        do {
+            return try await PokemonListPage(pager.loadNext())
+        } catch is CancellationError {
+            return .stale
+        } catch {
+            return .failed(.unexpected(canRetry: true))
+        }
     }
 
     public func close() {
         pager.close()
-    }
-
-    private func page(_ work: () async throws -> PokemonListResult) async -> PokemonListPage {
-        do {
-            return try await PokemonListPage(work())
-        } catch is CancellationError {
-            return .stale
-        } catch {
-            return .failed(.interrupted)
-        }
     }
 }

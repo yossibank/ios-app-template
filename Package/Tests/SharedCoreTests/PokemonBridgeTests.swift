@@ -1,82 +1,37 @@
 import Foundation
+import ScreenCore
 import Shared
 @testable import SharedCore
 import Testing
 
 struct PokemonBridgeTests {
-    @Test("詳細を引けた行は profile を持つ")
-    func loadedEntriesCarryTheirProfile() {
-        let pokemon = Pokemon(
-            PokemonEntry(
-                id: 25,
-                name: "pikachu",
-                detail: PokemonEntryDetailLoaded(
-                    imageUrl: "https://img.example/artwork/25.png",
-                    types: [.electric],
-                    baseStats: [Shared.PokemonBaseStat(kind: .speed, value: 90)]
-                )
-            )
-        )
+    @Test("一覧の行が id・名前・画像の URL になる")
+    func entriesBecomePokemon() {
+        let pokemon = Pokemon(entry(id: 25, name: "pikachu"))
 
         #expect(pokemon.id == 25)
-        #expect(pokemon.profile?.types == [.electric])
-        #expect(pokemon.profile?.baseStats == [PokemonBaseStat(kind: .speed, value: 90)])
-        #expect(pokemon.profile?.totalBaseStat == 90)
+        #expect(pokemon.name == "pikachu")
+        #expect(pokemon.artwork == URL(string: "https://img.example/25.png"))
     }
 
-    @Test("詳細を引けなかった行は profile が無い")
-    func missingEntriesHaveNoProfile() {
-        let pokemon = Pokemon(
-            PokemonEntry(
-                id: 132,
-                name: "ditto",
-                detail: PokemonEntryDetailMissing(failure: ApiFailureServer(statusCode: 500))
-            )
-        )
-
-        #expect(pokemon.profile == nil)
-    }
-
-    @Test("共通コアが選んだ画像が URL になる")
-    func theImageBecomesAURL() {
-        let image = "https://img.example/art/1.png"
-
-        #expect(profile(image: image)?.artwork == URL(string: image))
-    }
-
-    @Test("画像が無ければ URL は無い")
-    func noImageMeansNoURL() {
-        #expect(profile(image: nil)?.artwork == nil)
-    }
-
-    @Test("合計は各能力の和になる")
-    func totalIsTheSumOfTheStats() {
-        let stats = [
-            Shared.PokemonBaseStat(kind: .hp, value: 45),
-            Shared.PokemonBaseStat(kind: .attack, value: 49)
-        ]
-
-        #expect(profile(image: nil, baseStats: stats)?.totalBaseStat == 94)
-    }
-
-    @Test("失敗の種類が共通コアから引き継がれる")
-    func failureReasonsAreCarriedOver() {
-        #expect(PokemonLoadFailure(ApiFailureOffline.shared).reason == .offline)
-        #expect(PokemonLoadFailure(ApiFailureTimeout.shared).reason == .timeout)
-        #expect(PokemonLoadFailure(ApiFailureServer(statusCode: 503)).reason == .server(statusCode: 503))
-        #expect(PokemonLoadFailure(ApiFailureUnreadable.shared).reason == .unreadable)
-        #expect(PokemonLoadFailure(ApiFailureClosed.shared).reason == .closed)
+    @Test("失敗の種類が共通の文言になる")
+    func failuresBecomeTheSharedMessages() {
+        #expect(FetchFailure(ApiFailureOffline.shared) == .offline)
+        #expect(FetchFailure(ApiFailureTimeout.shared) == .timeout)
+        #expect(FetchFailure(ApiFailureUnreadable.shared) == .unreadable)
+        #expect(FetchFailure(ApiFailureClosed.shared) == .unexpected(canRetry: false))
+        #expect(FetchFailure(ApiFailureServer(statusCode: 503)).message.contains("503"))
     }
 
     @Test("再試行できるかは共通コアの判断をそのまま使う")
     func retryabilityComesFromTheSharedCore() {
-        #expect(PokemonLoadFailure(ApiFailureOffline.shared).canRetry)
-        #expect(PokemonLoadFailure(ApiFailureTimeout.shared).canRetry)
-        #expect(PokemonLoadFailure(ApiFailureServer(statusCode: 503)).canRetry)
-        #expect(PokemonLoadFailure(ApiFailureServer(statusCode: 429)).canRetry)
-        #expect(!PokemonLoadFailure(ApiFailureServer(statusCode: 404)).canRetry)
-        #expect(!PokemonLoadFailure(ApiFailureUnreadable.shared).canRetry)
-        #expect(!PokemonLoadFailure(ApiFailureClosed.shared).canRetry)
+        #expect(FetchFailure(ApiFailureOffline.shared).canRetry)
+        #expect(FetchFailure(ApiFailureTimeout.shared).canRetry)
+        #expect(FetchFailure(ApiFailureServer(statusCode: 503)).canRetry)
+        #expect(FetchFailure(ApiFailureServer(statusCode: 429)).canRetry)
+        #expect(!FetchFailure(ApiFailureServer(statusCode: 404)).canRetry)
+        #expect(!FetchFailure(ApiFailureUnreadable.shared).canRetry)
+        #expect(!FetchFailure(ApiFailureClosed.shared).canRetry)
     }
 
     @Test("読み込めたページが snapshot になる")
@@ -117,19 +72,14 @@ struct PokemonBridgeTests {
         }
 
         #expect(snapshot.pokemon.count == 1)
-        #expect(failure.reason == .offline)
+        #expect(failure == .offline)
     }
 
     @Test("全部失敗したページは失敗になる")
     func failedResultsBecomeAFailure() {
         let page = PokemonListPage(PokemonListResultFailed(failure: ApiFailureTimeout.shared))
 
-        guard case let .failed(failure) = page else {
-            Issue.record("失敗になっていない")
-            return
-        }
-
-        #expect(failure.reason == .timeout)
+        #expect(page == .failed(.timeout))
     }
 
     @Test("捨てられた結果はそのまま捨てられた結果になる")
@@ -137,46 +87,7 @@ struct PokemonBridgeTests {
         #expect(PokemonListPage(PokemonListResultStale.shared) == .stale)
     }
 
-    @Test("詳細を引けなかった件数が数えられる")
-    func incompleteRowsAreCounted() {
-        let snapshot = PokemonListSnapshot(
-            pokemon: [
-                Pokemon(id: 1, name: "bulbasaur", profile: nil),
-                Pokemon(id: 4, name: "charmander", profile: PokemonProfile(artwork: nil, types: [], baseStats: []))
-            ],
-            hasMore: false,
-            total: 2
-        )
-
-        #expect(snapshot.incompleteCount == 1)
-    }
-
     private func entry(id: Int32, name: String) -> PokemonEntry {
-        PokemonEntry(
-            id: id,
-            name: name,
-            detail: PokemonEntryDetailLoaded(
-                imageUrl: nil,
-                types: [.grass],
-                baseStats: []
-            )
-        )
-    }
-
-    private func profile(
-        image: String?,
-        baseStats: [Shared.PokemonBaseStat] = []
-    ) -> PokemonProfile? {
-        Pokemon(
-            PokemonEntry(
-                id: 1,
-                name: "bulbasaur",
-                detail: PokemonEntryDetailLoaded(
-                    imageUrl: image,
-                    types: [],
-                    baseStats: baseStats
-                )
-            )
-        ).profile
+        PokemonEntry(id: id, name: name, imageUrl: "https://img.example/\(id).png")
     }
 }

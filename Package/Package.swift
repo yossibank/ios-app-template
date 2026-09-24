@@ -55,6 +55,7 @@ let package = Package(
         .target(
             name: "SharedCore",
             dependencies: [
+                "ScreenCore",
                 .product(
                     name: "Shared",
                     package: shared.identity
@@ -82,7 +83,7 @@ let package = Package(
         ),
         .testTarget(
             name: "SharedCoreTests",
-            dependencies: ["SharedCore"],
+            dependencies: ["ScreenCore", "SharedCore"],
             swiftSettings: swiftSettings
         ),
         .testTarget(
