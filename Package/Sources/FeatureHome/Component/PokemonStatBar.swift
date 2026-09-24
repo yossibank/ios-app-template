@@ -1,3 +1,4 @@
+import ScreenCore
 import SwiftUI
 
 struct PokemonStatBar: View {
@@ -39,17 +40,8 @@ private struct StatFillBar: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(.quaternary)
-
-                Capsule()
-                    .fill(accent)
-                    .frame(width: geometry.size.width * fraction)
-            }
-        }
-        .frame(height: 7)
-        .frame(minWidth: 48)
+        CapsuleMeter(fraction: fraction, tint: accent)
+            .frame(height: 7)
+            .frame(minWidth: 48)
     }
 }

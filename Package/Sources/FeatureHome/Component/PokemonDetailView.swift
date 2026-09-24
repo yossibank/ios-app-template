@@ -1,3 +1,4 @@
+import ScreenCore
 import SharedCore
 import SwiftUI
 
@@ -47,12 +48,8 @@ struct PokemonDetailView: View {
                 .accessibilityHidden(true)
 
             if let profile, !profile.types.isEmpty {
-                HStack(spacing: 8) {
-                    ForEach(profile.types, id: \.self) { type in
-                        PokemonTypeBadge(type: type)
-                    }
-                }
-                .accessibilityElement(children: .combine)
+                PokemonTypeBadges(types: profile.types, spacing: 8)
+                    .accessibilityElement(children: .combine)
             }
         }
         .frame(maxWidth: .infinity)
@@ -113,18 +110,9 @@ private struct PokemonStatRow: View {
                 .monospacedDigit()
                 .frame(width: valueWidth, alignment: .trailing)
 
-            GeometryReader { geometry in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(.quaternary)
-
-                    Capsule()
-                        .fill(stat.kind.barColor)
-                        .frame(width: geometry.size.width * fraction)
-                }
-            }
-            .frame(height: 8)
-            .accessibilityHidden(true)
+            CapsuleMeter(fraction: fraction, tint: stat.kind.barColor)
+                .frame(height: 8)
+                .accessibilityHidden(true)
         }
         .padding(.vertical, 3)
         .accessibilityElement(children: .combine)

@@ -28,12 +28,8 @@ struct PokemonCard: View {
                 .lineLimit(2)
 
             if let profile, !profile.types.isEmpty {
-                HStack(spacing: 4) {
-                    ForEach(profile.types, id: \.self) { type in
-                        PokemonTypeBadge(type: type)
-                    }
-                }
-                .padding(.top, 6)
+                PokemonTypeBadges(types: profile.types, spacing: 4)
+                    .padding(.top, 6)
             }
 
             if let profile, !profile.baseStats.isEmpty {
@@ -41,9 +37,7 @@ struct PokemonCard: View {
                     .padding(.top, 10)
             }
         }
-        .padding(.horizontal, PokemonMetrics.contentInset)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .pokemonCardInsets()
         .background(alignment: .topTrailing) {
             Text(HomeStrings.numberPlain(pokemon.id))
                 .font(.system(size: 64, weight: .black, design: .rounded))
@@ -62,7 +56,7 @@ struct PokemonCard: View {
                         endPoint: .bottom
                     )
                 )
-                .background(.quaternary.opacity(0.4), in: PokemonMetrics.cardShape)
+                .background(PokemonMetrics.cardFill, in: PokemonMetrics.cardShape)
         }
         .contentShape(PokemonMetrics.cardShape)
         .accessibilityElement(children: .ignore)
