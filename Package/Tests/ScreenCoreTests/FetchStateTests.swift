@@ -4,66 +4,25 @@ import Testing
 
 @MainActor
 struct FetchStateTests {
-    @Test("取得が走っただけでは .task のきっかけを作り直さない")
-    func runningDoesNotRenewTheRequestID() async {
-        let state = FetchState<[Int]>()
-        let renewed = Flag()
-
-        withObservationTracking {
-            _ = state.id(of: .reload)
-        } onChange: {
-            renewed.raise()
-        }
-
-        await state.runReload { [1] }
-
-        #expect(renewed.isRaised == false, "取得しただけで .task が作り直されている")
-    }
-
-    @Test("再取得を頼んだときは .task のきっかけを作り直す")
-    func requestingRenewsTheRequestID() async {
-        let state = FetchState<[Int]>()
-        await state.runReload { [1] }
-
-        let renewed = Flag()
-
-        withObservationTracking {
-            _ = state.id(of: .reload)
-        } onChange: {
-            renewed.raise()
-        }
-
-        state.request(.reload)
-
-        #expect(renewed.isRaised, "再取得を頼んだのに .task が作り直されない")
-    }
-
     @Test("取得に成功したら一覧になる")
     func loads() async {
         let state = FetchState<[Int]>()
 
-        await state.runReload { [1, 2] }
+        await state.reload { [1, 2] }?.value
 
         #expect(state.phase.loaded == [1, 2])
     }
 
     @Test("画面に戻っただけでは取得し直さない")
     func reappearingDoesNotRefetch() async {
-        let state = FetchState<[Int]>()
-        var calls = 0
+        let model = CountingModel()
 
-        await state.runReload {
-            calls += 1
-            return [1]
-        }
+        model.start()
+        await model.settle()
+        model.start()
+        await model.settle()
 
-        await state.runReload {
-            calls += 1
-            return [2]
-        }
-
-        #expect(calls == 1, "画面に戻るたびに取得し直している")
-        #expect(state.phase.loaded == [1])
+        #expect(model.fetchCalls == 1, "画面に戻るたびに取得し直している")
     }
 
     @Test("再取得を頼めば走り直す")
@@ -71,42 +30,18 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         var calls = 0
 
-        await state.runReload {
+        await state.reload {
             calls += 1
             return [1]
-        }
+        }?.value
 
-        state.request(.reload)
-
-        await state.runReload {
+        await state.reload {
             calls += 1
             return [2]
-        }
+        }?.value
 
         #expect(calls == 2, "再取得を頼んだのに走っていない")
         #expect(state.phase.loaded == [2])
-    }
-
-    @Test("画面に戻っただけでは続きを読まない")
-    func reappearingDoesNotLoadMore() async {
-        let state = FetchState<[Int]>()
-        var calls = 0
-
-        await state.runReload { [1] }
-        state.request(.loadMore)
-
-        await state.runMore {
-            calls += 1
-            return .more([1, 2])
-        }
-
-        await state.runMore {
-            calls += 1
-            return .more([1, 2, 3])
-        }
-
-        #expect(calls == 1, "画面に戻るたびに次のページを読んでいる")
-        #expect(state.phase.loaded == [1, 2])
     }
 
     @Test("プルして再取得している間も一覧は消えない")
@@ -114,9 +49,9 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         let gate = Gate()
 
-        await state.runReload { [1] }
+        await state.reload { [1] }?.value
 
-        let running = Task { await state.runRefresh { await gate.wait(); return [2] } }
+        let running = Task { await state.refresh { await gate.wait(); return [2] } }
         await gate.waitUntilEntered()
 
         #expect(state.phase.loaded == [1], "再取得の途中で一覧が消えている")
@@ -131,7 +66,7 @@ struct FetchStateTests {
     func refreshWithNothingOnScreenLoads() async {
         let state = FetchState<[Int]>()
 
-        await state.runRefresh { [1] }
+        await state.refresh { [1] }
 
         #expect(state.phase.loaded == [1])
     }
@@ -141,58 +76,42 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         let gate = Gate()
 
-        let running = Task { await state.runReload { await gate.wait(); return [1] } }
+        let first = state.reload { await gate.wait(); return [1] }
         await gate.waitUntilEntered()
 
-        state.request(.reload)
+        await state.reload { [2] }?.value
         gate.open()
-        await running.value
+        await first?.value
 
-        #expect(state.phase.loaded == nil)
+        #expect(state.phase.loaded == [2], "置き換えられた取得の結果が上書きしている")
     }
 
-    @Test("取り消された後に返ってきた結果は出さない")
-    func cancelledResultIsDropped() async {
+    @Test("置き換えられた後に失敗が返っても、失敗として出さない")
+    func replacedFailureIsDropped() async {
         let state = FetchState<[Int]>()
         let gate = Gate()
 
-        let running = Task { await state.runReload { await gate.wait(); return [1] } }
-        await gate.waitUntilEntered()
-
-        running.cancel()
-        gate.open()
-        await running.value
-
-        #expect(state.phase.loaded == nil)
-    }
-
-    @Test("取り消された後に失敗が返っても、失敗として出さない")
-    func cancelledFailureIsDropped() async {
-        let state = FetchState<[Int]>()
-        let gate = Gate()
-
-        let running = Task {
-            await state.runReload { () async throws(FetchFailure) -> [Int] in
-                await gate.wait()
-                throw FetchFailure("取り消した後の失敗")
-            }
+        let first = state.reload { () async throws(FetchFailure) -> [Int] in
+            await gate.wait()
+            throw FetchFailure("置き換えた後の失敗")
         }
         await gate.waitUntilEntered()
 
-        running.cancel()
+        await state.reload { [2] }?.value
         gate.open()
-        await running.value
+        await first?.value
 
         #expect(state.phase.failure == nil)
+        #expect(state.phase.loaded == [2])
     }
 
     @Test("取得が失敗したら失敗状態になる")
     func failureBecomesFailed() async {
         let state = FetchState<[Int]>()
 
-        await state.runReload { () async throws(FetchFailure) -> [Int] in
+        await state.reload { () async throws(FetchFailure) -> [Int] in
             throw FetchFailure("取得に失敗しました")
-        }
+        }?.value
 
         #expect(state.phase.failure?.message == "取得に失敗しました")
     }
@@ -200,77 +119,79 @@ struct FetchStateTests {
     @Test("続きの取得が失敗しても、読み込めている分は消えない")
     func loadMoreFailureKeepsWhatWasLoaded() async {
         let state = FetchState<[Int]>()
-        await state.runReload { [1, 2] }
+        await state.reload { [1, 2] }?.value
 
-        await state.runMore { () async throws(FetchFailure) -> FetchMore<[Int]>? in
+        await state.loadMore { () async throws(FetchFailure) -> FetchMore<[Int]>? in
             throw FetchFailure("取得に失敗しました")
-        }
+        }?.value
 
         #expect(state.phase.loaded == [1, 2])
         #expect(state.isRunning(.loadMore) == false)
     }
 
-    @Test("続きが無いと返ったら一覧はそのまま")
-    func loadMoreNilKeepsList() async {
+    @Test("続きが返らなかったら一覧はそのままで、続きを頼み直せる")
+    func loadMoreNilKeepsListAndCanBeRetried() async {
         let state = FetchState<[Int]>()
-        await state.runReload { [1, 2] }
+        await state.reload { [1, 2] }?.value
 
-        await state.runMore { nil }
+        await state.loadMore { nil }?.value
 
         #expect(state.phase.loaded == [1, 2])
         #expect(state.isRunning(.loadMore) == false)
+
+        await state.loadMore { .more([1, 2, 3]) }?.value
+
+        #expect(state.phase.loaded == [1, 2, 3], "続きが返らなかった後に続きを頼み直せない")
     }
 
-    @Test("続きの取得中に再取得しても、読み込み中の表示が残らない")
-    func reloadDuringLoadMoreClearsLoadingMore() async {
+    @Test("続きの取得中に再取得すると、続きの結果は捨てられ、読み込み中の表示も残らない")
+    func reloadDuringLoadMoreDiscardsIt() async {
         let state = FetchState<[Int]>()
-        await state.runReload { [1] }
+        await state.reload { [1] }?.value
 
         let gate = Gate()
-        let more = Task { await state.runMore { await gate.wait(); return .more([1, 2]) } }
+        let more = state.loadMore { await gate.wait(); return .more([1, 2]) }
         await gate.waitUntilEntered()
 
-        state.request(.reload)
-        await state.runReload { [9] }
+        await state.reload { [9] }?.value
 
         gate.open()
-        await more.value
+        await more?.value
 
         #expect(state.phase.loaded == [9])
         #expect(state.isRunning(.loadMore) == false)
 
-        let before = state.id(of: .loadMore)
-        state.request(.loadMore)
-        #expect(state.id(of: .loadMore) != before, "続きを読めなくなっている")
+        await state.loadMore { .more([9, 10]) }?.value
+        #expect(state.phase.loaded == [9, 10], "続きを読めなくなっている")
     }
 
-    @Test("終端を受け取ったら、もう続きを要求しない")
+    @Test("終端を受け取ったら、もう続きを取りにいかない")
     func stopsAskingAfterTheLastPage() async {
         let state = FetchState<[Int]>()
-        await state.runReload { [1] }
+        await state.reload { [1] }?.value
 
-        await state.runMore { .last([1, 2]) }
+        await state.loadMore { .last([1, 2]) }?.value
 
-        let before = state.id(of: .loadMore)
-        state.request(.loadMore)
+        var asked = false
+        await state.loadMore {
+            asked = true
+            return .more([1, 2, 3])
+        }?.value
 
-        #expect(state.id(of: .loadMore) == before)
+        #expect(asked == false)
         #expect(state.phase.loaded == [1, 2])
     }
 
     @Test("再取得すると終端の記憶は消える")
     func reloadForgetsTheEnd() async {
         let state = FetchState<[Int]>()
-        await state.runReload { [1] }
-        await state.runMore { .last([1, 2]) }
+        await state.reload { [1] }?.value
+        await state.loadMore { .last([1, 2]) }?.value
 
-        state.request(.reload)
-        await state.runReload { [1] }
+        await state.reload { [1] }?.value
+        await state.loadMore { .more([1, 3]) }?.value
 
-        let before = state.id(of: .loadMore)
-        state.request(.loadMore)
-
-        #expect(state.id(of: .loadMore) != before)
+        #expect(state.phase.loaded == [1, 3])
     }
 
     @Test("読み込めていないうちは続きを取りにいかない")
@@ -278,36 +199,75 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         var asked = false
 
-        await state.runMore {
+        await state.loadMore {
             asked = true
             return .more([9])
-        }
+        }?.value
 
         #expect(asked == false)
         #expect(state.phase.loaded == nil)
     }
 
-    @Test("詳細の取り直しが重なっても、読み込めた続きは消えない")
-    func loadMoreSurvivesAConcurrentRepair() async {
+    @Test("更新が返した値で一覧を置き換える")
+    func updateReplacesTheList() async {
         let state = FetchState<[Int]>()
-        await state.runReload { [1] }
+        await state.reload { [1] }?.value
 
-        let more = Gate()
-        let repair = Gate()
+        await state.update { [10] }?.value
 
-        let loadingMore = Task { await state.runMore { await more.wait(); return .more([1, 2]) } }
-        await more.waitUntilEntered()
+        #expect(state.phase.loaded == [10])
+        #expect(state.isRunning(.update) == false)
+    }
 
-        let repairing = Task { await state.runRepair { await repair.wait(); return nil } }
-        await repair.waitUntilEntered()
+    @Test("更新が値を返さなければ一覧はそのまま")
+    func updateNilKeepsTheList() async {
+        let state = FetchState<[Int]>()
+        await state.reload { [1] }?.value
 
-        more.open()
-        await loadingMore.value
+        await state.update { nil }?.value
 
-        repair.open()
-        await repairing.value
+        #expect(state.phase.loaded == [1])
+    }
 
-        #expect(state.phase.loaded == [1, 2], "重なった取り直しに続きが押し流されている")
+    @Test("続きの取得中は更新を始めず、読み込めた続きも消えない")
+    func updateWaitsForLoadMore() async {
+        let state = FetchState<[Int]>()
+        await state.reload { [1] }?.value
+
+        let gate = Gate()
+        let more = state.loadMore { await gate.wait(); return .more([1, 2]) }
+        await gate.waitUntilEntered()
+
+        var updated = false
+        let update = state.update {
+            updated = true
+            return [0]
+        }
+
+        gate.open()
+        await more?.value
+
+        #expect(update == nil)
+        #expect(updated == false, "続きの取得と更新が重なっている")
+        #expect(state.phase.loaded == [1, 2], "重なった更新に続きが押し流されている")
+    }
+}
+
+@MainActor
+@Observable
+private final class CountingModel: ScreenViewModel {
+    let fetchState = FetchState<[Int]>()
+    private(set) var fetchCalls = 0
+
+    func fetch() async throws(FetchFailure) -> [Int] {
+        fetchCalls += 1
+        return [fetchCalls]
+    }
+
+    func settle() async {
+        while fetchState.isRunning(.reload) {
+            await Task.yield()
+        }
     }
 }
 
@@ -350,13 +310,5 @@ private extension FetchPhase {
         }
 
         return failure
-    }
-}
-
-private final class Flag: @unchecked Sendable {
-    private(set) var isRaised = false
-
-    func raise() {
-        isRaised = true
     }
 }

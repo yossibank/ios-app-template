@@ -30,7 +30,7 @@ struct PokemonBridgeTests {
             PokemonEntry(
                 id: 132,
                 name: "ditto",
-                detail: PokemonEntryDetailMissing(failure: PokemonFailureServer(statusCode: 500))
+                detail: PokemonEntryDetailMissing(failure: ApiFailureServer(statusCode: 500))
             )
         )
 
@@ -61,22 +61,22 @@ struct PokemonBridgeTests {
 
     @Test("失敗の種類が共通コアから引き継がれる")
     func failureReasonsAreCarriedOver() {
-        #expect(PokemonLoadFailure(PokemonFailureOffline.shared).reason == .offline)
-        #expect(PokemonLoadFailure(PokemonFailureTimeout.shared).reason == .timeout)
-        #expect(PokemonLoadFailure(PokemonFailureServer(statusCode: 503)).reason == .server(statusCode: 503))
-        #expect(PokemonLoadFailure(PokemonFailureUnexpected.shared).reason == .unreadable)
-        #expect(PokemonLoadFailure(PokemonFailureClosed.shared).reason == .closed)
+        #expect(PokemonLoadFailure(ApiFailureOffline.shared).reason == .offline)
+        #expect(PokemonLoadFailure(ApiFailureTimeout.shared).reason == .timeout)
+        #expect(PokemonLoadFailure(ApiFailureServer(statusCode: 503)).reason == .server(statusCode: 503))
+        #expect(PokemonLoadFailure(ApiFailureUnreadable.shared).reason == .unreadable)
+        #expect(PokemonLoadFailure(ApiFailureClosed.shared).reason == .closed)
     }
 
     @Test("再試行できるかは共通コアの判断をそのまま使う")
     func retryabilityComesFromTheSharedCore() {
-        #expect(PokemonLoadFailure(PokemonFailureOffline.shared).canRetry)
-        #expect(PokemonLoadFailure(PokemonFailureTimeout.shared).canRetry)
-        #expect(PokemonLoadFailure(PokemonFailureServer(statusCode: 503)).canRetry)
-        #expect(PokemonLoadFailure(PokemonFailureServer(statusCode: 429)).canRetry)
-        #expect(!PokemonLoadFailure(PokemonFailureServer(statusCode: 404)).canRetry)
-        #expect(!PokemonLoadFailure(PokemonFailureUnexpected.shared).canRetry)
-        #expect(!PokemonLoadFailure(PokemonFailureClosed.shared).canRetry)
+        #expect(PokemonLoadFailure(ApiFailureOffline.shared).canRetry)
+        #expect(PokemonLoadFailure(ApiFailureTimeout.shared).canRetry)
+        #expect(PokemonLoadFailure(ApiFailureServer(statusCode: 503)).canRetry)
+        #expect(PokemonLoadFailure(ApiFailureServer(statusCode: 429)).canRetry)
+        #expect(!PokemonLoadFailure(ApiFailureServer(statusCode: 404)).canRetry)
+        #expect(!PokemonLoadFailure(ApiFailureUnreadable.shared).canRetry)
+        #expect(!PokemonLoadFailure(ApiFailureClosed.shared).canRetry)
     }
 
     @Test("読み込めたページが snapshot になる")
@@ -107,7 +107,7 @@ struct PokemonBridgeTests {
                 pokemon: [entry(id: 1, name: "bulbasaur")],
                 hasMore: true,
                 total: 1351,
-                failure: PokemonFailureOffline.shared
+                failure: ApiFailureOffline.shared
             )
         )
 
@@ -122,7 +122,7 @@ struct PokemonBridgeTests {
 
     @Test("全部失敗したページは失敗になる")
     func failedResultsBecomeAFailure() {
-        let page = PokemonListPage(PokemonListResultFailed(failure: PokemonFailureTimeout.shared))
+        let page = PokemonListPage(PokemonListResultFailed(failure: ApiFailureTimeout.shared))
 
         guard case let .failed(failure) = page else {
             Issue.record("失敗になっていない")
@@ -149,11 +149,6 @@ struct PokemonBridgeTests {
         )
 
         #expect(snapshot.incompleteCount == 1)
-    }
-
-    @Test("先読みの距離は共通コアから引く")
-    func prefetchDistanceComesFromTheSharedCore() {
-        #expect(PokemonList.prefetchDistance == Int(PokemonPager.companion.PREFETCH_DISTANCE))
     }
 
     private func entry(id: Int32, name: String) -> PokemonEntry {

@@ -78,12 +78,12 @@ extension Pokemon {
 extension PokemonLoadFailure {
     static let interrupted = PokemonLoadFailure(reason: .interrupted, canRetry: true)
 
-    init(_ failure: any PokemonFailure) {
+    init(_ failure: any ApiFailure) {
         let reason: Reason = switch onEnum(of: failure) {
         case .offline: .offline
         case .timeout: .timeout
         case let .server(server): .server(statusCode: Int(server.statusCode))
-        case .unexpected: .unreadable
+        case .unreadable: .unreadable
         case .closed: .closed
         }
 

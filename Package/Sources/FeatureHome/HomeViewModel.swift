@@ -46,10 +46,10 @@ extension HomeViewModel {
         }
     }
 
-    func fetchRepaired() async throws(FetchFailure) -> [Pokemon]? {
+    func update() async throws(FetchFailure) -> [Pokemon]? {
         viewState.notice = nil
 
-        return await ready(from: dependency.listing.retryMissingDetails(), retry: .repair)?.pokemon
+        return await ready(from: dependency.listing.retryMissingDetails(), retry: .update)?.pokemon
     }
 
     nonisolated func close() {

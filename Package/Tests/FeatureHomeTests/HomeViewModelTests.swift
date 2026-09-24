@@ -148,7 +148,7 @@ struct HomeViewModelTests {
 
         #expect(model.viewState.incompleteCount == 2)
 
-        let repaired = try await model.fetchRepaired()
+        let repaired = try await model.update()
 
         #expect(repaired?.map(\.name) == ["a", "b"])
         #expect(model.viewState.incompleteCount == 0, "取り直しても欠けたままになっている")
@@ -165,10 +165,10 @@ struct HomeViewModelTests {
         let model = HomeViewModel(dependency: .init(listing: stub))
 
         _ = try await model.fetch()
-        _ = try await model.fetchRepaired()
+        _ = try await model.update()
 
         #expect(model.viewState.notice != nil, "取り直しの失敗が握り潰されている")
-        #expect(model.viewState.notice?.retry == .repair, "取り直しの失敗なのに続きを読もうとしている")
+        #expect(model.viewState.notice?.retry == .update, "取り直しの失敗なのに続きを読もうとしている")
     }
 
     @Test("捨てられた結果は続きとして積まない")
