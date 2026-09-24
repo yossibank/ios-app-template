@@ -24,9 +24,7 @@ public struct ScreenSource<Model: ScreenViewModel> {
 @MainActor
 public struct ScreenView<Model: ScreenViewModel, Success: View, EmptyContent: View>: View {
     private let source: ScreenSource<Model>
-    private let isEmpty: (Model.Value) -> Bool
-    private let success: (Model.State, Model.Value, ScreenActions) -> Success
-    private let empty: (ScreenActions) -> EmptyContent
+    private let content: ScreenContent<Model, Success, EmptyContent>
 
     public init(
         _ source: ScreenSource<Model>,
@@ -35,29 +33,16 @@ public struct ScreenView<Model: ScreenViewModel, Success: View, EmptyContent: Vi
         @ViewBuilder empty: @escaping (ScreenActions) -> EmptyContent
     ) {
         self.source = source
-        self.isEmpty = isEmpty
-        self.success = success
-        self.empty = empty
+        self.content = ScreenContent(isEmpty: isEmpty, success: success, empty: empty)
     }
 
     public var body: some View {
         switch source.kind {
         case let .live(model):
-            LiveScreen(
-                model,
-                isEmpty: isEmpty,
-                success: success,
-                empty: empty
-            )
+            LiveScreen(model, content: content)
 
         case let .snapshot(phase, running):
-            SnapshotScreen<Model, Success, EmptyContent>(
-                phase: phase,
-                running: running,
-                isEmpty: isEmpty,
-                success: success,
-                empty: empty
-            )
+            SnapshotScreen(phase: phase, running: running, content: content)
         }
     }
 }
@@ -92,38 +77,48 @@ public extension ScreenView where Model.Value: Collection {
 }
 
 @MainActor
+private struct ScreenContent<Model: ScreenViewModel, Success: View, EmptyContent: View> {
+    let isEmpty: (Model.Value) -> Bool
+    let success: (Model.State, Model.Value, ScreenActions) -> Success
+    let empty: (ScreenActions) -> EmptyContent
+
+    func body(
+        phase: FetchPhase<Model.Value>,
+        viewState: Model.State,
+        actions: ScreenActions
+    ) -> PhaseContent<Model.Value, Success, EmptyContent> {
+        PhaseContent(
+            phase: phase,
+            isEmpty: isEmpty,
+            actions: actions,
+            success: { value, actions in
+                success(viewState, value, actions)
+            },
+            empty: empty
+        )
+    }
+}
+
+@MainActor
 private struct LiveScreen<Model: ScreenViewModel, Success: View, EmptyContent: View>: View {
     @State private var model: Model
 
-    private let isEmpty: (Model.Value) -> Bool
-    private let success: (Model.State, Model.Value, ScreenActions) -> Success
-    private let empty: (ScreenActions) -> EmptyContent
+    private let content: ScreenContent<Model, Success, EmptyContent>
 
-    init(
-        _ model: Model,
-        isEmpty: @escaping (Model.Value) -> Bool,
-        @ViewBuilder success: @escaping (Model.State, Model.Value, ScreenActions) -> Success,
-        @ViewBuilder empty: @escaping (ScreenActions) -> EmptyContent
-    ) {
+    init(_ model: Model, content: ScreenContent<Model, Success, EmptyContent>) {
         _model = State(initialValue: model)
-        self.isEmpty = isEmpty
-        self.success = success
-        self.empty = empty
+        self.content = content
     }
 
     var body: some View {
-        PhaseContent(
+        content.body(
             phase: model.fetchState.phase,
-            isEmpty: isEmpty,
+            viewState: model.viewState,
             actions: ScreenActions(
                 request: { model.request($0) },
                 refresh: { await model.refresh() },
                 isRunning: { model.fetchState.isRunning($0) }
-            ),
-            success: { value, actions in
-                success(model.viewState, value, actions)
-            },
-            empty: empty
+            )
         )
         .task(id: model.fetchState.id(of: .reload)) {
             await model.run(.reload)
@@ -143,38 +138,28 @@ private struct SnapshotScreen<Model: ScreenViewModel, Success: View, EmptyConten
 
     private let phase: FetchPhase<Model.Value>
     private let running: Set<FetchOperation>
-    private let isEmpty: (Model.Value) -> Bool
-    private let success: (Model.State, Model.Value, ScreenActions) -> Success
-    private let empty: (ScreenActions) -> EmptyContent
+    private let content: ScreenContent<Model, Success, EmptyContent>
 
     init(
         phase: FetchPhase<Model.Value>,
         running: Set<FetchOperation>,
-        isEmpty: @escaping (Model.Value) -> Bool,
-        @ViewBuilder success: @escaping (Model.State, Model.Value, ScreenActions) -> Success,
-        @ViewBuilder empty: @escaping (ScreenActions) -> EmptyContent
+        content: ScreenContent<Model, Success, EmptyContent>
     ) {
         _viewState = State(initialValue: Model.State())
         self.phase = phase
         self.running = running
-        self.isEmpty = isEmpty
-        self.success = success
-        self.empty = empty
+        self.content = content
     }
 
     var body: some View {
-        PhaseContent(
+        content.body(
             phase: phase,
-            isEmpty: isEmpty,
+            viewState: viewState,
             actions: ScreenActions(
                 request: { _ in },
                 refresh: {},
                 isRunning: { running.contains($0) }
-            ),
-            success: { value, actions in
-                success(viewState, value, actions)
-            },
-            empty: empty
+            )
         )
     }
 }

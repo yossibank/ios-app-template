@@ -52,23 +52,11 @@ public final class FetchState<Value> {
         reachedEnd = false
         phase = .loading
 
-        await settle(.reload, work) { value in
-            phase = .loaded(value)
-        } failed: { failure in
-            phase = .failed(failure)
-        }
+        await settleReload(work)
     }
 
     func runMore(_ work: @MainActor () async throws(FetchFailure) -> FetchMore<Value>?) async {
-        guard claim(.loadMore) else {
-            return
-        }
-
-        guard
-            case .loaded = phase,
-            !Task.isCancelled
-        else {
-            release(.loadMore)
+        guard claimWhileLoaded(.loadMore) else {
             return
         }
 
@@ -88,15 +76,7 @@ public final class FetchState<Value> {
     }
 
     func runRepair(_ work: @MainActor () async throws(FetchFailure) -> Value?) async {
-        guard claim(.repair) else {
-            return
-        }
-
-        guard
-            case .loaded = phase,
-            !Task.isCancelled
-        else {
-            release(.repair)
+        guard claimWhileLoaded(.repair) else {
             return
         }
 
@@ -110,7 +90,7 @@ public final class FetchState<Value> {
     }
 
     func runRefresh(_ work: @MainActor () async throws(FetchFailure) -> Value) async {
-        guard case .loaded = phase else {
+        guard isLoaded else {
             release(.reload)
             await runReload(work)
             return
@@ -123,31 +103,27 @@ public final class FetchState<Value> {
         generation += 1
         reachedEnd = false
 
-        await settle(.reload, work) { value in
-            phase = .loaded(value)
-        } failed: { failure in
-            phase = .failed(failure)
+        await settleReload(work)
+    }
+
+    private var isLoaded: Bool {
+        if case .loaded = phase {
+            true
+        } else {
+            false
         }
     }
 
     private func accepts(_ operation: FetchOperation) -> Bool {
         switch operation {
         case .reload:
-            return true
+            true
 
         case .loadMore:
-            guard case .loaded = phase else {
-                return false
-            }
-
-            return !reachedEnd && !isRunning(.loadMore)
+            isLoaded && !reachedEnd && !isRunning(.loadMore)
 
         case .repair:
-            guard case .loaded = phase else {
-                return false
-            }
-
-            return !isRunning(.repair)
+            isLoaded && !isRunning(.repair)
         }
     }
 
@@ -164,8 +140,32 @@ public final class FetchState<Value> {
         return true
     }
 
+    private func claimWhileLoaded(_ operation: FetchOperation) -> Bool {
+        guard claim(operation) else {
+            return false
+        }
+
+        guard
+            isLoaded,
+            !Task.isCancelled
+        else {
+            release(operation)
+            return false
+        }
+
+        return true
+    }
+
     private func release(_ operation: FetchOperation) {
         served[operation] = nil
+    }
+
+    private func settleReload(_ work: @MainActor () async throws(FetchFailure) -> Value) async {
+        await settle(.reload, work) { value in
+            phase = .loaded(value)
+        } failed: { failure in
+            phase = .failed(failure)
+        }
     }
 
     private func settle<Result>(
