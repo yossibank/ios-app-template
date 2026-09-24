@@ -34,6 +34,12 @@ extension PokemonTypeKind {
     }
 }
 
+extension PokemonEntry {
+    var accentColor: Color {
+        loadedDetail?.types.first?.badgeColor ?? .secondary
+    }
+}
+
 private extension Color {
     var wcagLuminance: Double {
         var red: CGFloat = 0

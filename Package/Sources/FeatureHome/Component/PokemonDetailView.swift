@@ -5,14 +5,11 @@ struct PokemonDetailView: View {
     let pokemon: PokemonEntry
 
     private var detail: PokemonEntryDetailLoaded? {
-        guard case let .loaded(detail) = onEnum(of: pokemon.detail) else {
-            return nil
-        }
-        return detail
+        pokemon.loadedDetail
     }
 
     private var accent: Color {
-        detail?.types.first?.badgeColor ?? .secondary
+        pokemon.accentColor
     }
 
     var body: some View {

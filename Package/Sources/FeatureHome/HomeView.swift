@@ -48,7 +48,7 @@ private struct HomeContent: View {
         var seen: [PokemonTypeKind] = []
 
         for entry in pokemon {
-            guard case let .loaded(detail) = onEnum(of: entry.detail) else {
+            guard let detail = entry.loadedDetail else {
                 continue
             }
 

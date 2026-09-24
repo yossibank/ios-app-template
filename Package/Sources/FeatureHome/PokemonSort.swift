@@ -21,13 +21,3 @@ enum PokemonSort: CaseIterable {
         }
     }
 }
-
-extension PokemonEntry {
-    var totalBaseStat: Int {
-        guard case let .loaded(detail) = onEnum(of: detail) else {
-            return -1
-        }
-
-        return Int(detail.totalBaseStat)
-    }
-}
