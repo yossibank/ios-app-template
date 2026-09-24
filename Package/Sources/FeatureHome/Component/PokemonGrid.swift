@@ -9,10 +9,3 @@ struct PokemonGrid<Content: View>: View {
         }
     }
 }
-
-extension View {
-    func pokemonContentInsets() -> some View {
-        padding(.horizontal, PokemonMetrics.contentInset)
-            .padding(.vertical, PokemonMetrics.contentTopInset)
-    }
-}

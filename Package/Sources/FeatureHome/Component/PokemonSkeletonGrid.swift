@@ -36,9 +36,7 @@ private struct PokemonSkeletonCard: View {
             SkeletonBlock(height: 7)
                 .padding(.top, 10)
         }
-        .padding(.horizontal, PokemonMetrics.contentInset)
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.quaternary.opacity(0.4), in: PokemonMetrics.cardShape)
+        .pokemonCardInsets()
+        .background(PokemonMetrics.cardFill, in: PokemonMetrics.cardShape)
     }
 }

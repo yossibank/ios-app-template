@@ -37,31 +37,13 @@ extension HomeViewModel {
     }
 
     func fetchMore() async throws(FetchFailure) -> FetchMore<[Pokemon]>? {
-        switch await outcome(of: dependency.listing.loadNext()) {
-        case let .ready(pokemon, hasMore):
-            return hasMore ? .more(pokemon) : .last(pokemon)
-
-        case let .failed(failure):
-            note(failure)
-            return nil
-
-        case .stale:
-            return nil
+        await ready(from: dependency.listing.loadNext()).map { page in
+            page.hasMore ? .more(page.pokemon) : .last(page.pokemon)
         }
     }
 
     func fetchRepaired() async throws(FetchFailure) -> [Pokemon]? {
-        switch await outcome(of: dependency.listing.retryMissingDetails()) {
-        case let .ready(pokemon, _):
-            return pokemon
-
-        case let .failed(failure):
-            note(failure)
-            return nil
-
-        case .stale:
-            return nil
-        }
+        await ready(from: dependency.listing.retryMissingDetails())?.pokemon
     }
 
     nonisolated func close() {
@@ -86,14 +68,24 @@ extension HomeViewModel {
         }
     }
 
+    private func ready(from page: PokemonListPage) -> (pokemon: [Pokemon], hasMore: Bool)? {
+        switch outcome(of: page) {
+        case let .ready(pokemon, hasMore):
+            return (pokemon, hasMore)
+
+        case let .failed(failure):
+            viewState.notice = failure
+            return nil
+
+        case .stale:
+            return nil
+        }
+    }
+
     private func record(_ snapshot: PokemonListSnapshot, notice: FetchFailure?) {
         viewState.incompleteCount = snapshot.incompleteCount
         viewState.notice = notice
         viewState.total = snapshot.total
-    }
-
-    private func note(_ notice: FetchFailure?) {
-        viewState.notice = notice
     }
 }
 
