@@ -4,7 +4,7 @@ import SwiftUI
 public struct ScreenSource<Model: ScreenViewModel> {
     enum Kind {
         case live(Model)
-        case snapshot(FetchPhase<Model.Value>)
+        case snapshot(FetchPhase<Model.Value>, running: Set<FetchOperation>)
     }
 
     let kind: Kind
@@ -13,8 +13,11 @@ public struct ScreenSource<Model: ScreenViewModel> {
         Self(kind: .live(model))
     }
 
-    public static func snapshot(_ phase: FetchPhase<Model.Value>) -> Self {
-        Self(kind: .snapshot(phase))
+    public static func snapshot(
+        _ phase: FetchPhase<Model.Value>,
+        running: Set<FetchOperation> = []
+    ) -> Self {
+        Self(kind: .snapshot(phase, running: running))
     }
 }
 
@@ -47,9 +50,10 @@ public struct ScreenView<Model: ScreenViewModel, Success: View, EmptyContent: Vi
                 empty: empty
             )
 
-        case let .snapshot(phase):
+        case let .snapshot(phase, running):
             SnapshotScreen<Model, Success, EmptyContent>(
                 phase: phase,
+                running: running,
                 isEmpty: isEmpty,
                 success: success,
                 empty: empty
@@ -111,24 +115,24 @@ private struct LiveScreen<Model: ScreenViewModel, Success: View, EmptyContent: V
         PhaseContent(
             phase: model.fetchState.phase,
             isEmpty: isEmpty,
-            reload: { model.reload() },
-            loadMore: { model.requestLoadMore() },
-            refill: { model.requestRefill() },
-            refresh: { await model.refresh() },
-            isRefilling: model.fetchState.isRefilling,
+            actions: ScreenActions(
+                request: { model.request($0) },
+                refresh: { await model.refresh() },
+                isRunning: { model.fetchState.isRunning($0) }
+            ),
             success: { value, actions in
                 success(model.viewState, value, actions)
             },
             empty: empty
         )
-        .task(id: model.fetchState.reloadID) {
-            await model.load()
+        .task(id: model.fetchState.id(of: .reload)) {
+            await model.run(.reload)
         }
-        .task(id: model.fetchState.loadMoreID) {
-            await model.loadMore()
+        .task(id: model.fetchState.id(of: .loadMore)) {
+            await model.run(.loadMore)
         }
-        .task(id: model.fetchState.refillID) {
-            await model.refill()
+        .task(id: model.fetchState.id(of: .repair)) {
+            await model.run(.repair)
         }
     }
 }
@@ -138,18 +142,21 @@ private struct SnapshotScreen<Model: ScreenViewModel, Success: View, EmptyConten
     @State private var viewState: Model.State
 
     private let phase: FetchPhase<Model.Value>
+    private let running: Set<FetchOperation>
     private let isEmpty: (Model.Value) -> Bool
     private let success: (Model.State, Model.Value, ScreenActions) -> Success
     private let empty: (ScreenActions) -> EmptyContent
 
     init(
         phase: FetchPhase<Model.Value>,
+        running: Set<FetchOperation>,
         isEmpty: @escaping (Model.Value) -> Bool,
         @ViewBuilder success: @escaping (Model.State, Model.Value, ScreenActions) -> Success,
         @ViewBuilder empty: @escaping (ScreenActions) -> EmptyContent
     ) {
         _viewState = State(initialValue: Model.State())
         self.phase = phase
+        self.running = running
         self.isEmpty = isEmpty
         self.success = success
         self.empty = empty
@@ -159,11 +166,11 @@ private struct SnapshotScreen<Model: ScreenViewModel, Success: View, EmptyConten
         PhaseContent(
             phase: phase,
             isEmpty: isEmpty,
-            reload: {},
-            loadMore: {},
-            refill: {},
-            refresh: {},
-            isRefilling: false,
+            actions: ScreenActions(
+                request: { _ in },
+                refresh: {},
+                isRunning: { running.contains($0) }
+            ),
             success: { value, actions in
                 success(viewState, value, actions)
             },
@@ -176,24 +183,9 @@ private struct SnapshotScreen<Model: ScreenViewModel, Success: View, EmptyConten
 private struct PhaseContent<Value, Success: View, EmptyContent: View>: View {
     @Environment(\.screenStyle) private var style
 
-    private var actions: ScreenActions {
-        ScreenActions(
-            reload: reload,
-            loadMore: loadMore,
-            refill: refill,
-            refresh: refresh,
-            isLoadingMore: phase.isLoadingMore,
-            isRefilling: isRefilling
-        )
-    }
-
     let phase: FetchPhase<Value>
     let isEmpty: (Value) -> Bool
-    let reload: @MainActor () -> Void
-    let loadMore: @MainActor () -> Void
-    let refill: @MainActor () -> Void
-    let refresh: @MainActor () async -> Void
-    let isRefilling: Bool
+    let actions: ScreenActions
     @ViewBuilder let success: (Value, ScreenActions) -> Success
     @ViewBuilder let empty: (ScreenActions) -> EmptyContent
 
@@ -202,7 +194,7 @@ private struct PhaseContent<Value, Success: View, EmptyContent: View>: View {
         case .idle, .loading:
             style.loading()
 
-        case let .loaded(value), let .loadingMore(value):
+        case let .loaded(value):
             if isEmpty(value) {
                 empty(actions)
             } else {
@@ -211,7 +203,9 @@ private struct PhaseContent<Value, Success: View, EmptyContent: View>: View {
 
         case let .failed(failure):
             style.failure(
-                ScreenStyle.Failure(error: failure, retry: reload)
+                ScreenStyle.Failure(error: failure) {
+                    actions.request(.reload)
+                }
             )
         }
     }

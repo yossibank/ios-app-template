@@ -6,7 +6,7 @@ public protocol ScreenViewModel: ViewModel {
 
     func fetch() async throws(FetchFailure) -> Value
     func fetchMore() async throws(FetchFailure) -> FetchMore<Value>?
-    func fetchRefilled() async throws(FetchFailure) -> Value?
+    func fetchRepaired() async throws(FetchFailure) -> Value?
 }
 
 public extension ScreenViewModel {
@@ -14,45 +14,38 @@ public extension ScreenViewModel {
         nil
     }
 
-    func fetchRefilled() async throws(FetchFailure) -> Value? {
+    func fetchRepaired() async throws(FetchFailure) -> Value? {
         nil
     }
 }
 
 extension ScreenViewModel {
-    func load() async {
-        await fetchState.run { () async throws(FetchFailure) -> Value in
-            try await fetch()
-        }
+    func request(_ operation: FetchOperation) {
+        fetchState.request(operation)
     }
 
-    func reload() {
-        fetchState.requestReload()
-    }
+    func run(_ operation: FetchOperation) async {
+        switch operation {
+        case .reload:
+            await fetchState.runReload { () async throws(FetchFailure) -> Value in
+                try await fetch()
+            }
 
-    func requestLoadMore() {
-        fetchState.requestLoadMore()
-    }
+        case .loadMore:
+            await fetchState.runMore { () async throws(FetchFailure) -> FetchMore<Value>? in
+                try await fetchMore()
+            }
 
-    func loadMore() async {
-        await fetchState.runMore { () async throws(FetchFailure) -> FetchMore<Value>? in
-            try await fetchMore()
+        case .repair:
+            await fetchState.runRepair { () async throws(FetchFailure) -> Value? in
+                try await fetchRepaired()
+            }
         }
     }
 
     func refresh() async {
         await fetchState.runRefresh { () async throws(FetchFailure) -> Value in
             try await fetch()
-        }
-    }
-
-    func requestRefill() {
-        fetchState.requestRefill()
-    }
-
-    func refill() async {
-        await fetchState.runRefill { () async throws(FetchFailure) -> Value? in
-            try await fetchRefilled()
         }
     }
 }

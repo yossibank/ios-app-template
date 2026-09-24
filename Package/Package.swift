@@ -2,6 +2,12 @@
 
 import PackageDescription
 
+let swiftSettings: [SwiftSetting] = [
+    .enableUpcomingFeature("MemberImportVisibility"),
+    .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+    .enableUpcomingFeature("InferIsolatedConformances")
+]
+
 let package = Package(
     name: "Package",
     defaultLocalization: "ja",
@@ -29,7 +35,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/yossibank/kmp-app-template.git",
-            exact: "0.17.0"
+            exact: "0.18.0"
         )
     ],
     targets: [
@@ -37,7 +43,8 @@ let package = Package(
             name: "ScreenCore",
             resources: [
                 .process("Resources")
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "SharedCore",
@@ -46,26 +53,36 @@ let package = Package(
                     name: "Shared",
                     package: "kmp-app-template"
                 )
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "FeatureHome",
             dependencies: ["ScreenCore", "SharedCore"],
             resources: [
                 .process("Resources")
-            ]
+            ],
+            swiftSettings: swiftSettings
         ),
         .target(
             name: "AppRoot",
-            dependencies: ["FeatureHome"]
+            dependencies: ["FeatureHome"],
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "ScreenCoreTests",
-            dependencies: ["ScreenCore"]
+            dependencies: ["ScreenCore"],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "SharedCoreTests",
+            dependencies: ["SharedCore"],
+            swiftSettings: swiftSettings
         ),
         .testTarget(
             name: "FeatureHomeTests",
-            dependencies: ["FeatureHome"]
+            dependencies: ["FeatureHome"],
+            swiftSettings: swiftSettings
         )
     ]
 )

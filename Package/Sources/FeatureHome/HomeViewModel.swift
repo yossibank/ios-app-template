@@ -6,7 +6,7 @@ import SharedCore
 @Observable
 final class HomeViewModel: ScreenViewModel {
     let viewState = State()
-    let fetchState = FetchState<[PokemonEntry]>()
+    let fetchState = FetchState<[Pokemon]>()
     let dependency: Dependency
 
     convenience init() {
@@ -16,45 +16,33 @@ final class HomeViewModel: ScreenViewModel {
     init(dependency: Dependency) {
         self.dependency = dependency
     }
+
+    deinit {
+        close()
+    }
 }
 
 extension HomeViewModel {
-    func fetch() async throws(FetchFailure) -> [PokemonEntry] {
-        try await reset()
+    func fetch() async throws(FetchFailure) -> [Pokemon] {
+        switch await outcome(of: dependency.listing.reload()) {
+        case let .ready(pokemon, _):
+            return pokemon
 
-        let outcome = try await result(of: { try await dependency.paging.loadNext() })
-
-        switch onEnum(of: outcome) {
-        case let .loaded(loaded):
-            record(incomplete: loaded.incompleteCount, notice: nil)
-            return loaded.pokemon
-
-        case let .degraded(degraded):
-            record(incomplete: degraded.incompleteCount, notice: degraded.failure.asFetchFailure)
-            return degraded.pokemon
-
-        case let .failed(failed):
-            throw failed.failure.asFetchFailure
+        case let .failed(failure):
+            throw failure
 
         case .stale:
             return []
         }
     }
 
-    func fetchMore() async throws(FetchFailure) -> FetchMore<[PokemonEntry]>? {
-        let outcome = try await result(of: { try await dependency.paging.loadNext() })
+    func fetchMore() async throws(FetchFailure) -> FetchMore<[Pokemon]>? {
+        switch await outcome(of: dependency.listing.loadNext()) {
+        case let .ready(pokemon, hasMore):
+            return hasMore ? .more(pokemon) : .last(pokemon)
 
-        switch onEnum(of: outcome) {
-        case let .loaded(loaded):
-            record(incomplete: loaded.incompleteCount, notice: nil)
-            return loaded.hasMore ? .more(loaded.pokemon) : .last(loaded.pokemon)
-
-        case let .degraded(degraded):
-            record(incomplete: degraded.incompleteCount, notice: degraded.failure.asFetchFailure)
-            return .last(degraded.pokemon)
-
-        case let .failed(failed):
-            note(failed.failure.asFetchFailure)
+        case let .failed(failure):
+            note(failure)
             return nil
 
         case .stale:
@@ -62,20 +50,13 @@ extension HomeViewModel {
         }
     }
 
-    func fetchRefilled() async throws(FetchFailure) -> [PokemonEntry]? {
-        let outcome = try await result(of: { try await dependency.paging.retryMissingDetails() })
+    func fetchRepaired() async throws(FetchFailure) -> [Pokemon]? {
+        switch await outcome(of: dependency.listing.retryMissingDetails()) {
+        case let .ready(pokemon, _):
+            return pokemon
 
-        switch onEnum(of: outcome) {
-        case let .loaded(loaded):
-            record(incomplete: loaded.incompleteCount, notice: nil)
-            return loaded.pokemon
-
-        case let .degraded(degraded):
-            record(incomplete: degraded.incompleteCount, notice: degraded.failure.asFetchFailure)
-            return degraded.pokemon
-
-        case let .failed(failed):
-            note(failed.failure.asFetchFailure)
+        case let .failed(failure):
+            note(failure)
             return nil
 
         case .stale:
@@ -83,72 +64,82 @@ extension HomeViewModel {
         }
     }
 
-    func close() {
-        dependency.paging.close()
+    nonisolated func close() {
+        dependency.listing.close()
     }
 
-    private func record(incomplete: Int32, notice: FetchFailure?) {
-        viewState.incompleteCount = Int(incomplete)
+    private func outcome(of page: PokemonListPage) -> Outcome {
+        switch page {
+        case let .loaded(snapshot):
+            record(snapshot, notice: nil)
+            return .ready(pokemon: snapshot.pokemon, hasMore: snapshot.hasMore)
+
+        case let .degraded(snapshot, failure):
+            record(snapshot, notice: failure.asFetchFailure)
+            return .ready(pokemon: snapshot.pokemon, hasMore: false)
+
+        case let .failed(failure):
+            return .failed(failure.asFetchFailure)
+
+        case .stale:
+            return .stale
+        }
+    }
+
+    private func record(_ snapshot: PokemonListSnapshot, notice: FetchFailure?) {
+        viewState.incompleteCount = snapshot.incompleteCount
         viewState.notice = notice
+        viewState.total = snapshot.total
     }
 
     private func note(_ notice: FetchFailure?) {
         viewState.notice = notice
     }
-
-    private func result(
-        of operation: () async throws -> PokemonListResult
-    ) async throws(FetchFailure) -> PokemonListResult {
-        do {
-            return try await operation()
-        } catch {
-            throw FetchFailure(HomeStrings.unexpected)
-        }
-    }
-
-    private func reset() async throws(FetchFailure) {
-        do {
-            try await dependency.paging.reset()
-        } catch {
-            throw FetchFailure(HomeStrings.unexpected)
-        }
-    }
 }
 
 extension HomeViewModel {
+    private enum Outcome {
+        case ready(pokemon: [Pokemon], hasMore: Bool)
+        case failed(FetchFailure)
+        case stale
+    }
+
     @Observable
     final class State: ViewState {
         var query = ""
-        var selectedType: PokemonTypeKind?
+        var selectedType: PokemonType?
+        var sort: PokemonSort = .number
+        var route: HomeRoute?
+        var total = 0
         var incompleteCount = 0
         var notice: FetchFailure?
     }
 
     struct Dependency {
-        var paging: any PokemonPaging = PokemonPager()
+        var listing: any PokemonListing = PokemonPagerListing()
     }
 }
 
-private extension PokemonFailure {
+private extension PokemonLoadFailure {
     var asFetchFailure: FetchFailure {
         FetchFailure(message, canRetry: canRetry)
     }
 
     var message: String {
-        switch onEnum(of: self) {
+        switch reason {
         case .offline:
             HomeStrings.offline
 
         case .timeout:
             HomeStrings.timeout
 
-        case let .server(server):
-            HomeStrings.serverError(statusCode: Int(server.statusCode))
+        case let .server(statusCode):
+            HomeStrings.serverError(statusCode: statusCode)
 
-        case .unexpected:
+        case .unreadable:
             HomeStrings.unreadable
 
-        case .closed:
+        case .closed, .interrupted:
             HomeStrings.unexpected
         }
     }

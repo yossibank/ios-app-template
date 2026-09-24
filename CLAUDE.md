@@ -44,17 +44,24 @@ Package/                    画面とロジック。モジュールはここに�
 - コメントが要ると判断したときは、書かずに提案する。
 - グローバル関数を作らない。型のメソッドか、対象の型への extension にする。
 - 画面に出る文言を Swift のリテラルで書かない。`Localizable.xcstrings` に置き、
-  `String(localized:bundle: .module)` で引く。`defaultValue` は渡さない
-  （引けていないことをテストで検出できなくなる）。
+  `*Strings.Key` に足してから引く。`defaultValue` は渡さない
+  （引けていないことをテストで検出できなくなる）。キーは `Key` に並べる。
+  並べないと全数解決のテストの対象から外れる。
+- `#Preview` の中だけはリテラルでよい。出荷する文言ではないため、カタログに入れない。
 
 ## 全体ルール
 
 - 変更したら `make verify` を通す。通らないものは完了ではない。
 - 共通ロジックは kmp-app-template 側に置く。ここには iOS 固有のものだけ。
 - 失敗画面と絞り込み 0 件の見せ方は各 OS の作法に寄せる。揃えるのは文言の語彙まで。
-- テストターゲットを増やしたら `AppTemplate.xctestplan` に追加する。足さないと走らないまま緑になる。
+- テストターゲットを増やしたら `AppTemplate.xctestplan` に追加する。`make verify` の
+  `testplan` が突き合わせて落とすので、足し忘れたまま緑にはならない。
+- 共通コア（`Shared`）を import してよいのは `SharedCore` とそのテストだけ。
+  `FeatureHome` に渡すのは `SharedCore` が公開する Swift の型。KMP の型を素通しにしない。
 - 共通コアのバージョンを `Package.swift` 以外で指定しない。
 - lint ツールのバージョンを `Mintfile` 以外で指定しない。CI も Mintfile から読む。
 - Makefile は `$(SWIFTFORMAT)` / `$(SWIFTLINT)` 経由で呼ぶ。実体名を直接書かない
   （手元は Mint、CI は配布バイナリ、と入口を差し替えているため）。
+- 警告はエラーとして扱う（`SWIFT_TREAT_WARNINGS_AS_ERRORS=YES`）。SwiftLint も `--strict`。
+  `make verify` と CI は同じ厳しさで、手元で通れば CI でも通る。
 - 警告を数えるときは DerivedData を捨てる。増分ビルドでは再コンパイルされず 0 件に見える。

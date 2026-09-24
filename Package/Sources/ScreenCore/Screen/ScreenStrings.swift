@@ -2,10 +2,23 @@ import Foundation
 
 enum ScreenStrings {
     static var loadFailed: String {
-        String(localized: "screen.load_failed", bundle: .module)
+        Key.loadFailed.text
     }
 
     static var retry: String {
-        String(localized: "screen.retry", bundle: .module)
+        Key.retry.text
+    }
+}
+
+extension ScreenStrings {
+    enum Key: String, CaseIterable {
+        case loadFailed = "screen.load_failed"
+        case retry = "screen.retry"
+    }
+}
+
+extension ScreenStrings.Key {
+    var text: String {
+        String(localized: String.LocalizationValue(stringLiteral: rawValue), bundle: .module)
     }
 }

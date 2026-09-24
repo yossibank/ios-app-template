@@ -1,17 +1,6 @@
 {
   "sourceLanguage": "ja",
   "strings": {
-    "home.close": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "閉じる"
-          }
-        }
-      }
-    },
     "home.detail_missing": {
       "extractionState": "manual",
       "localizations": {
@@ -95,7 +84,18 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "#%03d"
+            "value": "#%03lld"
+          }
+        }
+      }
+    },
+    "home.number_plain": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%03lld"
           }
         }
       }
@@ -107,6 +107,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "接続を確認してください"
+          }
+        }
+      }
+    },
+    "home.progress": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "home.progress_filtered": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld 件（全 %2$lld 件中 %3$lld 件読み込み済み）"
           }
         }
       }
@@ -151,6 +173,50 @@
           "stringUnit": {
             "state": "translated",
             "value": "サーバーが応答しませんでした（%lld）"
+          }
+        }
+      }
+    },
+    "home.sort.name": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名前"
+          }
+        }
+      }
+    },
+    "home.sort.number": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "図鑑番号"
+          }
+        }
+      }
+    },
+    "home.sort.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "並び替え"
+          }
+        }
+      }
+    },
+    "home.sort.total": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "種族値が高い順"
           }
         }
       }

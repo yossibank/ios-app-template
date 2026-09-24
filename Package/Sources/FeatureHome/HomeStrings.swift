@@ -3,130 +3,213 @@ import SharedCore
 
 enum HomeStrings {
     static var title: String {
-        String(localized: "home.title", bundle: .module)
+        Key.title.text
     }
 
     static var searchPrompt: String {
-        String(localized: "home.search_prompt", bundle: .module)
+        Key.searchPrompt.text
     }
 
     static var emptyTitle: String {
-        String(localized: "home.empty_title", bundle: .module)
+        Key.emptyTitle.text
     }
 
     static var emptyDescription: String {
-        String(localized: "home.empty_description", bundle: .module)
+        Key.emptyDescription.text
     }
 
     static var reload: String {
-        String(localized: "home.reload", bundle: .module)
+        Key.reload.text
     }
 
     static var offline: String {
-        String(localized: "home.offline", bundle: .module)
+        Key.offline.text
     }
 
     static var timeout: String {
-        String(localized: "home.timeout", bundle: .module)
+        Key.timeout.text
     }
 
     static var unreadable: String {
-        String(localized: "home.unreadable", bundle: .module)
+        Key.unreadable.text
     }
 
     static var unexpected: String {
-        String(localized: "home.unexpected", bundle: .module)
-    }
-
-    static func serverError(statusCode: Int) -> String {
-        String(
-            format: String(localized: "home.server_error", bundle: .module),
-            statusCode
-        )
-    }
-
-    static func incomplete(_ count: Int) -> String {
-        String(
-            format: String(localized: "home.incomplete", bundle: .module),
-            count
-        )
-    }
-
-    static func number(_ id: Int) -> String {
-        String(
-            format: String(localized: "home.number", bundle: .module),
-            id
-        )
-    }
-
-    static func total(_ value: Int) -> String {
-        String(
-            format: String(localized: "home.total", bundle: .module),
-            value
-        )
+        Key.unexpected.text
     }
 
     static var totalCaption: String {
-        String(localized: "home.total_caption", bundle: .module)
+        Key.totalCaption.text
     }
 
     static var retryDetails: String {
-        String(localized: "home.retry_details", bundle: .module)
+        Key.retryDetails.text
+    }
+
+    static var sortTitle: String {
+        Key.sortTitle.text
+    }
+
+    static var sortNumber: String {
+        Key.sortNumber.text
+    }
+
+    static var sortTotal: String {
+        Key.sortTotal.text
+    }
+
+    static var sortName: String {
+        Key.sortName.text
     }
 
     static var filterAll: String {
-        String(localized: "home.filter_all", bundle: .module)
+        Key.filterAll.text
     }
 
     static var noTypeMatch: String {
-        String(localized: "home.no_type_match", bundle: .module)
+        Key.noTypeMatch.text
     }
 
     static var noTypeMatchDescription: String {
-        String(localized: "home.no_type_match_description", bundle: .module)
+        Key.noTypeMatchDescription.text
     }
 
     static var detailMissing: String {
-        String(localized: "home.detail_missing", bundle: .module)
+        Key.detailMissing.text
     }
 
-    static var close: String {
-        String(localized: "home.close", bundle: .module)
+    static func serverError(statusCode: Int) -> String {
+        String(format: Key.serverError.text, statusCode)
     }
 
-    static func statName(_ kind: PokemonStatKind) -> String {
-        switch kind {
-        case .hp: String(localized: "home.stat.hp", bundle: .module)
-        case .attack: String(localized: "home.stat.attack", bundle: .module)
-        case .defense: String(localized: "home.stat.defense", bundle: .module)
-        case .specialAttack: String(localized: "home.stat.special_attack", bundle: .module)
-        case .specialDefense: String(localized: "home.stat.special_defense", bundle: .module)
-        case .speed: String(localized: "home.stat.speed", bundle: .module)
-        case .other: String(localized: "home.stat.other", bundle: .module)
+    static func incomplete(_ count: Int) -> String {
+        String(format: Key.incomplete.text, count)
+    }
+
+    static func number(_ id: Int) -> String {
+        String(format: Key.number.text, id)
+    }
+
+    static func numberPlain(_ id: Int) -> String {
+        String(format: Key.numberPlain.text, id)
+    }
+
+    static func total(_ value: Int) -> String {
+        String(format: Key.total.text, value)
+    }
+
+    static func progress(loaded: Int, total: Int) -> String {
+        String(format: Key.progress.text, loaded, total)
+    }
+
+    static func progressFiltered(shown: Int, total: Int, loaded: Int) -> String {
+        String(format: Key.progressFiltered.text, shown, total, loaded)
+    }
+
+    static func statName(_ stat: PokemonStat) -> String {
+        Key(stat).text
+    }
+
+    static func typeName(_ type: PokemonType) -> String {
+        Key(type).text
+    }
+}
+
+extension HomeStrings {
+    enum Key: String, CaseIterable {
+        case title = "home.title"
+        case searchPrompt = "home.search_prompt"
+        case emptyTitle = "home.empty_title"
+        case emptyDescription = "home.empty_description"
+        case reload = "home.reload"
+        case offline = "home.offline"
+        case timeout = "home.timeout"
+        case unreadable = "home.unreadable"
+        case unexpected = "home.unexpected"
+        case serverError = "home.server_error"
+        case incomplete = "home.incomplete"
+        case retryDetails = "home.retry_details"
+        case number = "home.number"
+        case numberPlain = "home.number_plain"
+        case total = "home.total"
+        case totalCaption = "home.total_caption"
+        case progress = "home.progress"
+        case progressFiltered = "home.progress_filtered"
+        case sortTitle = "home.sort.title"
+        case sortNumber = "home.sort.number"
+        case sortTotal = "home.sort.total"
+        case sortName = "home.sort.name"
+        case filterAll = "home.filter_all"
+        case noTypeMatch = "home.no_type_match"
+        case noTypeMatchDescription = "home.no_type_match_description"
+        case detailMissing = "home.detail_missing"
+        case statHp = "home.stat.hp"
+        case statAttack = "home.stat.attack"
+        case statDefense = "home.stat.defense"
+        case statSpecialAttack = "home.stat.special_attack"
+        case statSpecialDefense = "home.stat.special_defense"
+        case statSpeed = "home.stat.speed"
+        case statOther = "home.stat.other"
+        case typeNormal = "home.type.normal"
+        case typeFire = "home.type.fire"
+        case typeWater = "home.type.water"
+        case typeElectric = "home.type.electric"
+        case typeGrass = "home.type.grass"
+        case typeIce = "home.type.ice"
+        case typeFighting = "home.type.fighting"
+        case typePoison = "home.type.poison"
+        case typeGround = "home.type.ground"
+        case typeFlying = "home.type.flying"
+        case typePsychic = "home.type.psychic"
+        case typeBug = "home.type.bug"
+        case typeRock = "home.type.rock"
+        case typeGhost = "home.type.ghost"
+        case typeDragon = "home.type.dragon"
+        case typeDark = "home.type.dark"
+        case typeSteel = "home.type.steel"
+        case typeFairy = "home.type.fairy"
+        case typeUnknown = "home.type.unknown"
+    }
+}
+
+extension HomeStrings.Key {
+    var text: String {
+        String(localized: String.LocalizationValue(stringLiteral: rawValue), bundle: .module)
+    }
+
+    init(_ stat: PokemonStat) {
+        self = switch stat {
+        case .hp: .statHp
+        case .attack: .statAttack
+        case .defense: .statDefense
+        case .specialAttack: .statSpecialAttack
+        case .specialDefense: .statSpecialDefense
+        case .speed: .statSpeed
+        case .other: .statOther
         }
     }
 
-    static func typeName(_ kind: PokemonTypeKind) -> String {
-        switch kind {
-        case .normal: String(localized: "home.type.normal", bundle: .module)
-        case .fire: String(localized: "home.type.fire", bundle: .module)
-        case .water: String(localized: "home.type.water", bundle: .module)
-        case .electric: String(localized: "home.type.electric", bundle: .module)
-        case .grass: String(localized: "home.type.grass", bundle: .module)
-        case .ice: String(localized: "home.type.ice", bundle: .module)
-        case .fighting: String(localized: "home.type.fighting", bundle: .module)
-        case .poison: String(localized: "home.type.poison", bundle: .module)
-        case .ground: String(localized: "home.type.ground", bundle: .module)
-        case .flying: String(localized: "home.type.flying", bundle: .module)
-        case .psychic: String(localized: "home.type.psychic", bundle: .module)
-        case .bug: String(localized: "home.type.bug", bundle: .module)
-        case .rock: String(localized: "home.type.rock", bundle: .module)
-        case .ghost: String(localized: "home.type.ghost", bundle: .module)
-        case .dragon: String(localized: "home.type.dragon", bundle: .module)
-        case .dark: String(localized: "home.type.dark", bundle: .module)
-        case .steel: String(localized: "home.type.steel", bundle: .module)
-        case .fairy: String(localized: "home.type.fairy", bundle: .module)
-        case .unknown: String(localized: "home.type.unknown", bundle: .module)
+    init(_ type: PokemonType) {
+        self = switch type {
+        case .normal: .typeNormal
+        case .fire: .typeFire
+        case .water: .typeWater
+        case .electric: .typeElectric
+        case .grass: .typeGrass
+        case .ice: .typeIce
+        case .fighting: .typeFighting
+        case .poison: .typePoison
+        case .ground: .typeGround
+        case .flying: .typeFlying
+        case .psychic: .typePsychic
+        case .bug: .typeBug
+        case .rock: .typeRock
+        case .ghost: .typeGhost
+        case .dragon: .typeDragon
+        case .dark: .typeDark
+        case .steel: .typeSteel
+        case .fairy: .typeFairy
+        case .unknown: .typeUnknown
         }
     }
 }

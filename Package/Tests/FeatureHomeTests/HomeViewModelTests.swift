@@ -55,7 +55,7 @@ struct HomeViewModelTests {
     func fetchMoreSurfacesItsFailure() async throws {
         let model = model(
             loaded(["a"], hasMore: true),
-            degraded(PokemonFailureOffline.shared, ["a"])
+            degraded(.offline, ["a"])
         )
 
         _ = try await model.fetch()
@@ -80,22 +80,35 @@ struct HomeViewModelTests {
 
     @Test("閉じると共通コアも閉じる")
     func closeReachesTheSharedCore() {
-        let stub = StubPaging([loaded(["a"])])
-        let model = HomeViewModel(dependency: .init(paging: stub))
+        let stub = StubListing([loaded(["a"])])
+        let model = HomeViewModel(dependency: .init(listing: stub))
 
         model.close()
 
         #expect(stub.closed)
     }
 
+    @Test("画面を手放すと共通コアも閉じる")
+    func releasingTheModelClosesTheSharedCore() {
+        let stub = StubListing([loaded(["a"])])
+        var model: HomeViewModel? = HomeViewModel(dependency: .init(listing: stub))
+
+        #expect(model != nil)
+        #expect(stub.closed == false, "手放す前に閉じている")
+
+        model = nil
+
+        #expect(stub.closed, "手放しても共通コアが開いたまま")
+    }
+
     @Test("接続できないときは再試行できる失敗になる")
     func offlineCanBeRetried() async throws {
-        #expect(try await failure(from: failed(PokemonFailureOffline.shared)).canRetry)
+        #expect(try await failure(from: failed(.offline)).canRetry)
     }
 
     @Test("応答が遅いときは接続断とは別の文言になる")
     func timeoutIsNotReportedAsOffline() async throws {
-        let failure = try await failure(from: failed(PokemonFailureTimeout.shared))
+        let failure = try await failure(from: failed(.timeout))
 
         #expect(failure.message == HomeStrings.timeout)
         #expect(failure.message != HomeStrings.offline)
@@ -104,7 +117,7 @@ struct HomeViewModelTests {
 
     @Test("サーバーエラーは状態コードを文言に含める")
     func serverFailureCarriesStatusCode() async throws {
-        let failure = try await failure(from: failed(PokemonFailureServer(statusCode: 503)))
+        let failure = try await failure(from: failed(.server(statusCode: 503)))
 
         #expect(failure.message.contains("503"))
         #expect(failure.canRetry)
@@ -112,39 +125,46 @@ struct HomeViewModelTests {
 
     @Test("解釈できない応答は再試行できない失敗になる")
     func unreadableBodyCannotBeRetried() async throws {
-        #expect(try await !failure(from: failed(PokemonFailureUnexpected.shared)).canRetry)
+        #expect(try await !failure(from: failed(.unreadable, canRetry: false)).canRetry)
+    }
+
+    @Test("共通コアの呼び出しが中断されたら予期しないエラーとして出る")
+    func interruptedCallsAreReported() async throws {
+        let failure = try await failure(from: failed(.interrupted))
+
+        #expect(failure.message == HomeStrings.unexpected)
     }
 
     @Test("詳細だけを取り直すとページを読み直さずに埋まる")
-    func refillFillsTheMissingRows() async throws {
-        let stub = StubPaging(
+    func repairFillsTheMissingRows() async throws {
+        let stub = StubListing(
             [loaded(["a", "b"], hasDetail: false)],
             repaired: loaded(["a", "b"])
         )
-        let model = HomeViewModel(dependency: .init(paging: stub))
+        let model = HomeViewModel(dependency: .init(listing: stub))
 
         _ = try await model.fetch()
 
         #expect(model.viewState.incompleteCount == 2)
 
-        let refilled = try await model.fetchRefilled()
+        let repaired = try await model.fetchRepaired()
 
-        #expect(refilled?.map(\.name) == ["a", "b"])
+        #expect(repaired?.map(\.name) == ["a", "b"])
         #expect(model.viewState.incompleteCount == 0, "取り直しても欠けたままになっている")
         #expect(stub.repairCalls == 1)
         #expect(stub.calls == 1, "詳細の取り直しでページを読み直している")
     }
 
     @Test("取り直しても埋まらなければ理由を知らせる")
-    func refillReportsWhyNothingChanged() async throws {
-        let stub = StubPaging(
+    func repairReportsWhyNothingChanged() async throws {
+        let stub = StubListing(
             [loaded(["a"], hasDetail: false)],
-            repaired: degraded(PokemonFailureOffline.shared, ["a"])
+            repaired: degraded(.offline, ["a"])
         )
-        let model = HomeViewModel(dependency: .init(paging: stub))
+        let model = HomeViewModel(dependency: .init(listing: stub))
 
         _ = try await model.fetch()
-        _ = try await model.fetchRefilled()
+        _ = try await model.fetchRepaired()
 
         #expect(model.viewState.notice != nil, "取り直しの失敗が握り潰されている")
     }
@@ -153,7 +173,7 @@ struct HomeViewModelTests {
     func staleResultsAreNotAppended() async throws {
         let model = model(
             loaded(["a"], hasMore: true),
-            PokemonListResultStale.shared
+            .stale
         )
 
         _ = try await model.fetch()
@@ -162,13 +182,13 @@ struct HomeViewModelTests {
         #expect(more == nil, "捨てられた結果が続きとして積まれている")
     }
 
-    private func model(_ pages: PokemonListResult...) -> HomeViewModel {
-        HomeViewModel(dependency: .init(paging: StubPaging(pages)))
+    private func model(_ pages: PokemonListPage...) -> HomeViewModel {
+        HomeViewModel(dependency: .init(listing: StubListing(pages)))
     }
 
-    private func failure(from result: PokemonListResult) async throws -> FetchFailure {
+    private func failure(from page: PokemonListPage) async throws -> FetchFailure {
         try await #require(throws: FetchFailure.self) {
-            _ = try await model(result).fetch()
+            _ = try await model(page).fetch()
         }
     }
 
@@ -176,43 +196,41 @@ struct HomeViewModelTests {
         _ names: [String],
         hasMore: Bool = false,
         hasDetail: Bool = true
-    ) -> PokemonListResult {
-        PokemonListResultLoaded(
-            pokemon: entries(names, hasDetail: hasDetail),
-            hasMore: hasMore
-        )
+    ) -> PokemonListPage {
+        .loaded(snapshot(names, hasMore: hasMore, hasDetail: hasDetail))
     }
 
     private func degraded(
-        _ failure: any PokemonFailure,
+        _ reason: PokemonLoadFailure.Reason,
         _ names: [String]
-    ) -> PokemonListResult {
-        PokemonListResultDegraded(
-            pokemon: entries(names),
-            hasMore: true,
-            failure: failure
+    ) -> PokemonListPage {
+        .degraded(
+            snapshot(names, hasMore: true, hasDetail: true),
+            PokemonLoadFailure(reason: reason, canRetry: true)
         )
     }
 
-    private func failed(_ failure: any PokemonFailure) -> PokemonListResult {
-        PokemonListResultFailed(failure: failure)
+    private func failed(
+        _ reason: PokemonLoadFailure.Reason,
+        canRetry: Bool = true
+    ) -> PokemonListPage {
+        .failed(PokemonLoadFailure(reason: reason, canRetry: canRetry))
     }
 
-    private func entries(_ names: [String], hasDetail: Bool = true) -> [PokemonEntry] {
-        names.enumerated().map { index, name in
-            let detail: any PokemonEntryDetail = if hasDetail {
-                PokemonEntryDetailLoaded(
-                    spriteUrl: "https://img.example/\(index + 1).png",
-                    artworkUrl: "https://img.example/artwork/\(index + 1).png",
-                    types: [.grass],
-                    baseStats: [PokemonBaseStat(kind: .hp, value: 45)]
-                )
-            } else {
-                PokemonEntryDetailMissing(failure: PokemonFailureServer(statusCode: 500))
-            }
-
-            return PokemonEntry(id: Int32(index + 1), name: name, detail: detail)
-        }
+    private func snapshot(
+        _ names: [String],
+        hasMore: Bool,
+        hasDetail: Bool
+    ) -> PokemonListSnapshot {
+        PokemonListSnapshot(
+            pokemon: names.enumerated().map { index, name in
+                hasDetail
+                    ? .fixture(id: index + 1, name: name)
+                    : .incomplete(id: index + 1, name: name)
+            },
+            hasMore: hasMore,
+            total: 1351
+        )
     }
 
     private func fetchMoreGenerically<Model: ScreenViewModel>(
@@ -222,38 +240,43 @@ struct HomeViewModelTests {
     }
 }
 
-private final class StubPaging: PokemonPaging {
-    private nonisolated(unsafe) let pages: [PokemonListResult]
-    private nonisolated(unsafe) let repaired: PokemonListResult?
-    private nonisolated(unsafe) var index = 0
+private final class StubListing: PokemonListing, @unchecked Sendable {
+    private let pages: [PokemonListPage]
+    private let repaired: PokemonListPage?
+    private var index = 0
 
-    private(set) nonisolated(unsafe) var calls = 0
+    private(set) var calls = 0
 
-    private(set) nonisolated(unsafe) var repairCalls = 0
+    private(set) var repairCalls = 0
 
-    private(set) nonisolated(unsafe) var closed = false
+    private(set) var closed = false
 
-    init(_ pages: [PokemonListResult], repaired: PokemonListResult? = nil) {
+    init(_ pages: [PokemonListPage], repaired: PokemonListPage? = nil) {
         self.pages = pages
         self.repaired = repaired
     }
 
-    func loadNext() async throws -> PokemonListResult {
-        calls += 1
-        defer { index += 1 }
-        return pages[min(index, pages.count - 1)]
-    }
-
-    func retryMissingDetails() async throws -> PokemonListResult {
-        repairCalls += 1
-        return repaired ?? PokemonListResultLoaded(pokemon: [], hasMore: false)
-    }
-
-    func reset() async throws {
+    func reload() async -> PokemonListPage {
         index = 0
+        return next()
+    }
+
+    func loadNext() async -> PokemonListPage {
+        next()
+    }
+
+    func retryMissingDetails() async -> PokemonListPage {
+        repairCalls += 1
+        return repaired ?? .loaded(PokemonListSnapshot(pokemon: [], hasMore: false, total: 0))
     }
 
     func close() {
         closed = true
+    }
+
+    private func next() -> PokemonListPage {
+        calls += 1
+        defer { index += 1 }
+        return pages[min(index, pages.count - 1)]
     }
 }

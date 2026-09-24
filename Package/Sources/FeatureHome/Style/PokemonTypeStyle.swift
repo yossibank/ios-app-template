@@ -1,11 +1,12 @@
 import SharedCore
 import SwiftUI
+import UIKit
 
-extension PokemonTypeKind {
+extension PokemonType {
     var badgeColor: Color {
         switch self {
         case .normal: Color(red: 0.62, green: 0.63, blue: 0.62)
-        case .fire: Color(red: 0.90, green: 0.16, blue: 0.16)
+        case .fire: Color(red: 0.86, green: 0.14, blue: 0.15)
         case .water: Color(red: 0.16, green: 0.50, blue: 0.94)
         case .electric: Color(red: 0.81, green: 0.63, blue: 0.00)
         case .grass: Color(red: 0.25, green: 0.63, blue: 0.16)
@@ -27,16 +28,32 @@ extension PokemonTypeKind {
     }
 }
 
-extension PokemonStatKind {
-    var barColor: Color {
-        switch self {
-        case .hp: Color(red: 0.42, green: 0.75, blue: 0.35)
-        case .attack: Color(red: 0.91, green: 0.45, blue: 0.29)
-        case .defense: Color(red: 0.29, green: 0.56, blue: 0.85)
-        case .specialAttack: Color(red: 0.61, green: 0.42, blue: 0.84)
-        case .specialDefense: Color(red: 0.25, green: 0.71, blue: 0.66)
-        case .speed: Color(red: 0.88, green: 0.69, blue: 0.23)
-        case .other: Color(red: 0.62, green: 0.62, blue: 0.62)
+extension PokemonType {
+    var onBadgeColor: Color {
+        badgeColor.wcagLuminance > 0.18 ? Color(white: 0.1) : .white
+    }
+}
+
+extension Pokemon {
+    var accentColor: Color {
+        profile?.types.first?.badgeColor ?? .secondary
+    }
+}
+
+private extension Color {
+    var wcagLuminance: Double {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        UIColor(self).getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+
+        func channel(_ value: CGFloat) -> Double {
+            let v = Double(value)
+            return v <= 0.04045 ? v / 12.92 : pow((v + 0.055) / 1.055, 2.4)
         }
+
+        return 0.2126 * channel(red) + 0.7152 * channel(green) + 0.0722 * channel(blue)
     }
 }
