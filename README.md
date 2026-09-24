@@ -23,7 +23,7 @@ SwiftUI と Kotlin Multiplatform で作る、ポケモン図鑑アプリのテ�
 
 </div>
 
-PokeAPI のポケモンを、無限スクロール・タイプでの絞り込み・並び替え・詳細画面で見られます。データの取得とページングは共通コア（Kotlin Multiplatform）が担い、このリポジトリは iOS の画面と状態管理だけを持ちます。
+PokeAPI のポケモンを、無限スクロール・タイプでの絞り込み・並び替え・詳細画面で見られます。
 
 ## 3 つのリポジトリ
 
@@ -64,11 +64,6 @@ flowchart LR
 > [!NOTE]
 > 共通コアを GitHub から取得するため、`~/.netrc` に `api.github.com` の資格情報が必要です。
 
-<details>
-<summary>手順</summary>
-
 1. `make bootstrap` で SwiftFormat / SwiftLint を用意する
 2. `make open` で `AppTemplate.xcworkspace` を開く
 3. 変更したら `make verify` を通す
-
-</details>
