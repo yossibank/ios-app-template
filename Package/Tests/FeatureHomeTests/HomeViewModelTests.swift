@@ -88,6 +88,19 @@ struct HomeViewModelTests {
         #expect(stub.closed)
     }
 
+    @Test("画面を手放すと共通コアも閉じる")
+    func releasingTheModelClosesTheSharedCore() {
+        let stub = StubPaging([loaded(["a"])])
+        var model: HomeViewModel? = HomeViewModel(dependency: .init(paging: stub))
+
+        #expect(model != nil)
+        #expect(stub.closed == false, "手放す前に閉じている")
+
+        model = nil
+
+        #expect(stub.closed, "手放しても共通コアが開いたまま")
+    }
+
     @Test("接続できないときは再試行できる失敗になる")
     func offlineCanBeRetried() async throws {
         #expect(try await failure(from: failed(PokemonFailureOffline.shared)).canRetry)

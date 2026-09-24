@@ -16,6 +16,10 @@ final class HomeViewModel: ScreenViewModel {
     init(dependency: Dependency) {
         self.dependency = dependency
     }
+
+    deinit {
+        close()
+    }
 }
 
 extension HomeViewModel {
@@ -62,7 +66,7 @@ extension HomeViewModel {
         }
     }
 
-    func close() {
+    nonisolated func close() {
         dependency.paging.close()
     }
 
