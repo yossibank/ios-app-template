@@ -51,7 +51,7 @@ struct HomeViewModelTests {
         #expect(more?.value.map(\.name) == ["a", "b"], "プロトコル既定の nil が返っている")
     }
 
-    @Test("追加取得が失敗したら知らせを立てて追い読みを止める")
+    @Test("追加取得が一部失敗したら知らせを立て、続きがあることは残す")
     func fetchMoreSurfacesItsFailure() async throws {
         let model = model(
             loaded(["a"], hasMore: true),
@@ -62,9 +62,10 @@ struct HomeViewModelTests {
         let more = try await model.fetchMore()
 
         #expect(model.viewState.notice != nil, "追加取得の失敗が握り潰されている")
+        #expect(model.viewState.notice?.retry == .loadMore, "続きの失敗なのに続きを読み直さない")
 
-        guard case .last? = more else {
-            Issue.record("失敗したのに続きを読もうとしている")
+        guard case .more? = more else {
+            Issue.record("失敗しただけで続きが無いことにされている")
             return
         }
     }
@@ -167,6 +168,7 @@ struct HomeViewModelTests {
         _ = try await model.fetchRepaired()
 
         #expect(model.viewState.notice != nil, "取り直しの失敗が握り潰されている")
+        #expect(model.viewState.notice?.retry == .repair, "取り直しの失敗なのに続きを読もうとしている")
     }
 
     @Test("捨てられた結果は続きとして積まない")
