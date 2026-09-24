@@ -78,3 +78,14 @@ SHARED_DIR=/path/to/kmp-app-template make verify
 ```
 
 </details>
+
+<details>
+<summary>テンプレートから作ったとき</summary>
+
+パッケージの接頭辞と GitHub のオーナーを置き換えます。3 つのリポジトリそれぞれで実行します。
+
+```sh
+Scripts/rename.sh <GitHub のオーナー> <パッケージの接頭辞>    # 例: Scripts/rename.sh acme com.acme
+```
+
+</details>
