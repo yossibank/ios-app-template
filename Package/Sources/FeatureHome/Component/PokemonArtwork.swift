@@ -31,7 +31,7 @@ struct PokemonArtwork: View {
     }
 }
 
-struct PokemonArtworkPlaceholder: View {
+private struct PokemonArtworkPlaceholder: View {
     let accent: Color
 
     var body: some View {
@@ -41,7 +41,7 @@ struct PokemonArtworkPlaceholder: View {
     }
 }
 
-struct PokemonInitial: View {
+private struct PokemonInitial: View {
     let text: String
 
     var body: some View {

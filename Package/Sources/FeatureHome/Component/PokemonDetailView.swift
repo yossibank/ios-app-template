@@ -92,11 +92,11 @@ struct PokemonDetailView: View {
     }
 }
 
-struct PokemonStatRow: View {
+private struct PokemonStatRow: View {
     let stat: PokemonBaseStat
 
     private var fraction: Double {
-        min(max(Double(stat.value) / maxBaseStat, 0.02), 1)
+        min(max(Double(stat.value) / PokemonMetrics.maxBaseStat, 0.02), 1)
     }
 
     var body: some View {

@@ -19,7 +19,7 @@ struct PokemonStatBar: View {
     }
 }
 
-struct PokemonStatTotal: View {
+private struct PokemonStatTotal: View {
     let total: Int
 
     var body: some View {
@@ -30,12 +30,12 @@ struct PokemonStatTotal: View {
     }
 }
 
-struct StatFillBar: View {
+private struct StatFillBar: View {
     let total: Int
     let accent: Color
 
     private var fraction: Double {
-        min(max(Double(total) / maxTotalBaseStat, 0.04), 1)
+        min(max(Double(total) / PokemonMetrics.maxTotalBaseStat, 0.04), 1)
     }
 
     var body: some View {

@@ -4,7 +4,7 @@ struct Banner: View {
     let text: String
 
     var color: Color = .secondary
-    var action: String = HomeStrings.reload
+    let action: String
     var busy = false
 
     var retry: (() -> Void)?

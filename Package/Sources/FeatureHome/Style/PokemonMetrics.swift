@@ -1,10 +1,12 @@
 import SwiftUI
 
-let maxTotalBaseStat = 720.0
-let maxBaseStat = 255.0
-let skeletonCount = 8
+enum PokemonMetrics {
+    static let maxTotalBaseStat = 720.0
+    static let maxBaseStat = 255.0
+    static let skeletonCount = 8
 
-let gridColumns = [
-    GridItem(.flexible(), spacing: 10),
-    GridItem(.flexible(), spacing: 10)
-]
+    static let gridColumns = [
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
+    ]
+}

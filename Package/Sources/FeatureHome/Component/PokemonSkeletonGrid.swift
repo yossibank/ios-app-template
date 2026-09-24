@@ -3,8 +3,8 @@ import SwiftUI
 struct PokemonSkeletonGrid: View {
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: gridColumns, spacing: 10) {
-                ForEach(0..<skeletonCount, id: \.self) { _ in
+            LazyVGrid(columns: PokemonMetrics.gridColumns, spacing: 10) {
+                ForEach(0..<PokemonMetrics.skeletonCount, id: \.self) { _ in
                     PokemonSkeletonCard()
                 }
             }
@@ -15,7 +15,7 @@ struct PokemonSkeletonGrid: View {
     }
 }
 
-struct PokemonSkeletonCard: View {
+private struct PokemonSkeletonCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             PokemonSkeletonBlock(width: 44, height: 12)
@@ -42,7 +42,7 @@ struct PokemonSkeletonCard: View {
     }
 }
 
-struct PokemonSkeletonBlock: View {
+private struct PokemonSkeletonBlock: View {
     let width: CGFloat?
     let height: CGFloat
 
