@@ -1,6 +1,15 @@
 // swift-tools-version: 6.2
 
+import Foundation
 import PackageDescription
+
+let sharedDir = Context.environment["SHARED_DIR"]
+
+let shared: (dependency: Package.Dependency, identity: String) = if let sharedDir {
+    (.package(path: sharedDir), URL(fileURLWithPath: sharedDir).lastPathComponent)
+} else {
+    (.package(url: "https://github.com/yossibank/kmp-app-template.git", exact: "0.19.0"), "kmp-app-template")
+}
 
 let swiftSettings: [SwiftSetting] = [
     .enableUpcomingFeature("MemberImportVisibility"),
@@ -33,10 +42,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(
-            url: "https://github.com/yossibank/kmp-app-template.git",
-            exact: "0.19.0"
-        )
+        shared.dependency
     ],
     targets: [
         .target(
@@ -51,7 +57,7 @@ let package = Package(
             dependencies: [
                 .product(
                     name: "Shared",
-                    package: "kmp-app-template"
+                    package: shared.identity
                 )
             ],
             swiftSettings: swiftSettings
