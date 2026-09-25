@@ -39,21 +39,15 @@ private struct HomeContent: View {
 
     @Bindable var viewState: HomeViewModel.State
 
-    @Namespace private var cardNamespace
-
     let pokemon: [Pokemon]
     let actions: ScreenActions
 
     private var filtered: [Pokemon] {
-        pokemon.filtered(
-            query: viewState.query,
-            type: viewState.selectedType,
-            sort: viewState.sort
-        )
+        pokemon.filtered(query: viewState.query, sort: viewState.sort)
     }
 
     private var isFiltering: Bool {
-        !viewState.query.isEmpty || viewState.selectedType != nil
+        !viewState.query.isEmpty
     }
 
     var body: some View {
@@ -74,34 +68,16 @@ private struct HomeContent: View {
                     sort: $viewState.sort
                 )
 
-                PokemonFilterBar(types: pokemon.availableTypes, selected: $viewState.selectedType)
-
-                if viewState.incompleteCount > 0 {
-                    Banner(
-                        text: HomeStrings.incomplete(viewState.incompleteCount),
-                        actionTitle: HomeStrings.retryDetails,
-                        isBusy: actions.isRunning(.update)
-                    ) {
-                        actions.request(.update)
-                    }
-                }
-
                 PokemonGrid {
                     ForEach(items) { item in
-                        Button {
-                            viewState.route = .detail(item)
-                        } label: {
-                            PokemonCard(pokemon: item)
-                        }
-                        .buttonStyle(.card)
-                        .matchedTransitionSource(id: item.id, in: cardNamespace)
-                        .onAppear {
-                            guard !isFiltering, viewState.notice == nil, prefetch.contains(item.id) else {
-                                return
-                            }
+                        PokemonCard(pokemon: item)
+                            .onAppear {
+                                guard !isFiltering, viewState.notice == nil, prefetch.contains(item.id) else {
+                                    return
+                                }
 
-                            actions.request(.loadMore)
-                        }
+                                actions.request(.loadMore)
+                            }
                     }
                 }
 
@@ -112,8 +88,8 @@ private struct HomeContent: View {
                 }
 
                 if let notice = viewState.notice {
-                    Banner(text: notice.failure.message, tint: .red, actionTitle: HomeStrings.reload) {
-                        actions.request(notice.failure.canRetry ? notice.retry : .reload)
+                    Banner(text: notice.message, tint: .red, actionTitle: HomeStrings.reload) {
+                        actions.request(notice.canRetry ? .loadMore : .reload)
                     }
                 }
             }
@@ -124,7 +100,7 @@ private struct HomeContent: View {
         }
         .overlay {
             if items.isEmpty {
-                PokemonNoMatch(query: viewState.query, selectedType: viewState.selectedType)
+                ContentUnavailableView.search(text: viewState.query)
             }
         }
         .searchable(
@@ -135,10 +111,6 @@ private struct HomeContent: View {
             Button(HomeStrings.reload, systemImage: "arrow.clockwise") {
                 actions.request(.reload)
             }
-        }
-        .navigationDestination(item: $viewState.route) { route in
-            PokemonDetailView(pokemon: route.pokemon)
-                .navigationTransition(.zoom(sourceID: route.pokemon.id, in: cardNamespace))
         }
     }
 }

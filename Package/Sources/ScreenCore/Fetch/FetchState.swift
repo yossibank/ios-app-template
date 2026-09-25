@@ -21,18 +21,18 @@ public final class FetchState<Value> {
         reachedEnd = false
         phase = .loading
 
-        return replace(work)
+        return replace(.reload, work)
     }
 
-    func refresh(_ work: @escaping @MainActor () async throws(FetchFailure) -> Value) async {
+    @discardableResult
+    func refresh(_ work: @escaping @MainActor () async throws(FetchFailure) -> Value) -> Task<Void, Never>? {
         guard isLoaded else {
-            await reload(work)?.value
-            return
+            return reload(work)
         }
 
         reachedEnd = false
 
-        await replace(work)?.value
+        return replace(.refresh, work)
     }
 
     @discardableResult
@@ -57,19 +57,6 @@ public final class FetchState<Value> {
         }
     }
 
-    @discardableResult
-    func update(_ work: @escaping @MainActor () async throws(FetchFailure) -> Value?) -> Task<Void, Never>? {
-        guard isLoaded else {
-            return nil
-        }
-
-        return run(.update, replacing: false, work) { value in
-            if let value {
-                self.phase = .loaded(value)
-            }
-        }
-    }
-
     private var isLoaded: Bool {
         if case .loaded = phase {
             true
@@ -78,8 +65,11 @@ public final class FetchState<Value> {
         }
     }
 
-    private func replace(_ work: @escaping @MainActor () async throws(FetchFailure) -> Value) -> Task<Void, Never>? {
-        run(.reload, replacing: true, work) { value in
+    private func replace(
+        _ operation: FetchOperation,
+        _ work: @escaping @MainActor () async throws(FetchFailure) -> Value
+    ) -> Task<Void, Never>? {
+        run(operation, replacing: true, work) { value in
             self.phase = .loaded(value)
         } failed: { failure in
             self.phase = .failed(failure)

@@ -8,7 +8,7 @@ let sharedDir = Context.environment["SHARED_DIR"]
 let shared: (dependency: Package.Dependency, identity: String) = if let sharedDir {
     (.package(path: sharedDir), URL(fileURLWithPath: sharedDir).lastPathComponent)
 } else {
-    (.package(url: "https://github.com/yossibank/kmp-app-template.git", exact: "0.20.0"), "kmp-app-template")
+    (.package(url: "https://github.com/yossibank/kmp-app-template.git", exact: "0.21.0"), "kmp-app-template")
 }
 
 let swiftSettings: [SwiftSetting] = [
@@ -55,6 +55,7 @@ let package = Package(
         .target(
             name: "SharedCore",
             dependencies: [
+                "ScreenCore",
                 .product(
                     name: "Shared",
                     package: shared.identity
@@ -82,7 +83,7 @@ let package = Package(
         ),
         .testTarget(
             name: "SharedCoreTests",
-            dependencies: ["SharedCore"],
+            dependencies: ["ScreenCore", "SharedCore"],
             swiftSettings: swiftSettings
         ),
         .testTarget(

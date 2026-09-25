@@ -1,17 +1,6 @@
 {
   "sourceLanguage": "ja",
   "strings": {
-    "home.detail_missing": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このポケモンの詳細は取得できていません"
-          }
-        }
-      }
-    },
     "home.empty_description": {
       "extractionState": "manual",
       "localizations": {
@@ -34,50 +23,6 @@
         }
       }
     },
-    "home.filter_all": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "すべて"
-          }
-        }
-      }
-    },
-    "home.incomplete": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld 件の詳細を取得できませんでした"
-          }
-        }
-      }
-    },
-    "home.no_type_match": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "このタイプのポケモンは読み込み済みの中にいません"
-          }
-        }
-      }
-    },
-    "home.no_type_match_description": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "下に進んで続きを読み込むと見つかるかもしれません"
-          }
-        }
-      }
-    },
     "home.number": {
       "extractionState": "manual",
       "localizations": {
@@ -96,17 +41,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%03lld"
-          }
-        }
-      }
-    },
-    "home.offline": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "接続を確認してください"
           }
         }
       }
@@ -144,17 +78,6 @@
         }
       }
     },
-    "home.retry_details": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "詳細だけ取り直す"
-          }
-        }
-      }
-    },
     "home.search_prompt": {
       "extractionState": "manual",
       "localizations": {
@@ -162,17 +85,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "名前で絞り込む"
-          }
-        }
-      }
-    },
-    "home.server_error": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "サーバーが応答しませんでした（%lld）"
           }
         }
       }
@@ -210,105 +122,6 @@
         }
       }
     },
-    "home.sort.total": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "種族値が高い順"
-          }
-        }
-      }
-    },
-    "home.stat.attack": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "こうげき"
-          }
-        }
-      }
-    },
-    "home.stat.defense": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ぼうぎょ"
-          }
-        }
-      }
-    },
-    "home.stat.hp": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "HP"
-          }
-        }
-      }
-    },
-    "home.stat.other": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "その他"
-          }
-        }
-      }
-    },
-    "home.stat.special_attack": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "とくこう"
-          }
-        }
-      }
-    },
-    "home.stat.special_defense": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "とくぼう"
-          }
-        }
-      }
-    },
-    "home.stat.speed": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "すばやさ"
-          }
-        }
-      }
-    },
-    "home.timeout": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "時間内に応答がありませんでした"
-          }
-        }
-      }
-    },
     "home.title": {
       "extractionState": "manual",
       "localizations": {
@@ -316,259 +129,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "ポケモン"
-          }
-        }
-      }
-    },
-    "home.total": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld"
-          }
-        }
-      }
-    },
-    "home.total_caption": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "種族値"
-          }
-        }
-      }
-    },
-    "home.type.bug": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "むし"
-          }
-        }
-      }
-    },
-    "home.type.dark": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "あく"
-          }
-        }
-      }
-    },
-    "home.type.dragon": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ドラゴン"
-          }
-        }
-      }
-    },
-    "home.type.electric": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "でんき"
-          }
-        }
-      }
-    },
-    "home.type.fairy": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "フェアリー"
-          }
-        }
-      }
-    },
-    "home.type.fighting": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "かくとう"
-          }
-        }
-      }
-    },
-    "home.type.fire": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ほのお"
-          }
-        }
-      }
-    },
-    "home.type.flying": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ひこう"
-          }
-        }
-      }
-    },
-    "home.type.ghost": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ゴースト"
-          }
-        }
-      }
-    },
-    "home.type.grass": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "くさ"
-          }
-        }
-      }
-    },
-    "home.type.ground": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "じめん"
-          }
-        }
-      }
-    },
-    "home.type.ice": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "こおり"
-          }
-        }
-      }
-    },
-    "home.type.normal": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ノーマル"
-          }
-        }
-      }
-    },
-    "home.type.poison": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "どく"
-          }
-        }
-      }
-    },
-    "home.type.psychic": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "エスパー"
-          }
-        }
-      }
-    },
-    "home.type.rock": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "いわ"
-          }
-        }
-      }
-    },
-    "home.type.steel": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "はがね"
-          }
-        }
-      }
-    },
-    "home.type.unknown": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不明"
-          }
-        }
-      }
-    },
-    "home.type.water": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "みず"
-          }
-        }
-      }
-    },
-    "home.unexpected": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "予期しないエラーが発生しました"
-          }
-        }
-      }
-    },
-    "home.unreadable": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "データを読み取れませんでした"
           }
         }
       }
