@@ -1,0 +1,30 @@
+#!/bin/sh
+set -eu
+
+swiftformat=${SWIFTFORMAT:-mint run swiftformat}
+swiftlint=${SWIFTLINT:-mint run swiftlint}
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR -- '*.swift')
+
+if [ -z "$staged" ]; then
+    exit 0
+fi
+
+partial=$(git diff --name-only -- $staged)
+whole=$(echo "$staged" | grep -vxF "$partial" || true)
+
+if [ -n "$whole" ]; then
+    $swiftformat --quiet $whole
+    $swiftlint --fix --quiet $whole
+    git add $whole
+fi
+
+if ! $swiftformat --lint --quiet $staged || ! $swiftlint lint --strict --quiet $staged; then
+    echo "" >&2
+    echo "整形か lint に失敗しました。" >&2
+    if [ -n "$partial" ]; then
+        echo "一部だけステージしたファイルは自動で直しません。make format してからステージし直してください。" >&2
+        echo "$partial" | sed 's/^/  /' >&2
+    fi
+    exit 1
+fi

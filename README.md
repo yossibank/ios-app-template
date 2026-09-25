@@ -64,7 +64,7 @@ flowchart LR
 > [!NOTE]
 > 共通コアを GitHub から取得するため、`~/.netrc` に `api.github.com` の資格情報が必要です。
 
-1. `make bootstrap` で SwiftFormat / SwiftLint を用意する
+1. `make bootstrap` で SwiftFormat / SwiftLint と、コミット時に整形するフックを用意する
 2. `make open` で `AppTemplate.xcworkspace` を開く
 3. 変更したら `make verify` を通す
 

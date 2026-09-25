@@ -5,10 +5,13 @@
 --enable wrapIfStatementBodies
 --enable wrapGuardStatementBodies
 --enable wrapIfExpressionBodies
+--enable organizeDeclarations
 
 --commas inline
 --header strip
---maxwidth 120
+--mark-categories false
+--maxwidth 100
+--organization-mode type
 --ranges no-space
 --redundanttype inferred
 --self init-only

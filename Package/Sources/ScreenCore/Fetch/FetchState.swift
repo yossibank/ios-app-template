@@ -5,10 +5,19 @@ import Observation
 @Observable
 public final class FetchState<Value> {
     public private(set) var phase: FetchPhase<Value> = .idle
+
     private(set) var running: FetchOperation?
 
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private var reachedEnd = false
+
+    private var isLoaded: Bool {
+        if case .loaded = phase {
+            true
+        } else {
+            false
+        }
+    }
 
     public init() {}
 
@@ -17,7 +26,9 @@ public final class FetchState<Value> {
     }
 
     @discardableResult
-    func reload(_ work: @escaping @MainActor () async throws(FetchFailure) -> Value) -> Task<Void, Never>? {
+    func reload(
+        _ work: @escaping @MainActor () async throws(FetchFailure) -> Value
+    ) -> Task<Void, Never>? {
         reachedEnd = false
         phase = .loading
 
@@ -25,7 +36,9 @@ public final class FetchState<Value> {
     }
 
     @discardableResult
-    func refresh(_ work: @escaping @MainActor () async throws(FetchFailure) -> Value) -> Task<Void, Never>? {
+    func refresh(
+        _ work: @escaping @MainActor () async throws(FetchFailure) -> Value
+    ) -> Task<Void, Never>? {
         guard isLoaded else {
             return reload(work)
         }
@@ -36,8 +49,9 @@ public final class FetchState<Value> {
     }
 
     @discardableResult
-    func loadMore(_ work: @escaping @MainActor () async throws(FetchFailure) -> FetchMore<Value>?)
-        -> Task<Void, Never>? {
+    func loadMore(
+        _ work: @escaping @MainActor () async throws(FetchFailure) -> FetchMore<Value>?
+    ) -> Task<Void, Never>? {
         guard isLoaded, !reachedEnd else {
             return nil
         }
@@ -54,14 +68,6 @@ public final class FetchState<Value> {
             case nil:
                 break
             }
-        }
-    }
-
-    private var isLoaded: Bool {
-        if case .loaded = phase {
-            true
-        } else {
-            false
         }
     }
 
