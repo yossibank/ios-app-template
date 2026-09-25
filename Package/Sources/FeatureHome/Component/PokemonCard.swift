@@ -6,6 +6,10 @@ struct PokemonCard: View {
 
     private let accent = Color.accentColor
 
+    private var accessibilityLabel: String {
+        [HomeStrings.number(pokemon.id), pokemon.name.capitalized].joined(separator: "、")
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(HomeStrings.number(pokemon.id))
@@ -45,9 +49,5 @@ struct PokemonCard: View {
         .contentShape(PokemonMetrics.cardShape)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
-    }
-
-    private var accessibilityLabel: String {
-        [HomeStrings.number(pokemon.id), pokemon.name.capitalized].joined(separator: "、")
     }
 }

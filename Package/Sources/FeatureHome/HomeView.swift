@@ -72,7 +72,11 @@ private struct HomeContent: View {
                     ForEach(items) { item in
                         PokemonCard(pokemon: item)
                             .onAppear {
-                                guard !isFiltering, viewState.notice == nil, prefetch.contains(item.id) else {
+                                guard
+                                    !isFiltering,
+                                    viewState.notice == nil,
+                                    prefetch.contains(item.id)
+                                else {
                                     return
                                 }
 

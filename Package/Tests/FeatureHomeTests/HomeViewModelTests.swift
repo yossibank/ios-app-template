@@ -158,10 +158,10 @@ struct HomeViewModelTests {
 }
 
 private final class StubListing: PokemonListing, @unchecked Sendable {
+    private(set) var closed = false
+
     private let pages: [PokemonListPage]
     private var index = 0
-
-    private(set) var closed = false
 
     init(_ pages: [PokemonListPage]) {
         self.pages = pages
