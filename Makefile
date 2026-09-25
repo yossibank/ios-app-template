@@ -24,6 +24,7 @@ testplan:
 
 bootstrap:
 	mint bootstrap
+	git config core.hooksPath Scripts/git-hooks
 
 lint:
 	$(SWIFTFORMAT) --lint .
