@@ -11,6 +11,7 @@ struct HomeContent: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var refreshes = 0
+    @State private var isRefreshing = false
 
     let list: PokemonList
     let actions: ScreenActions
@@ -68,12 +69,14 @@ struct HomeContent: View {
                         text: notice.message,
                         tint: .red,
                         actionTitle: .homeReload,
-                        isBusy: actions.isLoadingMore
+                        isBusy: actions.isLoadingMore || isRefreshing
                     ) {
                         if notice.canRetry {
                             actions.loadMore()
                         } else {
-                            actions.reload()
+                            Task {
+                                await refresh()
+                            }
                         }
                     }
                 }
@@ -90,8 +93,7 @@ struct HomeContent: View {
             .padding(.bottom, PokemonMetrics.contentTopInset)
         }
         .refreshable {
-            await actions.refresh()
-            refreshes += 1
+            await refresh()
         }
         .sensoryFeedback(.success, trigger: refreshes)
         .sensoryFeedback(trigger: list.notice) { _, notice in
@@ -108,8 +110,18 @@ struct HomeContent: View {
         )
         .toolbar {
             Button(.homeReload, systemImage: "arrow.clockwise") {
-                actions.reload()
+                Task {
+                    await refresh()
+                }
             }
+            .disabled(isRefreshing)
         }
+    }
+
+    private func refresh() async {
+        isRefreshing = true
+        await actions.refresh()
+        isRefreshing = false
+        refreshes += 1
     }
 }
