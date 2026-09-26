@@ -4,10 +4,10 @@ included:
   - App/AppTemplate
 
 disabled_rules:
-  - line_length            # SwiftFormat の --maxwidth 120
+  - line_length
   - colon
   - opening_brace
-  - trailing_comma         # SwiftFormat の --commas inline
+  - trailing_comma
 
   - cyclomatic_complexity
   - nesting
@@ -34,25 +34,24 @@ opt_in_rules:
 
 custom_rules:
   shared_import_outside_core:
-    name: "共通コアの直接 import"
+    name: '共通コアの直接 import'
     regex: '^[ \t]*(@_exported[ \t]+)?import[ \t]+Shared\b'
-    message: "共通コアは SharedCore 経由で使う。SharedCore 以外から import Shared しない"
+    message: '共通コアは SharedCore 経由で使う。SharedCore 以外から import Shared しない'
     severity: error
     excluded_match_kinds:
       - comment
       - doccomment
       - string
     excluded:
-      - ".*/Package/Sources/SharedCore/.*"
-      - ".*/Package/Tests/SharedCoreTests/.*"
+      - '.*/Package/Sources/SharedCore/.*'
+      - '.*/Package/Tests/SharedCoreTests/.*'
 
   global_function:
-    name: "グローバル関数"
+    name: 'グローバル関数'
     regex: '^(?:@\w+(?:\([^)]*\))?[ \t]+)*(?:(?:private|fileprivate|internal|public|open)[ \t]+)*func[ \t]'
-    message: "グローバル関数を作らない。型のメソッドか、対象の型への extension にする"
+    message: 'グローバル関数を作らない。型のメソッドか、対象の型への extension にする'
     severity: error
     excluded_match_kinds:
       - comment
       - doccomment
       - string
-
