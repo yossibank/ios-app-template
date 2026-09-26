@@ -73,3 +73,16 @@ struct PokemonCard: View {
         }
     }
 }
+
+#Preview("カード") {
+    PokemonCard(pokemon: Pokemon(id: 25, name: "pikachu", artwork: nil))
+        .frame(width: 170)
+        .padding()
+}
+
+#Preview("カード（読み込み中）") {
+    PokemonCard(pokemon: Pokemon(id: 0, name: "pokemon", artwork: nil))
+        .redacted(reason: .placeholder)
+        .frame(width: 170)
+        .padding()
+}

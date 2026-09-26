@@ -8,6 +8,10 @@
             PokemonList(pokemon: pokemon, total: 1351)
         }
 
+        static var degradedList: PokemonList {
+            PokemonList(pokemon: pokemon, total: 1351, notice: .offline)
+        }
+
         static var pokemon: [Pokemon] {
             [
                 .fixture(id: 1, name: "bulbasaur"),
@@ -38,6 +42,18 @@
         }
     }
 
+    #Preview("知らせ付き") {
+        NavigationStack {
+            HomeView(source: .snapshot(.loaded(PreviewData.degradedList)))
+        }
+    }
+
+    #Preview("失敗") {
+        NavigationStack {
+            HomeView(source: .snapshot(.failed(.offline)))
+        }
+    }
+
     #Preview("空") {
         NavigationStack {
             HomeView(source: .snapshot(.loaded(PokemonList(pokemon: [], total: 0))))
@@ -47,6 +63,13 @@
     #Preview("文字を大きくしたとき") {
         NavigationStack {
             HomeView(source: .snapshot(.loaded(PreviewData.list)))
+        }
+        .environment(\.dynamicTypeSize, .accessibility3)
+    }
+
+    #Preview("文字を大きくしたときの読み込み中") {
+        NavigationStack {
+            HomeView(source: .snapshot(.loading))
         }
         .environment(\.dynamicTypeSize, .accessibility3)
     }
