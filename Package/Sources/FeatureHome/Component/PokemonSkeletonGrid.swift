@@ -1,14 +1,19 @@
 import ScreenCore
+import SharedCore
 import SwiftUI
 
 struct PokemonSkeletonGrid: View {
+    private static let count = 8
+
     var body: some View {
         ScrollView {
             PokemonGrid {
-                ForEach(0..<PokemonMetrics.skeletonCount, id: \.self) { _ in
-                    PokemonSkeletonCard()
+                ForEach(0..<Self.count, id: \.self) { _ in
+                    PokemonCard(pokemon: .placeholder)
                 }
             }
+            .redacted(reason: .placeholder)
+            .shimmering()
             .pokemonContentInsets()
         }
         .scrollDisabled(true)
@@ -16,21 +21,6 @@ struct PokemonSkeletonGrid: View {
     }
 }
 
-private struct PokemonSkeletonCard: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SkeletonBlock(width: 44, height: 12)
-
-            Circle()
-                .fill(.quaternary)
-                .padding(12)
-                .aspectRatio(1, contentMode: .fit)
-                .frame(maxWidth: .infinity)
-
-            SkeletonBlock(width: 96, height: 16)
-                .padding(.top, 2)
-        }
-        .pokemonCardInsets()
-        .background(PokemonMetrics.cardFill, in: PokemonMetrics.cardShape)
-    }
+private extension Pokemon {
+    static let placeholder = Pokemon(id: 0, name: "pokemon", artwork: nil)
 }

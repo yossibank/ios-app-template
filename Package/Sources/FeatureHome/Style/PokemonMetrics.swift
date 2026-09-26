@@ -1,8 +1,6 @@
 import SwiftUI
 
 enum PokemonMetrics {
-    static let skeletonCount = 8
-
     static let cardCornerRadius = 20.0
     static let cardSpacing = 10.0
     static let contentInset = 12.0

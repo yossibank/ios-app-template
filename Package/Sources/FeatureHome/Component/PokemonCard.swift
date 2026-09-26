@@ -2,12 +2,17 @@ import SharedCore
 import SwiftUI
 
 struct PokemonCard: View {
+    @Environment(\.redactionReasons) private var redactionReasons
     @State private var artwork: Artwork?
 
     let pokemon: Pokemon
 
+    private var isPlaceholder: Bool {
+        redactionReasons.contains(.placeholder)
+    }
+
     private var accent: Color {
-        artwork?.tint ?? .accentColor
+        isPlaceholder ? .secondary : artwork?.tint ?? .accentColor
     }
 
     var body: some View {
@@ -19,7 +24,7 @@ struct PokemonCard: View {
 
             PokemonArtwork(
                 image: artwork?.image,
-                initial: pokemon.artwork == nil ? pokemon.name : nil,
+                initial: pokemon.artwork == nil && !isPlaceholder ? pokemon.name : nil,
                 accent: accent
             )
             .aspectRatio(1, contentMode: .fit)
@@ -31,13 +36,15 @@ struct PokemonCard: View {
         }
         .pokemonCardInsets()
         .background(alignment: .topTrailing) {
-            Text(.homeNumberPlain(pokemon.number))
-                .font(.system(size: 64, weight: .black, design: .rounded))
-                .foregroundStyle(accent.opacity(0.10))
-                .monospacedDigit()
-                .lineLimit(1)
-                .padding(.horizontal, 6)
-                .accessibilityHidden(true)
+            if !isPlaceholder {
+                Text(.homeNumberPlain(pokemon.number))
+                    .font(.system(size: 64, weight: .black, design: .rounded))
+                    .foregroundStyle(accent.opacity(0.10))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .padding(.horizontal, 6)
+                    .accessibilityHidden(true)
+            }
         }
         .background {
             PokemonMetrics.cardShape
