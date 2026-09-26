@@ -1,7 +1,11 @@
+import Observation
+
 @MainActor
-public protocol ScreenViewModel: ViewModel {
+public protocol ScreenViewModel: AnyObject, Observable {
+    associatedtype State: ScreenViewState
     associatedtype Value
 
+    var viewState: State { get }
     var fetchState: FetchState<Value> { get }
 
     func fetch() async throws(FetchFailure) -> Value

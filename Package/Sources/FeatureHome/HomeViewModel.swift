@@ -70,7 +70,7 @@ extension HomeViewModel {
 
 extension HomeViewModel {
     @Observable
-    final class State: ViewState {
+    final class State: ScreenViewState {
         var query = ""
         var total = 0
         var notice: FetchFailure?

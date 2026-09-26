@@ -236,6 +236,10 @@ struct FetchStateTests {
 @MainActor
 @Observable
 private final class CountingModel: ScreenViewModel {
+    @Observable
+    final class State: ScreenViewState {}
+
+    let viewState = State()
     let fetchState = FetchState<[Int]>()
     private(set) var fetchCalls = 0
 
