@@ -1,28 +1,21 @@
-import SharedCore
 import SwiftUI
+import UIKit
 
 struct PokemonArtwork: View {
-    let artwork: URL?
-    let fallback: String
+    let image: UIImage?
+    let initial: String?
     let accent: Color
 
     var body: some View {
-        if let artwork {
-            AsyncImage(
-                url: artwork,
-                transaction: Transaction(animation: .easeOut(duration: 0.2))
-            ) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .transition(.opacity)
-                } else {
-                    PokemonArtworkPlaceholder(accent: accent)
-                }
-            }
+        if let image {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
+        } else if let initial {
+            PokemonInitial(text: initial)
         } else {
-            PokemonInitial(text: fallback)
+            PokemonArtworkPlaceholder(accent: accent)
         }
     }
 }

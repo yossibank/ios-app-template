@@ -2,9 +2,13 @@ import SharedCore
 import SwiftUI
 
 struct PokemonCard: View {
+    @State private var artwork: Artwork?
+
     let pokemon: Pokemon
 
-    private let accent = Color.accentColor
+    private var accent: Color {
+        artwork?.tint ?? .accentColor
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -13,9 +17,13 @@ struct PokemonCard: View {
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
 
-            PokemonArtwork(artwork: pokemon.artwork, fallback: pokemon.name, accent: accent)
-                .aspectRatio(1, contentMode: .fit)
-                .frame(maxWidth: .infinity)
+            PokemonArtwork(
+                image: artwork?.image,
+                initial: pokemon.artwork == nil ? pokemon.name : nil,
+                accent: accent
+            )
+            .aspectRatio(1, contentMode: .fit)
+            .frame(maxWidth: .infinity)
 
             Text(pokemon.name.capitalized)
                 .font(.headline)
@@ -45,5 +53,16 @@ struct PokemonCard: View {
         .contentShape(PokemonMetrics.cardShape)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(.homeCardLabel(pokemon.number, pokemon.name.capitalized))
+        .task(id: pokemon.artwork) {
+            guard let url = pokemon.artwork else {
+                return
+            }
+
+            let loaded = await ArtworkStore.shared.artwork(for: url)
+
+            withAnimation(.easeOut(duration: 0.3)) {
+                artwork = loaded
+            }
+        }
     }
 }
