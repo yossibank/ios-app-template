@@ -6,11 +6,19 @@ public struct Banner: View {
         case failure
     }
 
+    public enum Accessory {
+        case none
+        case progress
+        case button(LocalizedStringResource, action: () -> Void)
+
+        public static func retry(_ action: @escaping () -> Void) -> Self {
+            .button(.screenRetry, action: action)
+        }
+    }
+
     private let text: String
     private let style: Style
-    private let actionTitle: LocalizedStringResource
-    private let isBusy: Bool
-    private let action: (() -> Void)?
+    private let accessory: Accessory
 
     private var tint: Color {
         switch style {
@@ -25,15 +33,11 @@ public struct Banner: View {
     public init(
         text: String,
         style: Style = .info,
-        actionTitle: LocalizedStringResource? = nil,
-        isBusy: Bool = false,
-        action: (() -> Void)? = nil
+        accessory: Accessory = .none
     ) {
         self.text = text
         self.style = style
-        self.actionTitle = actionTitle ?? .screenRetry
-        self.isBusy = isBusy
-        self.action = action
+        self.accessory = accessory
     }
 
     public var body: some View {
@@ -44,11 +48,16 @@ public struct Banner: View {
 
             Spacer()
 
-            if isBusy {
+            switch accessory {
+            case .none:
+                EmptyView()
+
+            case .progress:
                 ProgressView()
                     .controlSize(.small)
-            } else if let action {
-                Button(actionTitle, action: action)
+
+            case let .button(title, action):
+                Button(title, action: action)
                     .font(.footnote)
             }
         }
@@ -57,13 +66,13 @@ public struct Banner: View {
 }
 
 #Preview("知らせ") {
-    Banner(text: "8 件の詳細を取得できませんでした") {}
+    Banner(text: "8 件の詳細を取得できませんでした", accessory: .retry {})
 }
 
 #Preview("知らせ（実行中）") {
-    Banner(text: "8 件の詳細を取得できませんでした", isBusy: true) {}
+    Banner(text: "8 件の詳細を取得できませんでした", accessory: .progress)
 }
 
 #Preview("失敗の知らせ") {
-    Banner(text: "接続を確認してください", style: .failure) {}
+    Banner(text: "接続を確認してください", style: .failure, accessory: .retry {})
 }

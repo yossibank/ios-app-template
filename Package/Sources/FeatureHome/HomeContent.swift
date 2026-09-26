@@ -68,16 +68,10 @@ struct HomeContent: View {
                     Banner(
                         text: notice.message,
                         style: .failure,
-                        isBusy: actions.isLoadingMore || isRefreshing
-                    ) {
-                        if notice.canRetry {
-                            actions.loadMore()
-                        } else {
-                            Task {
-                                await refresh()
-                            }
-                        }
-                    }
+                        accessory: actions.isLoadingMore || isRefreshing
+                            ? .progress
+                            : .retry { retry(after: notice) }
+                    )
                 }
             }
             .pokemonContentInsets()
@@ -122,5 +116,15 @@ struct HomeContent: View {
         await actions.refresh()
         isRefreshing = false
         refreshes += 1
+    }
+
+    private func retry(after notice: FetchFailure) {
+        if notice.canRetry {
+            actions.loadMore()
+        } else {
+            Task {
+                await refresh()
+            }
+        }
     }
 }
