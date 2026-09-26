@@ -23,7 +23,7 @@ SwiftUI と Kotlin Multiplatform で作る、ポケモン図鑑アプリのテ�
 
 </div>
 
-PokeAPI のポケモンを、無限スクロール・タイプでの絞り込み・並び替え・詳細画面で見られます。
+PokeAPI のポケモンを、無限スクロールと名前での絞り込みで見られます。
 
 ## 3 つのリポジトリ
 
@@ -56,7 +56,7 @@ flowchart LR
 | --- | --- |
 | `SharedCore` | 共通コアとの境界。KMP の型を Swift の型に直して渡す |
 | `ScreenCore` | 画面の土台（読み込み状態の管理）と、機能に依らない UI 部品 |
-| `FeatureHome` | 一覧と詳細の画面 |
+| `FeatureHome` | 一覧の画面 |
 | `AppRoot` | 画面の組み立て |
 
 ## 動かし方
