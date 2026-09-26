@@ -89,39 +89,6 @@
         }
       }
     },
-    "home.sort.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "名前"
-          }
-        }
-      }
-    },
-    "home.sort.number": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "図鑑番号"
-          }
-        }
-      }
-    },
-    "home.sort.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "並び替え"
-          }
-        }
-      }
-    },
     "home.title": {
       "extractionState": "manual",
       "localizations": {

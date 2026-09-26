@@ -72,7 +72,6 @@ extension HomeViewModel {
     @Observable
     final class State: ViewState {
         var query = ""
-        var sort: PokemonSort = .number
         var total = 0
         var notice: FetchFailure?
     }

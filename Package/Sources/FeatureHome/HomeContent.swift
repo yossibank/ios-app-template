@@ -11,7 +11,7 @@ struct HomeContent: View {
     let actions: ScreenActions
 
     private var filtered: [Pokemon] {
-        pokemon.filtered(query: viewState.query, sort: viewState.sort)
+        pokemon.filtered(query: viewState.query)
     }
 
     private var isFiltering: Bool {
@@ -32,8 +32,7 @@ struct HomeContent: View {
                     shown: items.count,
                     loaded: pokemon.count,
                     total: viewState.total,
-                    filtering: isFiltering,
-                    sort: $viewState.sort
+                    filtering: isFiltering
                 )
 
                 PokemonGrid {

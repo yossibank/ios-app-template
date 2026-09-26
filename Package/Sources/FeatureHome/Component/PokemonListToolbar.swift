@@ -6,8 +6,6 @@ struct PokemonListToolbar: View {
     let total: Int
     let filtering: Bool
 
-    @Binding var sort: PokemonSort
-
     var body: some View {
         HStack {
             Text(
@@ -20,17 +18,6 @@ struct PokemonListToolbar: View {
             .monospacedDigit()
 
             Spacer()
-
-            Menu {
-                Picker(HomeStrings.sortTitle, selection: $sort) {
-                    ForEach(PokemonSort.allCases, id: \.self) { option in
-                        Text(option.label).tag(option)
-                    }
-                }
-            } label: {
-                Text(sort.label)
-                    .font(.caption)
-            }
         }
         .padding(.horizontal, 4)
     }

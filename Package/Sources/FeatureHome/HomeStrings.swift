@@ -21,18 +21,6 @@ enum HomeStrings {
         Key.reload.text
     }
 
-    static var sortTitle: String {
-        Key.sortTitle.text
-    }
-
-    static var sortNumber: String {
-        Key.sortNumber.text
-    }
-
-    static var sortName: String {
-        Key.sortName.text
-    }
-
     static func number(_ id: Int) -> String {
         String(format: Key.number.text, id)
     }
@@ -61,9 +49,6 @@ extension HomeStrings {
         case numberPlain = "home.number_plain"
         case progress = "home.progress"
         case progressFiltered = "home.progress_filtered"
-        case sortTitle = "home.sort.title"
-        case sortNumber = "home.sort.number"
-        case sortName = "home.sort.name"
     }
 }
 
