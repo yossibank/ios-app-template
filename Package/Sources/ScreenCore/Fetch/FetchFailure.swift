@@ -12,26 +12,30 @@ public struct FetchFailure: LocalizedError, Hashable, Sendable {
         self.message = message
         self.canRetry = canRetry
     }
+
+    public init(_ message: LocalizedStringResource, canRetry: Bool = true) {
+        self.init(String(localized: message), canRetry: canRetry)
+    }
 }
 
 public extension FetchFailure {
     static var offline: FetchFailure {
-        FetchFailure(ScreenStrings.offline)
+        FetchFailure(.screenOffline)
     }
 
     static var timeout: FetchFailure {
-        FetchFailure(ScreenStrings.timeout)
+        FetchFailure(.screenTimeout)
     }
 
     static var unreadable: FetchFailure {
-        FetchFailure(ScreenStrings.unreadable, canRetry: false)
+        FetchFailure(.screenUnreadable, canRetry: false)
     }
 
     static func unexpected(canRetry: Bool) -> FetchFailure {
-        FetchFailure(ScreenStrings.unexpected, canRetry: canRetry)
+        FetchFailure(.screenUnexpected, canRetry: canRetry)
     }
 
     static func server(statusCode: Int, canRetry: Bool) -> FetchFailure {
-        FetchFailure(ScreenStrings.serverError(statusCode: statusCode), canRetry: canRetry)
+        FetchFailure(.screenServerError(statusCode), canRetry: canRetry)
     }
 }

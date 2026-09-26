@@ -59,7 +59,7 @@ struct HomeContent: View {
                 }
 
                 if let notice = viewState.notice {
-                    Banner(text: notice.message, tint: .red, actionTitle: HomeStrings.reload) {
+                    Banner(text: notice.message, tint: .red, actionTitle: .homeReload) {
                         actions.request(notice.canRetry ? .loadMore : .reload)
                     }
                 }
@@ -76,10 +76,10 @@ struct HomeContent: View {
         }
         .searchable(
             text: $viewState.query,
-            prompt: HomeStrings.searchPrompt
+            prompt: .homeSearchPrompt
         )
         .toolbar {
-            Button(HomeStrings.reload, systemImage: "arrow.clockwise") {
+            Button(.homeReload, systemImage: "arrow.clockwise") {
                 actions.request(.reload)
             }
         }

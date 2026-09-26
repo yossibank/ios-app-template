@@ -6,13 +6,9 @@ struct PokemonCard: View {
 
     private let accent = Color.accentColor
 
-    private var accessibilityLabel: String {
-        [HomeStrings.number(pokemon.id), pokemon.name.capitalized].joined(separator: "、")
-    }
-
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(HomeStrings.number(pokemon.id))
+            Text(.homeNumber(pokemon.number))
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
@@ -27,7 +23,7 @@ struct PokemonCard: View {
         }
         .pokemonCardInsets()
         .background(alignment: .topTrailing) {
-            Text(HomeStrings.numberPlain(pokemon.id))
+            Text(.homeNumberPlain(pokemon.number))
                 .font(.system(size: 64, weight: .black, design: .rounded))
                 .foregroundStyle(accent.opacity(0.10))
                 .monospacedDigit()
@@ -48,6 +44,6 @@ struct PokemonCard: View {
         }
         .contentShape(PokemonMetrics.cardShape)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityLabel)
+        .accessibilityLabel(.homeCardLabel(pokemon.number, pokemon.name.capitalized))
     }
 }

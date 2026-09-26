@@ -14,16 +14,16 @@ public struct HomeView: View {
             )
         } empty: { actions in
             ContentUnavailableView {
-                Label(HomeStrings.emptyTitle, systemImage: "tray")
+                Label(.homeEmptyTitle, systemImage: "tray")
             } description: {
-                Text(HomeStrings.emptyDescription)
+                Text(.homeEmptyDescription)
             } actions: {
-                Button(HomeStrings.reload) {
+                Button(.homeReload) {
                     actions.request(.reload)
                 }
             }
         }
-        .navigationTitle(HomeStrings.title)
+        .navigationTitle(.homeTitle)
         .environment(\.screenStyle, .standard.showingWhileLoading { PokemonSkeletonGrid() })
     }
 }

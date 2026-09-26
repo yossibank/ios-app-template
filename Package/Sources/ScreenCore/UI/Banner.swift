@@ -3,14 +3,14 @@ import SwiftUI
 public struct Banner: View {
     private let text: String
     private let tint: Color
-    private let actionTitle: String
+    private let actionTitle: LocalizedStringResource
     private let isBusy: Bool
     private let action: (() -> Void)?
 
     public init(
         text: String,
         tint: Color = .secondary,
-        actionTitle: String,
+        actionTitle: LocalizedStringResource,
         isBusy: Bool = false,
         action: (() -> Void)? = nil
     ) {

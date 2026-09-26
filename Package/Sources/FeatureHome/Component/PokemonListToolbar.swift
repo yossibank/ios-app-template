@@ -10,8 +10,8 @@ struct PokemonListToolbar: View {
         HStack {
             Text(
                 filtering
-                    ? HomeStrings.progressFiltered(shown: shown, total: total, loaded: loaded)
-                    : HomeStrings.progress(loaded: loaded, total: total)
+                    ? .homeProgressFiltered(shown.ungrouped, total.ungrouped, loaded.ungrouped)
+                    : .homeProgress(loaded.ungrouped, total.ungrouped)
             )
             .font(.caption)
             .foregroundStyle(.secondary)

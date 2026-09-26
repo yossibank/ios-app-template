@@ -21,18 +21,12 @@ public struct ScreenStyle {
             },
             failure: { failure in
                 ContentUnavailableView {
-                    Label(
-                        ScreenStrings.loadFailed,
-                        systemImage: "exclamationmark.triangle"
-                    )
+                    Label(.screenLoadFailed, systemImage: "exclamationmark.triangle")
                 } description: {
                     Text(failure.message)
                 } actions: {
                     if failure.canRetry {
-                        Button(
-                            ScreenStrings.retry,
-                            action: failure.retry
-                        )
+                        Button(.screenRetry, action: failure.retry)
                     }
                 }
             }
