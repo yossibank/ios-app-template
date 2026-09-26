@@ -28,13 +28,6 @@ struct HomeContent: View {
 
         ScrollView {
             LazyVStack(spacing: PokemonMetrics.contentInset) {
-                PokemonListToolbar(
-                    shown: items.count,
-                    loaded: list.pokemon.count,
-                    total: list.total,
-                    filtering: isFiltering
-                )
-
                 PokemonGrid {
                     ForEach(items) { item in
                         PokemonCard(pokemon: item)
@@ -74,6 +67,15 @@ struct HomeContent: View {
                 }
             }
             .pokemonContentInsets()
+        }
+        .safeAreaInset(edge: .bottom) {
+            PokemonListToolbar(
+                shown: items.count,
+                loaded: list.pokemon.count,
+                total: list.total,
+                filtering: isFiltering
+            )
+            .padding(.bottom, PokemonMetrics.contentTopInset)
         }
         .refreshable {
             await actions.refresh()
