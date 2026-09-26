@@ -67,8 +67,7 @@ struct HomeContent: View {
                 if let notice = list.notice {
                     Banner(
                         text: notice.message,
-                        tint: .red,
-                        actionTitle: .homeReload,
+                        style: .failure,
                         isBusy: actions.isLoadingMore || isRefreshing
                     ) {
                         if notice.canRetry {
