@@ -1,46 +1,9 @@
 import SwiftUI
 
 public struct Banner: View {
-    public enum Style: Sendable {
-        case info
-        case failure
-    }
-
-    public enum Accessory {
-        case none
-        case progress
-        case button(LocalizedStringResource, action: () -> Void)
-
-        public static func retry(_ action: @escaping () -> Void) -> Self {
-            .button(.screenRetry, action: action)
-        }
-    }
-
-    private static let horizontalInset = 4.0
-
     private let text: String
     private let style: Style
     private let accessory: Accessory
-
-    private var tint: Color {
-        switch style {
-        case .info:
-            .secondary
-
-        case .failure:
-            .red
-        }
-    }
-
-    private var symbol: String {
-        switch style {
-        case .info:
-            "info.circle"
-
-        case .failure:
-            "exclamationmark.triangle"
-        }
-    }
 
     public init(
         text: String,
@@ -54,9 +17,9 @@ public struct Banner: View {
 
     public var body: some View {
         HStack {
-            Label(text, systemImage: symbol)
+            Label(text, systemImage: style.symbol)
                 .font(.footnote)
-                .foregroundStyle(tint)
+                .foregroundStyle(style.tint)
 
             Spacer()
 
@@ -73,18 +36,59 @@ public struct Banner: View {
                     .font(.footnote)
             }
         }
-        .padding(.horizontal, Self.horizontalInset)
+        .padding(.horizontal, 4)
     }
 }
 
-#Preview("知らせ") {
-    Banner(text: "8 件の詳細を取得できませんでした", accessory: .retry {})
+public extension Banner {
+    enum Style: Sendable {
+        case info
+        case failure
+
+        var tint: Color {
+            switch self {
+            case .info: .secondary
+            case .failure: .red
+            }
+        }
+
+        var symbol: String {
+            switch self {
+            case .info: "info.circle"
+            case .failure: "exclamationmark.triangle"
+            }
+        }
+    }
+
+    enum Accessory {
+        case none
+        case progress
+        case button(LocalizedStringResource, action: () -> Void)
+
+        public static func retry(_ action: @escaping () -> Void) -> Self {
+            .button(.screenRetry, action: action)
+        }
+    }
 }
 
-#Preview("知らせ（実行中）") {
-    Banner(text: "8 件の詳細を取得できませんでした", accessory: .progress)
+#Preview("バナー") {
+    Banner(
+        text: "8 件の詳細を取得できませんでした",
+        accessory: .none
+    )
 }
 
-#Preview("失敗の知らせ") {
-    Banner(text: "接続を確認してください", style: .failure, accessory: .retry {})
+#Preview("バナー(実行中)") {
+    Banner(
+        text: "8 件の詳細を取得できませんでした",
+        accessory: .progress
+    )
+}
+
+#Preview("バナー(失敗)") {
+    Banner(
+        text: "接続を確認してください",
+        style: .failure,
+        accessory: .retry {}
+    )
 }
