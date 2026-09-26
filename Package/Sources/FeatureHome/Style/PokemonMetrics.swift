@@ -5,7 +5,7 @@ enum PokemonMetrics {
     static let cardSpacing = 10.0
     static let contentInset = 12.0
     static let cardVerticalInset = 10.0
-    static let contentTopInset = 8.0
+    static let contentVerticalInset = 8.0
     static let minimumCardWidth = 150.0
 
     static let gridColumns = [
@@ -24,7 +24,7 @@ enum PokemonMetrics {
 extension View {
     func pokemonContentInsets() -> some View {
         padding(.horizontal, PokemonMetrics.contentInset)
-            .padding(.vertical, PokemonMetrics.contentTopInset)
+            .padding(.vertical, PokemonMetrics.contentVerticalInset)
     }
 
     func pokemonCardInsets() -> some View {

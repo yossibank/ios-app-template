@@ -2,6 +2,12 @@ import SharedCore
 import SwiftUI
 
 struct PokemonCard: View {
+    private static let watermarkSize = 64.0
+    private static let watermarkOpacity = 0.10
+    private static let watermarkInset = 6.0
+    private static let gradientOpacities = [0.28, 0.06, 0]
+    private static let artworkFadeDuration = 0.3
+
     @Environment(\.redactionReasons) private var redactionReasons
     @State private var artwork: Artwork?
 
@@ -38,11 +44,11 @@ struct PokemonCard: View {
         .background(alignment: .topTrailing) {
             if !isPlaceholder {
                 Text(.homeNumberPlain(pokemon.number))
-                    .font(.system(size: 64, weight: .black, design: .rounded))
-                    .foregroundStyle(accent.opacity(0.10))
+                    .font(.system(size: Self.watermarkSize, weight: .black, design: .rounded))
+                    .foregroundStyle(accent.opacity(Self.watermarkOpacity))
                     .monospacedDigit()
                     .lineLimit(1)
-                    .padding(.horizontal, 6)
+                    .padding(.horizontal, Self.watermarkInset)
                     .accessibilityHidden(true)
             }
         }
@@ -50,7 +56,7 @@ struct PokemonCard: View {
             PokemonMetrics.cardShape
                 .fill(
                     LinearGradient(
-                        colors: [accent.opacity(0.28), accent.opacity(0.06), .clear],
+                        colors: Self.gradientOpacities.map { accent.opacity($0) },
                         startPoint: .top,
                         endPoint: .bottom
                     )
@@ -67,7 +73,7 @@ struct PokemonCard: View {
 
             let loaded = await ArtworkStore.shared.artwork(for: url)
 
-            withAnimation(.easeOut(duration: 0.3)) {
+            withAnimation(.easeOut(duration: Self.artworkFadeDuration)) {
                 artwork = loaded
             }
         }

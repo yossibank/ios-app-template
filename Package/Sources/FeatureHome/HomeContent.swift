@@ -89,7 +89,7 @@ struct HomeContent: View {
                 total: list.total,
                 filtering: isFiltering
             )
-            .padding(.bottom, PokemonMetrics.contentTopInset)
+            .padding(.bottom, PokemonMetrics.contentVerticalInset)
         }
         .refreshable {
             await refresh()

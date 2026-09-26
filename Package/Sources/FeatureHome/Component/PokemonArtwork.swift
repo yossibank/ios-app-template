@@ -2,6 +2,8 @@ import SwiftUI
 import UIKit
 
 struct PokemonArtwork: View {
+    private static let appearingScale = 0.9
+
     let image: UIImage?
     let initial: String?
     let accent: Color
@@ -11,7 +13,7 @@ struct PokemonArtwork: View {
             Image(uiImage: image)
                 .resizable()
                 .scaledToFit()
-                .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                .transition(.opacity.combined(with: .scale(scale: Self.appearingScale)))
         } else if let initial {
             PokemonInitial(text: initial)
         } else {
@@ -21,12 +23,15 @@ struct PokemonArtwork: View {
 }
 
 private struct PokemonArtworkPlaceholder: View {
+    private static let fillOpacity = 0.12
+    private static let inset = 14.0
+
     let accent: Color
 
     var body: some View {
         Circle()
-            .fill(accent.opacity(0.12))
-            .padding(14)
+            .fill(accent.opacity(Self.fillOpacity))
+            .padding(Self.inset)
     }
 }
 
