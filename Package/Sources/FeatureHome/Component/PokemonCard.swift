@@ -2,12 +2,6 @@ import SharedCore
 import SwiftUI
 
 struct PokemonCard: View {
-    private static let watermarkSize = 64.0
-    private static let watermarkOpacity = 0.10
-    private static let watermarkInset = 6.0
-    private static let gradientOpacities = [0.28, 0.06, 0]
-    private static let artworkFadeDuration = 0.3
-
     @Environment(\.redactionReasons) private var redactionReasons
     @State private var artwork: Artwork?
 
@@ -40,30 +34,29 @@ struct PokemonCard: View {
                 .font(.headline)
                 .lineLimit(2)
         }
-        .pokemonCardInsets()
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(alignment: .topTrailing) {
             if !isPlaceholder {
                 Text(.homeNumberPlain(pokemon.number))
-                    .font(.system(size: Self.watermarkSize, weight: .black, design: .rounded))
-                    .foregroundStyle(accent.opacity(Self.watermarkOpacity))
+                    .font(.system(size: 64, weight: .black, design: .rounded))
+                    .foregroundStyle(accent.opacity(0.10))
                     .monospacedDigit()
                     .lineLimit(1)
-                    .padding(.horizontal, Self.watermarkInset)
+                    .padding(.horizontal, 6)
                     .accessibilityHidden(true)
             }
         }
         .background {
-            PokemonMetrics.cardShape
-                .fill(
-                    LinearGradient(
-                        colors: Self.gradientOpacities.map { accent.opacity($0) },
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .background(PokemonMetrics.cardFill, in: PokemonMetrics.cardShape)
+            LinearGradient(
+                colors: [accent.opacity(0.28), accent.opacity(0.06), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .background(.quaternary.opacity(0.4))
         }
-        .contentShape(PokemonMetrics.cardShape)
+        .clipShape(.rect(cornerRadius: 20))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(.homeCardLabel(pokemon.number, pokemon.name.capitalized))
         .task(id: pokemon.artwork) {
@@ -73,7 +66,7 @@ struct PokemonCard: View {
 
             let loaded = await ArtworkStore.shared.artwork(for: url)
 
-            withAnimation(.easeOut(duration: Self.artworkFadeDuration)) {
+            withAnimation(.easeOut(duration: 0.3)) {
                 artwork = loaded
             }
         }

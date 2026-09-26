@@ -3,10 +3,6 @@ import SharedCore
 import SwiftUI
 
 struct HomeContent: View {
-    private static let prefetchDistance = 8
-    private static let distantCardScale = 0.94
-    private static let distantCardOpacity = 0.6
-
     @Bindable var viewState: HomeViewModel.State
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -28,21 +24,20 @@ struct HomeContent: View {
         let items = filtered
         let prefetch = Set(
             items
-                .suffix(Self.prefetchDistance)
+                .suffix(8)
                 .map(\.id)
         )
-        let distantScale = reduceMotion ? 1 : Self.distantCardScale
-        let distantOpacity = Self.distantCardOpacity
+        let distantScale = reduceMotion ? 1 : 0.94
 
         ScrollView {
-            LazyVStack(spacing: PokemonMetrics.contentInset) {
+            LazyVStack(spacing: 12) {
                 PokemonGrid {
                     ForEach(items) { item in
                         PokemonCard(pokemon: item)
                             .scrollTransition { content, phase in
                                 content
                                     .scaleEffect(phase.isIdentity ? 1 : distantScale)
-                                    .opacity(phase.isIdentity ? 1 : distantOpacity)
+                                    .opacity(phase.isIdentity ? 1 : 0.6)
                             }
                             .onAppear {
                                 guard
@@ -61,7 +56,7 @@ struct HomeContent: View {
                 if actions.isLoadingMore, list.notice == nil {
                     ProgressView()
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, PokemonMetrics.contentInset)
+                        .padding(.vertical, 12)
                 }
 
                 if let notice = list.notice {
@@ -83,7 +78,7 @@ struct HomeContent: View {
                 total: list.total,
                 filtering: isFiltering
             )
-            .padding(.bottom, PokemonMetrics.contentVerticalInset)
+            .padding(.bottom, 8)
         }
         .refreshable {
             await refresh()

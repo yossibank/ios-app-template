@@ -5,11 +5,6 @@ import SwiftUI
 import UIKit
 
 enum ArtworkDecoder {
-    static let maxPixelSize = 320
-
-    private static let minimumSaturation = 0.45
-    private static let brightnessRange = 0.55...0.9
-
     static func artwork(from data: Data, context: CIContext) -> Artwork? {
         guard
             let source = CGImageSourceCreateWithData(data as CFData, nil),
@@ -19,7 +14,7 @@ enum ArtworkDecoder {
                 [
                     kCGImageSourceCreateThumbnailFromImageAlways: true,
                     kCGImageSourceCreateThumbnailWithTransform: true,
-                    kCGImageSourceThumbnailMaxPixelSize: maxPixelSize
+                    kCGImageSourceThumbnailMaxPixelSize: 320
                 ] as CFDictionary
             )
         else {
@@ -71,11 +66,8 @@ enum ArtworkDecoder {
 
         return UIColor(
             hue: hue,
-            saturation: max(saturation, minimumSaturation),
-            brightness: min(
-                max(brightness, brightnessRange.lowerBound),
-                brightnessRange.upperBound
-            ),
+            saturation: max(saturation, 0.45),
+            brightness: min(max(brightness, 0.55), 0.9),
             alpha: 1
         )
     }

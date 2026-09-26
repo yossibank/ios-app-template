@@ -3,13 +3,11 @@ import SharedCore
 import SwiftUI
 
 struct PokemonSkeletonGrid: View {
-    private static let count = 8
-
     var body: some View {
         ScrollView {
             PokemonGrid {
-                ForEach(0..<Self.count, id: \.self) { _ in
-                    PokemonCard(pokemon: .placeholder)
+                ForEach(0..<8, id: \.self) { _ in
+                    PokemonCard(pokemon: Pokemon(id: 0, name: "pokemon", artwork: nil))
                 }
             }
             .skeleton()
@@ -18,8 +16,4 @@ struct PokemonSkeletonGrid: View {
         .scrollDisabled(true)
         .accessibilityHidden(true)
     }
-}
-
-private extension Pokemon {
-    static let placeholder = Pokemon(id: 0, name: "pokemon", artwork: nil)
 }
