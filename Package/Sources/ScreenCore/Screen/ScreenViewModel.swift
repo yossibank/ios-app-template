@@ -9,12 +9,12 @@ public protocol ScreenViewModel: AnyObject, Observable {
     var fetchState: FetchState<Value> { get }
 
     func fetch() async throws(FetchFailure) -> Value
-    func fetchMore() async throws(FetchFailure) -> FetchMore<Value>?
+    func fetchMore(after current: Value) async throws(FetchFailure) -> FetchMore<Value>
 }
 
 public extension ScreenViewModel {
-    func fetchMore() async throws(FetchFailure) -> FetchMore<Value>? {
-        nil
+    func fetchMore(after _: Value) async throws(FetchFailure) -> FetchMore<Value> {
+        .unchanged
     }
 }
 
@@ -24,31 +24,18 @@ extension ScreenViewModel {
             return
         }
 
-        request(.reload)
+        reload()
     }
 
-    func request(_ operation: FetchOperation) {
-        switch operation {
-        case .reload:
-            fetchState.reload { () async throws(FetchFailure) -> Value in
-                try await self.fetch()
-            }
-
-        case .refresh:
-            fetchState.refresh { () async throws(FetchFailure) -> Value in
-                try await self.fetch()
-            }
-
-        case .loadMore:
-            fetchState.loadMore { () async throws(FetchFailure) -> FetchMore<Value>? in
-                try await self.fetchMore()
-            }
-        }
+    func reload() {
+        fetchState.reload(fetch)
     }
 
     func refresh() async {
-        await fetchState.refresh { () async throws(FetchFailure) -> Value in
-            try await self.fetch()
-        }?.value
+        await fetchState.refresh(fetch)?.value
+    }
+
+    func loadMore() {
+        fetchState.loadMore(fetchMore(after:))
     }
 }

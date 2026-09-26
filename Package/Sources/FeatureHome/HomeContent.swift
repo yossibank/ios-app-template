@@ -7,11 +7,11 @@ struct HomeContent: View {
 
     @Bindable var viewState: HomeViewModel.State
 
-    let pokemon: [Pokemon]
+    let list: PokemonList
     let actions: ScreenActions
 
     private var filtered: [Pokemon] {
-        pokemon.filtered(query: viewState.query)
+        list.pokemon.filtered(query: viewState.query)
     }
 
     private var isFiltering: Bool {
@@ -30,8 +30,8 @@ struct HomeContent: View {
             LazyVStack(spacing: PokemonMetrics.contentInset) {
                 PokemonListToolbar(
                     shown: items.count,
-                    loaded: pokemon.count,
-                    total: viewState.total,
+                    loaded: list.pokemon.count,
+                    total: list.total,
                     filtering: isFiltering
                 )
 
@@ -41,26 +41,35 @@ struct HomeContent: View {
                             .onAppear {
                                 guard
                                     !isFiltering,
-                                    viewState.notice == nil,
+                                    list.notice == nil,
                                     prefetch.contains(item.id)
                                 else {
                                     return
                                 }
 
-                                actions.request(.loadMore)
+                                actions.loadMore()
                             }
                     }
                 }
 
-                if actions.isRunning(.loadMore) {
+                if actions.isLoadingMore, list.notice == nil {
                     ProgressView()
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, PokemonMetrics.contentInset)
                 }
 
-                if let notice = viewState.notice {
-                    Banner(text: notice.message, tint: .red, actionTitle: .homeReload) {
-                        actions.request(notice.canRetry ? .loadMore : .reload)
+                if let notice = list.notice {
+                    Banner(
+                        text: notice.message,
+                        tint: .red,
+                        actionTitle: .homeReload,
+                        isBusy: actions.isLoadingMore
+                    ) {
+                        if notice.canRetry {
+                            actions.loadMore()
+                        } else {
+                            actions.reload()
+                        }
                     }
                 }
             }
@@ -80,7 +89,7 @@ struct HomeContent: View {
         )
         .toolbar {
             Button(.homeReload, systemImage: "arrow.clockwise") {
-                actions.request(.reload)
+                actions.reload()
             }
         }
     }

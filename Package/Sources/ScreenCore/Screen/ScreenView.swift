@@ -32,8 +32,8 @@ public struct ScreenView<
         case let .live(model):
             LiveScreen(model, content: content)
 
-        case let .snapshot(phase, running):
-            SnapshotScreen<Model, _>(phase: phase, running: running, content: content)
+        case let .snapshot(phase, loadingMore):
+            SnapshotScreen<Model, _>(phase: phase, loadingMore: loadingMore, content: content)
         }
     }
 
@@ -55,9 +55,7 @@ public struct ScreenView<
             }
 
         case let .failed(failure):
-            ScreenFailureView(failure: failure) {
-                actions.request(.reload)
-            }
+            ScreenFailureView(failure: failure, retry: actions.reload)
         }
     }
 }
@@ -114,9 +112,10 @@ private struct LiveScreen<Model: ScreenViewModel, Content: View>: View {
             model.fetchState.phase,
             model.viewState,
             ScreenActions(
-                request: { model.request($0) },
+                reload: { model.reload() },
+                loadMore: { model.loadMore() },
                 refresh: { await model.refresh() },
-                isRunning: { model.fetchState.isRunning($0) }
+                isLoadingMore: model.fetchState.isRunning(.loadMore)
             )
         )
         .task {
@@ -130,17 +129,17 @@ private struct SnapshotScreen<Model: ScreenViewModel, Content: View>: View {
     @State private var viewState: Model.State
 
     private let phase: FetchPhase<Model.Value>
-    private let running: Set<FetchOperation>
+    private let loadingMore: Bool
     private let content: (FetchPhase<Model.Value>, Model.State, ScreenActions) -> Content
 
     init(
         phase: FetchPhase<Model.Value>,
-        running: Set<FetchOperation>,
+        loadingMore: Bool,
         content: @escaping (FetchPhase<Model.Value>, Model.State, ScreenActions) -> Content
     ) {
         _viewState = State(initialValue: Model.State())
         self.phase = phase
-        self.running = running
+        self.loadingMore = loadingMore
         self.content = content
     }
 
@@ -149,9 +148,10 @@ private struct SnapshotScreen<Model: ScreenViewModel, Content: View>: View {
             phase,
             viewState,
             ScreenActions(
-                request: { _ in },
+                reload: {},
+                loadMore: {},
                 refresh: {},
-                isRunning: { running.contains($0) }
+                isLoadingMore: loadingMore
             )
         )
     }

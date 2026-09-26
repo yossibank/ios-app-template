@@ -2,7 +2,7 @@
 public struct ScreenSource<Model: ScreenViewModel> {
     enum Kind {
         case live(Model)
-        case snapshot(FetchPhase<Model.Value>, running: Set<FetchOperation>)
+        case snapshot(FetchPhase<Model.Value>, loadingMore: Bool)
     }
 
     let kind: Kind
@@ -13,8 +13,8 @@ public struct ScreenSource<Model: ScreenViewModel> {
 
     public static func snapshot(
         _ phase: FetchPhase<Model.Value>,
-        running: Set<FetchOperation> = []
+        loadingMore: Bool = false
     ) -> Self {
-        Self(kind: .snapshot(phase, running: running))
+        Self(kind: .snapshot(phase, loadingMore: loadingMore))
     }
 }

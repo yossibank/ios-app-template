@@ -32,7 +32,7 @@ public final class FetchState<Value> {
         reachedEnd = false
         phase = .loading
 
-        return replace(.reload, work)
+        return run(.reload, work, then: show)
     }
 
     @discardableResult
@@ -45,65 +45,63 @@ public final class FetchState<Value> {
 
         reachedEnd = false
 
-        return replace(.refresh, work)
+        return run(.refresh, work, then: show)
     }
 
     @discardableResult
     func loadMore(
-        _ work: @escaping @MainActor () async throws(FetchFailure) -> FetchMore<Value>?
+        _ work: @escaping @MainActor (Value) async throws(FetchFailure) -> FetchMore<Value>
     ) -> Task<Void, Never>? {
-        guard isLoaded, !reachedEnd else {
+        guard
+            case let .loaded(current) = phase,
+            !reachedEnd,
+            running == nil
+        else {
             return nil
         }
 
-        return run(.loadMore, replacing: false, work) { result in
+        return run(.loadMore) { () async throws(FetchFailure) in
+            try await work(current)
+        } then: { result in
             switch result {
-            case let .more(value)?:
+            case let .success(.more(value)):
                 self.phase = .loaded(value)
 
-            case let .last(value)?:
+            case let .success(.last(value)):
                 self.reachedEnd = true
                 self.phase = .loaded(value)
 
-            case nil:
+            case .success(.unchanged), .failure:
                 break
             }
         }
     }
 
-    private func replace(
-        _ operation: FetchOperation,
-        _ work: @escaping @MainActor () async throws(FetchFailure) -> Value
-    ) -> Task<Void, Never>? {
-        run(operation, replacing: true, work) { value in
-            self.phase = .loaded(value)
-        } failed: { failure in
-            self.phase = .failed(failure)
+    private func show(_ result: Result<Value, FetchFailure>) {
+        switch result {
+        case let .success(value):
+            phase = .loaded(value)
+
+        case let .failure(failure):
+            phase = .failed(failure)
         }
     }
 
     private func run<Output>(
         _ operation: FetchOperation,
-        replacing: Bool,
         _ work: @escaping @MainActor () async throws(FetchFailure) -> Output,
-        succeeded: @escaping @MainActor (Output) -> Void,
-        failed: @escaping @MainActor (FetchFailure) -> Void = { _ in }
-    ) -> Task<Void, Never>? {
-        if replacing {
-            task?.cancel()
-        } else if running != nil {
-            return nil
-        }
-
+        then apply: @escaping @MainActor (Result<Output, FetchFailure>) -> Void
+    ) -> Task<Void, Never> {
+        task?.cancel()
         running = operation
 
         let task = Task {
-            let outcome: Result<Output, FetchFailure>
+            let result: Result<Output, FetchFailure>
 
             do throws(FetchFailure) {
-                outcome = try await .success(work())
+                result = try await .success(work())
             } catch {
-                outcome = .failure(error)
+                result = .failure(error)
             }
 
             guard !Task.isCancelled else {
@@ -111,14 +109,7 @@ public final class FetchState<Value> {
             }
 
             running = nil
-
-            switch outcome {
-            case let .success(value):
-                succeeded(value)
-
-            case let .failure(failure):
-                failed(failure)
-            }
+            apply(result)
         }
 
         self.task = task

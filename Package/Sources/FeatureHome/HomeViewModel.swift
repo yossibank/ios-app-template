@@ -6,7 +6,7 @@ import SharedCore
 @Observable
 final class HomeViewModel: ScreenViewModel {
     let viewState = State()
-    let fetchState = FetchState<[Pokemon]>()
+    let fetchState = FetchState<PokemonList>()
     let dependency: Dependency
 
     convenience init() {
@@ -23,23 +23,36 @@ final class HomeViewModel: ScreenViewModel {
 }
 
 extension HomeViewModel {
-    func fetch() async throws(FetchFailure) -> [Pokemon] {
-        viewState.notice = nil
+    func fetch() async throws(FetchFailure) -> PokemonList {
+        switch await dependency.listing.reload() {
+        case let .loaded(snapshot):
+            PokemonList(snapshot)
 
-        let page = await dependency.listing.reload()
+        case let .degraded(snapshot, failure):
+            PokemonList(snapshot, notice: failure)
 
-        if case let .failed(failure) = page {
+        case let .failed(failure):
             throw failure
-        }
 
-        return snapshot(of: page)?.pokemon ?? []
+        case .stale:
+            PokemonList(pokemon: [], total: 0)
+        }
     }
 
-    func fetchMore() async throws(FetchFailure) -> FetchMore<[Pokemon]>? {
-        viewState.notice = nil
+    func fetchMore(after current: PokemonList) async throws(FetchFailure)
+        -> FetchMore<PokemonList> {
+        switch await dependency.listing.loadNext() {
+        case let .loaded(snapshot):
+            page(PokemonList(snapshot), hasMore: snapshot.hasMore)
 
-        return await snapshot(of: dependency.listing.loadNext()).map { snapshot in
-            snapshot.hasMore ? .more(snapshot.pokemon) : .last(snapshot.pokemon)
+        case let .degraded(snapshot, failure):
+            page(PokemonList(snapshot, notice: failure), hasMore: snapshot.hasMore)
+
+        case let .failed(failure):
+            .more(PokemonList(pokemon: current.pokemon, total: current.total, notice: failure))
+
+        case .stale:
+            .unchanged
         }
     }
 
@@ -47,24 +60,8 @@ extension HomeViewModel {
         dependency.listing.close()
     }
 
-    private func snapshot(of page: PokemonListPage) -> PokemonListSnapshot? {
-        switch page {
-        case let .loaded(snapshot):
-            viewState.total = snapshot.total
-            return snapshot
-
-        case let .degraded(snapshot, failure):
-            viewState.total = snapshot.total
-            viewState.notice = failure
-            return snapshot
-
-        case let .failed(failure):
-            viewState.notice = failure
-            return nil
-
-        case .stale:
-            return nil
-        }
+    private func page(_ list: PokemonList, hasMore: Bool) -> FetchMore<PokemonList> {
+        hasMore ? .more(list) : .last(list)
     }
 }
 
@@ -72,8 +69,6 @@ extension HomeViewModel {
     @Observable
     final class State: ScreenViewState {
         var query = ""
-        var total = 0
-        var notice: FetchFailure?
     }
 
     struct Dependency {

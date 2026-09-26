@@ -6,10 +6,10 @@ public struct HomeView: View {
     let source: ScreenSource<HomeViewModel>
 
     public var body: some View {
-        ScreenView(source) { viewState, pokemon, actions in
+        ScreenView(source, isEmpty: \.pokemon.isEmpty) { viewState, list, actions in
             HomeContent(
                 viewState: viewState,
-                pokemon: pokemon,
+                list: list,
                 actions: actions
             )
         } empty: { actions in
@@ -19,7 +19,7 @@ public struct HomeView: View {
                 Text(.homeEmptyDescription)
             } actions: {
                 Button(.homeReload) {
-                    actions.request(.reload)
+                    actions.reload()
                 }
             }
         } loading: {

@@ -122,7 +122,7 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         await state.reload { [1, 2] }?.value
 
-        await state.loadMore { () async throws(FetchFailure) -> FetchMore<[Int]>? in
+        await state.loadMore { (_: [Int]) async throws(FetchFailure) -> FetchMore<[Int]> in
             throw FetchFailure("取得に失敗しました")
         }?.value
 
@@ -135,12 +135,12 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         await state.reload { [1, 2] }?.value
 
-        await state.loadMore { nil }?.value
+        await state.loadMore { _ in .unchanged }?.value
 
         #expect(state.phase.loaded == [1, 2])
         #expect(state.isRunning(.loadMore) == false)
 
-        await state.loadMore { .more([1, 2, 3]) }?.value
+        await state.loadMore { _ in .more([1, 2, 3]) }?.value
 
         #expect(state.phase.loaded == [1, 2, 3], "続きが返らなかった後に続きを頼み直せない")
     }
@@ -151,7 +151,7 @@ struct FetchStateTests {
         await state.reload { [1] }?.value
 
         let gate = Gate()
-        let more = state.loadMore { await gate.wait(); return .more([1, 2]) }
+        let more = state.loadMore { _ in await gate.wait(); return .more([1, 2]) }
         await gate.waitUntilEntered()
 
         await state.reload { [9] }?.value
@@ -162,7 +162,7 @@ struct FetchStateTests {
         #expect(state.phase.loaded == [9])
         #expect(state.isRunning(.loadMore) == false)
 
-        await state.loadMore { .more([9, 10]) }?.value
+        await state.loadMore { _ in .more([9, 10]) }?.value
         #expect(state.phase.loaded == [9, 10], "続きを読めなくなっている")
     }
 
@@ -171,10 +171,10 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         await state.reload { [1] }?.value
 
-        await state.loadMore { .last([1, 2]) }?.value
+        await state.loadMore { _ in .last([1, 2]) }?.value
 
         var asked = false
-        await state.loadMore {
+        await state.loadMore { _ in
             asked = true
             return .more([1, 2, 3])
         }?.value
@@ -187,10 +187,10 @@ struct FetchStateTests {
     func reloadForgetsTheEnd() async {
         let state = FetchState<[Int]>()
         await state.reload { [1] }?.value
-        await state.loadMore { .last([1, 2]) }?.value
+        await state.loadMore { _ in .last([1, 2]) }?.value
 
         await state.reload { [1] }?.value
-        await state.loadMore { .more([1, 3]) }?.value
+        await state.loadMore { _ in .more([1, 3]) }?.value
 
         #expect(state.phase.loaded == [1, 3])
     }
@@ -200,7 +200,7 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         var asked = false
 
-        await state.loadMore {
+        await state.loadMore { _ in
             asked = true
             return .more([9])
         }?.value
@@ -219,7 +219,7 @@ struct FetchStateTests {
         await gate.waitUntilEntered()
 
         var asked = false
-        let more = state.loadMore {
+        let more = state.loadMore { _ in
             asked = true
             return .more([2, 3])
         }
