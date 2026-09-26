@@ -8,9 +8,6 @@ public extension View {
 }
 
 private struct Shimmer: ViewModifier {
-    private static let duration = 1.4
-    private static let dimmedOpacity = 0.6
-
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     func body(content: Content) -> some View {
@@ -18,32 +15,51 @@ private struct Shimmer: ViewModifier {
             content
         } else {
             TimelineView(.animation) { timeline in
-                let progress = timeline.date.timeIntervalSinceReferenceDate
-                    .truncatingRemainder(dividingBy: Self.duration) / Self.duration
+                let progress = progress(at: timeline.date)
 
                 content.mask {
-                    LinearGradient(
-                        colors: [
-                            .black.opacity(Self.dimmedOpacity),
-                            .black,
-                            .black.opacity(Self.dimmedOpacity)
-                        ],
-                        startPoint: UnitPoint(x: progress * 2 - 1, y: 0.5),
-                        endPoint: UnitPoint(x: progress * 2, y: 0.5)
-                    )
+                    linearGradient(progress: progress)
                 }
             }
         }
     }
 }
 
-#Preview("骨組み") {
-    VStack(alignment: .leading, spacing: 8) {
+private extension Shimmer {
+    func linearGradient(progress: Double) -> LinearGradient {
+        LinearGradient(
+            colors: [
+                .black.opacity(0.6),
+                .black,
+                .black.opacity(0.6)
+            ],
+            startPoint: UnitPoint(x: progress * 2 - 1, y: 0.5),
+            endPoint: UnitPoint(x: progress * 2, y: 0.5)
+        )
+    }
+}
+
+private extension Shimmer {
+    func progress(at date: Date) -> Double {
+        let elapsed = date
+            .timeIntervalSinceReferenceDate
+            .truncatingRemainder(dividingBy: 1.5)
+
+        return elapsed / 1.5
+    }
+}
+
+#Preview("スケルトン") {
+    VStack(alignment: .leading, spacing: 4) {
         Text("#025")
             .font(.caption)
+
         Text("Pikachu")
             .font(.headline)
+
+        Image(systemName: "info.circle")
+            .resizable()
+            .frame(width: 150, height: 150)
     }
     .skeleton()
-    .padding()
 }
