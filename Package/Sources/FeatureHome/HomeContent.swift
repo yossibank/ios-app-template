@@ -4,8 +4,13 @@ import SwiftUI
 
 struct HomeContent: View {
     private static let prefetchDistance = 8
+    private static let distantCardScale = 0.94
+    private static let distantCardOpacity = 0.6
 
     @Bindable var viewState: HomeViewModel.State
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var refreshes = 0
 
     let list: PokemonList
     let actions: ScreenActions
@@ -25,12 +30,19 @@ struct HomeContent: View {
                 .suffix(Self.prefetchDistance)
                 .map(\.id)
         )
+        let distantScale = reduceMotion ? 1 : Self.distantCardScale
+        let distantOpacity = Self.distantCardOpacity
 
         ScrollView {
             LazyVStack(spacing: PokemonMetrics.contentInset) {
                 PokemonGrid {
                     ForEach(items) { item in
                         PokemonCard(pokemon: item)
+                            .scrollTransition { content, phase in
+                                content
+                                    .scaleEffect(phase.isIdentity ? 1 : distantScale)
+                                    .opacity(phase.isIdentity ? 1 : distantOpacity)
+                            }
                             .onAppear {
                                 guard
                                     !isFiltering,
@@ -79,6 +91,11 @@ struct HomeContent: View {
         }
         .refreshable {
             await actions.refresh()
+            refreshes += 1
+        }
+        .sensoryFeedback(.success, trigger: refreshes)
+        .sensoryFeedback(trigger: list.notice) { _, notice in
+            notice == nil ? nil : .error
         }
         .overlay {
             if items.isEmpty {
