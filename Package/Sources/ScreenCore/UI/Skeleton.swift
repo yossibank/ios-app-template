@@ -1,8 +1,9 @@
 import SwiftUI
 
 public extension View {
-    func shimmering() -> some View {
-        modifier(Shimmer())
+    func skeleton() -> some View {
+        redacted(reason: .placeholder)
+            .modifier(Shimmer())
     }
 }
 
@@ -39,14 +40,13 @@ private struct Shimmer: ViewModifier {
     }
 }
 
-#Preview("光る骨組み") {
+#Preview("骨組み") {
     VStack(alignment: .leading, spacing: 8) {
         Text("#025")
             .font(.caption)
         Text("Pikachu")
             .font(.headline)
     }
-    .redacted(reason: .placeholder)
-    .shimmering()
+    .skeleton()
     .padding()
 }

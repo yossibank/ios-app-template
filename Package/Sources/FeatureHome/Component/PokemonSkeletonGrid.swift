@@ -12,8 +12,7 @@ struct PokemonSkeletonGrid: View {
                     PokemonCard(pokemon: .placeholder)
                 }
             }
-            .redacted(reason: .placeholder)
-            .shimmering()
+            .skeleton()
             .pokemonContentInsets()
         }
         .scrollDisabled(true)
