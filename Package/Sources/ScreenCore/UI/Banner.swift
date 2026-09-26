@@ -16,6 +16,8 @@ public struct Banner: View {
         }
     }
 
+    private static let horizontalInset = 4.0
+
     private let text: String
     private let style: Style
     private let accessory: Accessory
@@ -27,6 +29,16 @@ public struct Banner: View {
 
         case .failure:
             .red
+        }
+    }
+
+    private var symbol: String {
+        switch style {
+        case .info:
+            "info.circle"
+
+        case .failure:
+            "exclamationmark.triangle"
         }
     }
 
@@ -42,7 +54,7 @@ public struct Banner: View {
 
     public var body: some View {
         HStack {
-            Text(text)
+            Label(text, systemImage: symbol)
                 .font(.footnote)
                 .foregroundStyle(tint)
 
@@ -61,7 +73,7 @@ public struct Banner: View {
                     .font(.footnote)
             }
         }
-        .padding(.horizontal, 4)
+        .padding(.horizontal, Self.horizontalInset)
     }
 }
 
