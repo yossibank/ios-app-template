@@ -9,7 +9,7 @@ public extension View {
 
 private struct Shimmer: ViewModifier {
     private static let duration = 1.4
-    private static let bandRatio = 0.5
+    private static let dimmedOpacity = 0.6
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -17,24 +17,21 @@ private struct Shimmer: ViewModifier {
         if reduceMotion {
             content
         } else {
-            content.overlay {
-                TimelineView(.animation) { timeline in
-                    GeometryReader { proxy in
-                        let progress = timeline.date.timeIntervalSinceReferenceDate
-                            .truncatingRemainder(dividingBy: Self.duration) / Self.duration
-                        let band = proxy.size.width * Self.bandRatio
+            TimelineView(.animation) { timeline in
+                let progress = timeline.date.timeIntervalSinceReferenceDate
+                    .truncatingRemainder(dividingBy: Self.duration) / Self.duration
 
-                        LinearGradient(
-                            colors: [.clear, .white.opacity(0.35), .clear],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                        .frame(width: band)
-                        .offset(x: -band + progress * (proxy.size.width + band))
-                    }
+                content.mask {
+                    LinearGradient(
+                        colors: [
+                            .black.opacity(Self.dimmedOpacity),
+                            .black,
+                            .black.opacity(Self.dimmedOpacity)
+                        ],
+                        startPoint: UnitPoint(x: progress * 2 - 1, y: 0.5),
+                        endPoint: UnitPoint(x: progress * 2, y: 0.5)
+                    )
                 }
-                .mask(content)
-                .allowsHitTesting(false)
             }
         }
     }
