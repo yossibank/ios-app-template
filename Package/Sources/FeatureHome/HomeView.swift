@@ -22,9 +22,10 @@ public struct HomeView: View {
                     actions.request(.reload)
                 }
             }
+        } loading: {
+            PokemonSkeletonGrid()
         }
         .navigationTitle(.homeTitle)
-        .environment(\.screenStyle, .standard.showingWhileLoading { PokemonSkeletonGrid() })
     }
 }
 
