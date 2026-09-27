@@ -241,6 +241,7 @@ private final class CountingModel: ScreenViewModel {
 
     let viewState = State()
     let fetchState = FetchState<[Int]>()
+
     private(set) var fetchCalls = 0
 
     func fetch() async throws(FetchFailure) -> [Int] {

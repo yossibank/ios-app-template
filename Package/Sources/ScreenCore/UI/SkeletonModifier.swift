@@ -2,30 +2,25 @@ import SwiftUI
 
 public extension View {
     func skeleton() -> some View {
-        redacted(reason: .placeholder)
-            .modifier(Shimmer())
+        modifier(SkeletonModifier())
     }
 }
 
-private struct Shimmer: ViewModifier {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
+private struct SkeletonModifier: ViewModifier {
     func body(content: Content) -> some View {
-        if reduceMotion {
-            content
-        } else {
-            TimelineView(.animation) { timeline in
-                let progress = progress(at: timeline.date)
+        TimelineView(.animation) { timeline in
+            let progress = progress(at: timeline.date)
 
-                content.mask {
+            content
+                .redacted(reason: .placeholder)
+                .mask {
                     linearGradient(progress: progress)
                 }
-            }
         }
     }
 }
 
-private extension Shimmer {
+private extension SkeletonModifier {
     func linearGradient(progress: Double) -> LinearGradient {
         LinearGradient(
             colors: [
@@ -39,7 +34,7 @@ private extension Shimmer {
     }
 }
 
-private extension Shimmer {
+private extension SkeletonModifier {
     func progress(at date: Date) -> Double {
         let elapsed = date
             .timeIntervalSinceReferenceDate

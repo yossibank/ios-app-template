@@ -15,3 +15,11 @@ public struct Pokemon: Identifiable, Hashable, Sendable {
         self.artwork = artwork
     }
 }
+
+public extension Pokemon {
+    static let placeholder = Pokemon(
+        id: 1,
+        name: "placeholder",
+        artwork: nil
+    )
+}

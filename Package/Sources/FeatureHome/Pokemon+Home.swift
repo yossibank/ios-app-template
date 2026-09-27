@@ -9,6 +9,14 @@ extension Pokemon {
 
 extension [Pokemon] {
     func filtered(query: String) -> [Pokemon] {
-        filter { query.isEmpty || $0.name.localizedStandardContains(query) }
+        let query = query.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if query.isEmpty {
+            return self
+        }
+
+        return filter {
+            $0.name.localizedStandardContains(query)
+        }
     }
 }

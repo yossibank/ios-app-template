@@ -178,7 +178,7 @@ struct HomeViewModelTests {
     private func snapshot(_ names: [String], hasMore: Bool) -> PokemonListSnapshot {
         PokemonListSnapshot(
             pokemon: names.enumerated().map { index, name in
-                .fixture(id: index + 1, name: name)
+                Pokemon(id: index + 1, name: name, artwork: nil)
             },
             hasMore: hasMore,
             total: 1351

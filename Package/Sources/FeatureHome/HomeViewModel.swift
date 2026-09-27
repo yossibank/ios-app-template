@@ -22,6 +22,18 @@ final class HomeViewModel: ScreenViewModel {
     }
 }
 
+private extension HomeViewModel {
+    func page(_ list: PokemonList, hasMore: Bool) -> FetchMore<PokemonList> {
+        hasMore ? .more(list) : .last(list)
+    }
+}
+
+extension HomeViewModel {
+    nonisolated func close() {
+        dependency.listing.close()
+    }
+}
+
 extension HomeViewModel {
     func fetch() async throws(FetchFailure) -> PokemonList {
         switch await dependency.listing.reload() {
@@ -39,29 +51,34 @@ extension HomeViewModel {
         }
     }
 
-    func fetchMore(after current: PokemonList) async throws(FetchFailure)
-        -> FetchMore<PokemonList> {
+    func fetchMore(
+        after current: PokemonList
+    ) async throws(FetchFailure) -> FetchMore<PokemonList> {
         switch await dependency.listing.loadNext() {
         case let .loaded(snapshot):
-            page(PokemonList(snapshot), hasMore: snapshot.hasMore)
+            page(
+                PokemonList(snapshot),
+                hasMore: snapshot.hasMore
+            )
 
         case let .degraded(snapshot, failure):
-            page(PokemonList(snapshot, notice: failure), hasMore: snapshot.hasMore)
+            page(
+                PokemonList(snapshot, notice: failure),
+                hasMore: snapshot.hasMore
+            )
 
         case let .failed(failure):
-            .more(PokemonList(pokemon: current.pokemon, total: current.total, notice: failure))
+            .more(
+                PokemonList(
+                    pokemon: current.pokemon,
+                    total: current.total,
+                    notice: failure
+                )
+            )
 
         case .stale:
             .unchanged
         }
-    }
-
-    nonisolated func close() {
-        dependency.listing.close()
-    }
-
-    private func page(_ list: PokemonList, hasMore: Bool) -> FetchMore<PokemonList> {
-        hasMore ? .more(list) : .last(list)
     }
 }
 

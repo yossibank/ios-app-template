@@ -5,62 +5,21 @@ import SwiftUI
 struct HomeContent: View {
     @Bindable var viewState: HomeViewModel.State
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var refreshes = 0
     @State private var isRefreshing = false
+    @State private var position = ScrollPosition(edge: .top)
 
     let list: PokemonList
     let actions: ScreenActions
 
-    private var filtered: [Pokemon] {
-        list.pokemon.filtered(query: viewState.query)
-    }
-
-    private var isFiltering: Bool {
-        !viewState.query.isEmpty
-    }
-
     var body: some View {
-        let items = filtered
-        let prefetch = Set(
-            items
-                .suffix(8)
-                .map(\.id)
-        )
-        let distantScale = reduceMotion ? 1 : 0.94
+        let items = list.pokemon.filtered(query: viewState.query)
 
         ScrollView {
-            LazyVStack(spacing: 12) {
-                PokemonGrid {
-                    ForEach(items) { item in
-                        PokemonCard(pokemon: item)
-                            .scrollTransition { content, phase in
-                                content
-                                    .scaleEffect(phase.isIdentity ? 1 : distantScale)
-                                    .opacity(phase.isIdentity ? 1 : 0.6)
-                            }
-                            .onAppear {
-                                guard
-                                    !isFiltering,
-                                    list.notice == nil,
-                                    prefetch.contains(item.id)
-                                else {
-                                    return
-                                }
-
-                                actions.loadMore()
-                            }
-                    }
-                }
-
-                if actions.isLoadingMore, list.notice == nil {
-                    ProgressView()
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                }
+            LazyVStack(spacing: 16) {
+                grid(items)
 
                 if let notice = list.notice {
-                    Banner(
+                    BannerView(
                         text: notice.message,
                         style: .failure,
                         accessory: actions.isLoadingMore || isRefreshing
@@ -69,23 +28,17 @@ struct HomeContent: View {
                     )
                 }
             }
-            .pokemonContentInsets()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
         }
+        .scrollPosition($position)
         .safeAreaInset(edge: .bottom) {
-            PokemonListToolbar(
-                shown: items.count,
-                loaded: list.pokemon.count,
-                total: list.total,
-                filtering: isFiltering
-            )
-            .padding(.bottom, 8)
+            if !items.isEmpty {
+                gauge(matched: isFiltering ? items.count : nil)
+            }
         }
         .refreshable {
             await refresh()
-        }
-        .sensoryFeedback(.success, trigger: refreshes)
-        .sensoryFeedback(trigger: list.notice) { _, notice in
-            notice == nil ? nil : .error
         }
         .overlay {
             if items.isEmpty {
@@ -96,24 +49,82 @@ struct HomeContent: View {
             text: $viewState.query,
             prompt: .homeSearchPrompt
         )
-        .toolbar {
-            Button(.homeReload, systemImage: "arrow.clockwise") {
-                Task {
-                    await refresh()
+    }
+}
+
+private extension HomeContent {
+    func grid(_ items: [Pokemon]) -> some View {
+        let prefetch = Set(items.suffix(8).map(\.id))
+
+        return PokemonGrid {
+            ForEach(items) { item in
+                PokemonCard(pokemon: item)
+                    .scrollTransition { content, phase in
+                        content
+                            .scaleEffect(phase.isIdentity ? 1 : 0.94)
+                            .opacity(phase.isIdentity ? 1 : 0.6)
+                    }
+                    .onAppear {
+                        loadMore(at: item, prefetch: prefetch)
+                    }
+            }
+
+            if isLoadingMore {
+                ForEach(0..<2, id: \.self) { _ in
+                    PokemonCard(pokemon: .placeholder)
+                        .skeleton()
                 }
             }
-            .disabled(isRefreshing)
         }
     }
 
-    private func refresh() async {
-        isRefreshing = true
-        await actions.refresh()
-        isRefreshing = false
-        refreshes += 1
+    func gauge(matched: Int?) -> some View {
+        PokemonListGauge(
+            loaded: list.pokemon.count,
+            total: list.total,
+            matched: matched
+        )
+        .onTapGesture {
+            withAnimation {
+                position.scrollTo(edge: .top)
+            }
+        }
+        .padding(.bottom, 8)
+    }
+}
+
+private extension HomeContent {
+    var isFiltering: Bool {
+        !viewState.query.isEmpty
     }
 
-    private func retry(after notice: FetchFailure) {
+    var isLoadingMore: Bool {
+        actions.isLoadingMore && list.notice == nil
+    }
+
+    func loadMore(at item: Pokemon, prefetch: Set<Pokemon.ID>) {
+        guard
+            !isFiltering,
+            list.notice == nil,
+            prefetch.contains(item.id)
+        else {
+            return
+        }
+
+        actions.loadMore()
+    }
+
+    func refresh() async {
+        isRefreshing = true
+
+        defer {
+            isRefreshing = false
+        }
+
+        await actions.refresh()
+    }
+
+    func retry(after notice: FetchFailure) {
         if notice.canRetry {
             actions.loadMore()
         } else {

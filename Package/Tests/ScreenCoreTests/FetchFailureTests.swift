@@ -13,8 +13,10 @@ struct FetchFailureTests {
     @Test("サーバーエラーは状態コードを文言に含める")
     func serverErrorCarriesTheStatusCode() {
         #expect(
-            FetchFailure.server(statusCode: 503, canRetry: true).message
-                == "サーバーが応答しませんでした（503）"
+            FetchFailure.server(
+                statusCode: 503,
+                canRetry: true
+            ).message == "サーバーが応答しませんでした（503）"
         )
     }
 

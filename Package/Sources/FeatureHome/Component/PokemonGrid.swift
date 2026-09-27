@@ -5,8 +5,8 @@ struct PokemonGrid<Content: View>: View {
 
     var body: some View {
         LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 150), spacing: 10)],
-            spacing: 10
+            columns: [GridItem(.adaptive(minimum: 160), spacing: 8)],
+            spacing: 8
         ) {
             content()
         }

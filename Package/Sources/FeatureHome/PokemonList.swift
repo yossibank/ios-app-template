@@ -8,7 +8,14 @@ struct PokemonList {
 }
 
 extension PokemonList {
-    init(_ snapshot: PokemonListSnapshot, notice: FetchFailure? = nil) {
-        self.init(pokemon: snapshot.pokemon, total: snapshot.total, notice: notice)
+    init(
+        _ snapshot: PokemonListSnapshot,
+        notice: FetchFailure? = nil
+    ) {
+        self.init(
+            pokemon: snapshot.pokemon,
+            total: snapshot.total,
+            notice: notice
+        )
     }
 }

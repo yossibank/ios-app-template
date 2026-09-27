@@ -15,12 +15,20 @@ extension Pokemon {
 extension FetchFailure {
     init(_ failure: any ApiFailure) {
         self = switch onEnum(of: failure) {
-        case .offline: .offline
-        case .timeout: .timeout
+        case .offline:
+            .offline
+
+        case .timeout:
+            .timeout
+
         case let .server(server):
             .server(statusCode: Int(server.statusCode), canRetry: server.canRetry)
-        case .unreadable: .unreadable
-        case .closed: .unexpected(canRetry: false)
+
+        case .unreadable:
+            .unreadable
+
+        case .closed:
+            .unexpected(canRetry: false)
         }
     }
 }

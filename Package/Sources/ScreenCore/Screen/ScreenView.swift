@@ -36,9 +36,11 @@ public struct ScreenView<
             SnapshotScreen<Model, _>(phase: phase, loadingMore: loadingMore, content: content)
         }
     }
+}
 
+private extension ScreenView {
     @ViewBuilder
-    private func content(
+    func content(
         phase: FetchPhase<Model.Value>,
         viewState: Model.State,
         actions: ScreenActions

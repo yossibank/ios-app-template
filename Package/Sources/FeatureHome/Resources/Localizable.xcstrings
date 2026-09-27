@@ -1,17 +1,6 @@
 {
   "sourceLanguage": "ja",
   "strings": {
-    "home.card_label": {
-      "extractionState": "manual",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "#%1$@、%2$@"
-          }
-        }
-      }
-    },
     "home.empty_description": {
       "extractionState": "manual",
       "localizations": {
@@ -45,35 +34,35 @@
         }
       }
     },
-    "home.number_plain": {
+    "home.progress_filtered_count": {
       "extractionState": "manual",
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%@"
+            "value": "%lld 件"
           }
         }
       }
     },
-    "home.progress": {
+    "home.progress_filtered_detail": {
       "extractionState": "manual",
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ / %2$@"
+            "value": "（全 %1$lld 件中 %2$lld 件読み込み済み）"
           }
         }
       }
     },
-    "home.progress_filtered": {
+    "home.progress_total": {
       "extractionState": "manual",
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ 件（全 %2$@ 件中 %3$@ 件読み込み済み）"
+            "value": "/ %lld"
           }
         }
       }

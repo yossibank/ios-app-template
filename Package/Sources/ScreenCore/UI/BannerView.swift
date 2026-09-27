@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct Banner: View {
+public struct BannerView: View {
     private let text: String
     private let style: Style
     private let accessory: Accessory
@@ -16,12 +16,10 @@ public struct Banner: View {
     }
 
     public var body: some View {
-        HStack {
+        HStack(spacing: 16) {
             Label(text, systemImage: style.symbol)
                 .font(.footnote)
                 .foregroundStyle(style.tint)
-
-            Spacer()
 
             switch accessory {
             case .none:
@@ -32,15 +30,36 @@ public struct Banner: View {
                     .controlSize(.small)
 
             case let .button(title, action):
-                Button(title, action: action)
-                    .font(.footnote)
+                outlinedButton(title, action: action)
             }
         }
         .padding(.horizontal, 4)
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 
-public extension Banner {
+private extension BannerView {
+    func outlinedButton(
+        _ title: LocalizedStringResource,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .overlay {
+                    Capsule()
+                        .stroke(.quaternary, lineWidth: 1)
+                }
+                .contentShape(.capsule)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+public extension BannerView {
     enum Style: Sendable {
         case info
         case failure
@@ -72,21 +91,21 @@ public extension Banner {
 }
 
 #Preview("バナー") {
-    Banner(
+    BannerView(
         text: "8 件の詳細を取得できませんでした",
         accessory: .none
     )
 }
 
 #Preview("バナー(実行中)") {
-    Banner(
+    BannerView(
         text: "8 件の詳細を取得できませんでした",
         accessory: .progress
     )
 }
 
 #Preview("バナー(失敗)") {
-    Banner(
+    BannerView(
         text: "接続を確認してください",
         style: .failure,
         accessory: .retry {}
