@@ -6,7 +6,7 @@ extension Pokemon {
     init(_ entry: PokemonEntry) {
         self.init(
             id: Int(entry.id),
-            name: entry.name,
+            name: entry.displayName,
             artwork: URL(string: entry.imageUrl)
         )
     }
@@ -47,17 +47,23 @@ extension PokemonListPage {
     init(_ result: PokemonListResult) {
         switch onEnum(of: result) {
         case let .loaded(loaded):
-            let snapshot = PokemonListSnapshot(
-                pokemon: loaded.pokemon,
-                hasMore: loaded.hasMore,
-                total: loaded.total
+            self = .loaded(
+                PokemonListSnapshot(
+                    pokemon: loaded.pokemon,
+                    hasMore: loaded.hasMore,
+                    total: loaded.total
+                )
             )
 
-            self = if let failure = loaded.failure {
-                .degraded(snapshot, FetchFailure(failure))
-            } else {
-                .loaded(snapshot)
-            }
+        case let .degraded(degraded):
+            self = .degraded(
+                PokemonListSnapshot(
+                    pokemon: degraded.pokemon,
+                    hasMore: degraded.hasMore,
+                    total: degraded.total
+                ),
+                FetchFailure(degraded.failure)
+            )
 
         case let .failed(failed):
             self = .failed(FetchFailure(failed.failure))
