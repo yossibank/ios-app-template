@@ -5,12 +5,12 @@ import Shared
 import Testing
 
 struct PokemonBridgeTests {
-    @Test("一覧の行が id・名前・画像の URL になる")
+    @Test("一覧の行が id・表示名・画像の URL になる")
     func entriesBecomePokemon() {
-        let pokemon = Pokemon(entry(id: 25, name: "pikachu"))
+        let pokemon = Pokemon(entry(id: 25, name: "mr-mime"))
 
         #expect(pokemon.id == 25)
-        #expect(pokemon.name == "pikachu")
+        #expect(pokemon.name == "Mr-Mime")
         #expect(pokemon.artwork == URL(string: "https://img.example/25.png"))
     }
 
@@ -40,8 +40,7 @@ struct PokemonBridgeTests {
             PokemonListResultLoaded(
                 pokemon: [entry(id: 1, name: "bulbasaur")],
                 hasMore: true,
-                total: 1351,
-                failure: nil
+                total: 1351
             )
         )
 
@@ -50,7 +49,7 @@ struct PokemonBridgeTests {
             return
         }
 
-        #expect(snapshot.pokemon.map(\.name) == ["bulbasaur"])
+        #expect(snapshot.pokemon.map(\.id) == [1])
         #expect(snapshot.hasMore)
         #expect(snapshot.total == 1351)
     }
@@ -58,7 +57,7 @@ struct PokemonBridgeTests {
     @Test("一部だけ失敗したページは理由を連れてくる")
     func degradedResultsCarryTheirFailure() {
         let page = PokemonListPage(
-            PokemonListResultLoaded(
+            PokemonListResultDegraded(
                 pokemon: [entry(id: 1, name: "bulbasaur")],
                 hasMore: true,
                 total: 1351,

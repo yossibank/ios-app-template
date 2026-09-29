@@ -8,14 +8,12 @@ public final class PokemonPagerListing: PokemonListing, @unchecked Sendable {
 
     public func reload() async -> PokemonListPage {
         do {
-            try await pager.reset()
+            return try await PokemonListPage(pager.reload())
         } catch is CancellationError {
             return .stale
         } catch {
             return .failed(.unexpected(canRetry: true))
         }
-
-        return await loadNext()
     }
 
     public func loadNext() async -> PokemonListPage {

@@ -66,12 +66,12 @@ enum Preview {
 
     static var pokemon: [Pokemon] {
         [
-            Pokemon(id: 1, name: "bulbasaur", artwork: nil),
-            Pokemon(id: 4, name: "charmander", artwork: nil),
-            Pokemon(id: 7, name: "squirtle", artwork: nil),
-            Pokemon(id: 10, name: "caterpie", artwork: nil),
-            Pokemon(id: 25, name: "pikachu", artwork: nil),
-            Pokemon(id: 149, name: "dragonite", artwork: nil)
+            Pokemon(id: 1, name: "Bulbasaur", artwork: nil),
+            Pokemon(id: 4, name: "Charmander", artwork: nil),
+            Pokemon(id: 7, name: "Squirtle", artwork: nil),
+            Pokemon(id: 10, name: "Caterpie", artwork: nil),
+            Pokemon(id: 25, name: "Pikachu", artwork: nil),
+            Pokemon(id: 149, name: "Dragonite", artwork: nil)
         ]
     }
 }

@@ -27,7 +27,7 @@ struct PokemonCard: View {
 
             Spacer(minLength: 0)
 
-            Text(pokemon.name.capitalized)
+            Text(pokemon.name)
                 .font(.headline)
                 .lineLimit(2)
         }
@@ -141,13 +141,13 @@ private extension PokemonCard {
 }
 
 #Preview("カード") {
-    PokemonCard(pokemon: Pokemon(id: 25, name: "pikachu", artwork: nil))
+    PokemonCard(pokemon: Pokemon(id: 25, name: "Pikachu", artwork: nil))
         .frame(width: 160)
         .fixedSize(horizontal: false, vertical: true)
 }
 
 #Preview("カード（読み込み中）") {
-    PokemonCard(pokemon: Pokemon(id: 0, name: "pikachu", artwork: nil))
+    PokemonCard(pokemon: Pokemon(id: 0, name: "Pikachu", artwork: nil))
         .redacted(reason: .placeholder)
         .frame(width: 160)
         .fixedSize(horizontal: false, vertical: true)
