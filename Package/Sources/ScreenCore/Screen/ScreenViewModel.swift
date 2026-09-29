@@ -1,7 +1,7 @@
 import Observation
 
 @MainActor
-public protocol ScreenViewModel: AnyObject, Observable {
+public protocol ScreenViewModel: AnyObject, Observable, Sendable {
     associatedtype State: ScreenViewState
     associatedtype Value
 
