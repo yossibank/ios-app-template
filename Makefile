@@ -20,11 +20,11 @@ open:
 verify: lint testplan build-test
 
 testplan:
-	@sh Scripts/check-testplan.sh
+	@sh scripts/check-testplan.sh
 
 bootstrap:
 	mint bootstrap
-	git config core.hooksPath Scripts/git-hooks
+	git config core.hooksPath scripts/git-hooks
 
 lint:
 	$(SWIFTFORMAT) --lint .
