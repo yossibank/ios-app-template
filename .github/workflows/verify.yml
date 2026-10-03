@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: verify-${{ github.ref }}
@@ -22,7 +23,7 @@ env:
   DEVELOPER_DIR: /Applications/Xcode.app
 
 jobs:
-  verify:
+  build:
     name: Build
     runs-on: xcode-27
 
@@ -92,14 +93,70 @@ jobs:
           swiftformat --version
           swiftlint version
 
+      - name: Lint
+        run: make lint testplan
+
+      - name: Build for testing
+        run: >-
+          xcodebuild build-for-testing
+          -workspace AppTemplate.xcworkspace
+          -scheme AppTemplate
+          -destination 'generic/platform=iOS Simulator'
+          -testProductsPath "$RUNNER_TEMP/AppTemplate.xctestproducts"
+          ARCHS=arm64
+          SWIFT_SUPPRESS_WARNINGS=NO
+          SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
+
+      - name: Pack the test products
+        run: tar -cf "$RUNNER_TEMP/test-products.tar" -C "$RUNNER_TEMP" AppTemplate.xctestproducts
+
+      - name: Upload the test products
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-products
+          path: ${{ runner.temp }}/test-products.tar
+          retention-days: 1
+
+  test:
+    name: Test
+    runs-on: xcode-27
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Start booting the simulator
         run: make boot
 
-      - name: Lint and build
-        run: make lint testplan build-for-testing
+      - name: Wait for the test products
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          until gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/artifacts" --jq '.artifacts[].name' | grep -qx test-products; do
+            build="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/attempts/${GITHUB_RUN_ATTEMPT}/jobs" --jq '.jobs[] | select(.name == "Build") | .conclusion // empty')"
+            if [ -n "$build" ] && [ "$build" != success ]; then
+              echo "Build が ${build} で終わったのでテストしません" >&2
+              exit 1
+            fi
+            sleep 10
+          done
+
+      - name: Download the test products
+        uses: actions/download-artifact@v8
+        with:
+          name: test-products
+          path: ${{ runner.temp }}
+
+      - name: Unpack the test products
+        run: tar -xf "$RUNNER_TEMP/test-products.tar" -C "$RUNNER_TEMP"
 
       - name: Wait for the simulator
         run: make boot-wait
 
       - name: Test
-        run: make test-without-building
+        run: |
+          udid="$(xcrun simctl list devices booted -j | jq -r '[.devices[][]][0].udid')"
+          xcodebuild test-without-building \
+            -testProductsPath "$RUNNER_TEMP/AppTemplate.xctestproducts" \
+            -destination "id=${udid}"
