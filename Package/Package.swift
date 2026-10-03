@@ -9,7 +9,7 @@ let shared: (dependency: Package.Dependency, identity: String) = if let sharedDi
     (.package(path: sharedDir), URL(fileURLWithPath: sharedDir).lastPathComponent)
 } else {
     (
-        .package(url: "https://github.com/yossibank/kmp-app-template.git", exact: "0.24.0"),
+        .package(url: "https://github.com/yossibank/kmp-app-template.git", exact: "0.25.0"),
         "kmp-app-template"
     )
 }
