@@ -33,9 +33,6 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
-      - name: Start booting the simulator
-        run: make boot
-
       - name: Create a token for the shared core
         id: shared-core-token
         uses: actions/create-github-app-token@v3
@@ -94,6 +91,9 @@ jobs:
         run: |
           swiftformat --version
           swiftlint version
+
+      - name: Start booting the simulator
+        run: make boot
 
       - name: Wait for the simulator
         run: make boot-wait
