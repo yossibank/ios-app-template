@@ -1,7 +1,7 @@
 import ScreenCore
 import SwiftUI
 
-struct PokemonListGauge: View {
+struct ProductListGauge: View {
     let loaded: Int
     let total: Int
     let matched: Int?
@@ -25,7 +25,7 @@ struct PokemonListGauge: View {
     }
 }
 
-private extension PokemonListGauge {
+private extension ProductListGauge {
     var fraction: Double? {
         if matched == nil, loaded < total {
             Double(loaded) / Double(total)
@@ -36,13 +36,13 @@ private extension PokemonListGauge {
 }
 
 #Preview("読み込み途中") {
-    PokemonListGauge(loaded: 40, total: 1351, matched: nil)
+    ProductListGauge(loaded: 40, total: 194, matched: nil)
 }
 
 #Preview("読み込み完了") {
-    PokemonListGauge(loaded: 1351, total: 1351, matched: nil)
+    ProductListGauge(loaded: 194, total: 194, matched: nil)
 }
 
 #Preview("絞り込み中") {
-    PokemonListGauge(loaded: 40, total: 1351, matched: 3)
+    ProductListGauge(loaded: 40, total: 194, matched: 3)
 }

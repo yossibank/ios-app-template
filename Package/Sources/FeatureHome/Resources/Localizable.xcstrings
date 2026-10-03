@@ -18,18 +18,18 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ポケモンがいません"
+            "value": "商品がありません"
           }
         }
       }
     },
-    "home.number": {
+    "home.logout": {
       "extractionState": "manual",
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "#%@"
+            "value": "ログアウト"
           }
         }
       }
@@ -84,7 +84,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "名前で絞り込む"
+            "value": "商品名で絞り込む"
           }
         }
       }
@@ -95,7 +95,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ポケモン"
+            "value": "商品"
           }
         }
       }

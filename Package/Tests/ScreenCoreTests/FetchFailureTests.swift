@@ -31,4 +31,13 @@ struct FetchFailureTests {
         #expect(FetchFailure.offline.canRetry)
         #expect(FetchFailure.timeout.canRetry)
     }
+
+    @Test("認証切れだけがセッションの終わりを知らせる")
+    func onlyUnauthorizedEndsTheSession() {
+        #expect(FetchFailure.unauthorized.message == "ログインし直してください")
+        #expect(FetchFailure.unauthorized.endsSession)
+        #expect(!FetchFailure.unauthorized.canRetry)
+        #expect(!FetchFailure.offline.endsSession)
+        #expect(!FetchFailure.server(statusCode: 401, canRetry: false).endsSession)
+    }
 }

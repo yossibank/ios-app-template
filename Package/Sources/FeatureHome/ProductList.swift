@@ -1,19 +1,19 @@
 import ScreenCore
 import SharedCore
 
-struct PokemonList {
-    var pokemon: [Pokemon]
+struct ProductList {
+    var products: [Product]
     var total: Int
     var notice: FetchFailure?
 }
 
-extension PokemonList {
+extension ProductList {
     init(
-        _ snapshot: PokemonListSnapshot,
+        _ snapshot: ProductListSnapshot,
         notice: FetchFailure? = nil
     ) {
         self.init(
-            pokemon: snapshot.pokemon,
+            products: snapshot.products,
             total: snapshot.total,
             notice: notice
         )

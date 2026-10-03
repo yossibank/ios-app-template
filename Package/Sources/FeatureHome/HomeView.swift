@@ -4,9 +4,10 @@ import SwiftUI
 
 public struct HomeView: View {
     let source: ScreenSource<HomeViewModel>
+    var onLogout: () -> Void = {}
 
     public var body: some View {
-        ScreenView(source, isEmpty: \.pokemon.isEmpty) { viewState, list, actions in
+        ScreenView(source, isEmpty: \.products.isEmpty) { viewState, list, actions in
             HomeContent(
                 viewState: viewState,
                 list: list,
@@ -18,12 +19,17 @@ public struct HomeView: View {
             skeleton
         }
         .navigationTitle(.homeTitle)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(.homeLogout, action: onLogout)
+            }
+        }
     }
 }
 
 public extension HomeView {
-    init() {
-        self.init(source: .live(HomeViewModel()))
+    init(onLogout: @escaping () -> Void) {
+        self.init(source: .live(HomeViewModel()), onLogout: onLogout)
     }
 }
 
@@ -42,9 +48,9 @@ private extension HomeView {
 
     var skeleton: some View {
         ScrollView {
-            PokemonGrid {
+            ProductGrid {
                 ForEach(0..<8, id: \.self) { _ in
-                    PokemonCard(pokemon: .placeholder)
+                    ProductCard(product: .placeholder)
                 }
             }
             .padding(.horizontal, 16)
@@ -56,23 +62,25 @@ private extension HomeView {
 }
 
 enum Preview {
-    static var list: PokemonList {
-        PokemonList(pokemon: pokemon, total: 1351)
+    static var list: ProductList {
+        ProductList(products: products, total: 194)
     }
 
-    static var listWithError: PokemonList {
-        PokemonList(pokemon: pokemon, total: 1351, notice: .offline)
+    static var listWithError: ProductList {
+        ProductList(products: products, total: 194, notice: .offline)
     }
 
-    static var pokemon: [Pokemon] {
+    static var products: [Product] {
         [
-            Pokemon(id: 1, name: "Bulbasaur", artwork: nil),
-            Pokemon(id: 4, name: "Charmander", artwork: nil),
-            Pokemon(id: 7, name: "Squirtle", artwork: nil),
-            Pokemon(id: 10, name: "Caterpie", artwork: nil),
-            Pokemon(id: 25, name: "Pikachu", artwork: nil),
-            Pokemon(id: 149, name: "Dragonite", artwork: nil)
-        ]
+            "Essence Mascara Lash Princess",
+            "Eyeshadow Palette with Mirror",
+            "Powder Canister",
+            "Red Lipstick",
+            "Red Nail Polish",
+            "Calvin Klein CK One"
+        ].enumerated().map { index, title in
+            Product(id: index + 1, title: title, thumbnail: nil)
+        }
     }
 }
 
@@ -108,6 +116,6 @@ enum Preview {
 
 #Preview("空") {
     NavigationStack {
-        HomeView(source: .snapshot(.loaded(PokemonList(pokemon: [], total: 0))))
+        HomeView(source: .snapshot(.loaded(ProductList(products: [], total: 0))))
     }
 }

@@ -8,4 +8,8 @@ struct AppTemplate: App {
             AppRootView()
         }
     }
+
+    init() {
+        AppRootView.configure(baseURL: "https://dummyjson.com")
+    }
 }

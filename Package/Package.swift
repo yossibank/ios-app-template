@@ -9,7 +9,7 @@ let shared: (dependency: Package.Dependency, identity: String) = if let sharedDi
     (.package(path: sharedDir), URL(fileURLWithPath: sharedDir).lastPathComponent)
 } else {
     (
-        .package(url: "https://github.com/yossibank/kmp-app-template.git", exact: "0.23.0"),
+        .package(url: "https://github.com/yossibank/kmp-app-template.git", exact: "0.24.0"),
         "kmp-app-template"
     )
 }
@@ -38,6 +38,10 @@ let package = Package(
         .library(
             name: "FeatureHome",
             targets: ["FeatureHome"]
+        ),
+        .library(
+            name: "FeatureLogin",
+            targets: ["FeatureLogin"]
         ),
         .library(
             name: "AppRoot",
@@ -75,8 +79,16 @@ let package = Package(
             swiftSettings: swiftSettings
         ),
         .target(
+            name: "FeatureLogin",
+            dependencies: ["ScreenCore", "SharedCore"],
+            resources: [
+                .process("Resources")
+            ],
+            swiftSettings: swiftSettings
+        ),
+        .target(
             name: "AppRoot",
-            dependencies: ["FeatureHome"],
+            dependencies: ["FeatureHome", "FeatureLogin", "SharedCore"],
             swiftSettings: swiftSettings
         ),
         .testTarget(
@@ -92,6 +104,11 @@ let package = Package(
         .testTarget(
             name: "FeatureHomeTests",
             dependencies: ["FeatureHome"],
+            swiftSettings: swiftSettings
+        ),
+        .testTarget(
+            name: "FeatureLoginTests",
+            dependencies: ["FeatureLogin"],
             swiftSettings: swiftSettings
         )
     ]

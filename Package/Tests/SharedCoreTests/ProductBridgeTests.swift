@@ -4,14 +4,14 @@ import Shared
 @testable import SharedCore
 import Testing
 
-struct PokemonBridgeTests {
-    @Test("一覧の行が id・表示名・画像の URL になる")
-    func entriesBecomePokemon() {
-        let pokemon = Pokemon(entry(id: 25, name: "mr-mime"))
+struct ProductBridgeTests {
+    @Test("一覧の行が id・商品名・サムネイルの URL になる")
+    func entriesBecomeProducts() {
+        let product = Product(entry(id: 7, title: "Red Lipstick"))
 
-        #expect(pokemon.id == 25)
-        #expect(pokemon.name == "Mr-Mime")
-        #expect(pokemon.artwork == URL(string: "https://img.example/25.png"))
+        #expect(product.id == 7)
+        #expect(product.title == "Red Lipstick")
+        #expect(product.thumbnail == URL(string: "https://img.example/7.webp"))
     }
 
     @Test("失敗の種類が共通の文言になる")
@@ -19,7 +19,7 @@ struct PokemonBridgeTests {
         #expect(FetchFailure(ApiFailureOffline.shared) == .offline)
         #expect(FetchFailure(ApiFailureTimeout.shared) == .timeout)
         #expect(FetchFailure(ApiFailureUnreadable.shared) == .unreadable)
-        #expect(FetchFailure(ApiFailureClosed.shared) == .unexpected(canRetry: false))
+        #expect(FetchFailure(ApiFailureUnauthorized.shared) == .unauthorized)
         #expect(FetchFailure(ApiFailureServer(statusCode: 503)).message.contains("503"))
     }
 
@@ -31,16 +31,16 @@ struct PokemonBridgeTests {
         #expect(FetchFailure(ApiFailureServer(statusCode: 429)).canRetry)
         #expect(!FetchFailure(ApiFailureServer(statusCode: 404)).canRetry)
         #expect(!FetchFailure(ApiFailureUnreadable.shared).canRetry)
-        #expect(!FetchFailure(ApiFailureClosed.shared).canRetry)
+        #expect(!FetchFailure(ApiFailureUnauthorized.shared).canRetry)
     }
 
     @Test("読み込めたページが snapshot になる")
     func loadedResultsBecomeASnapshot() {
-        let page = PokemonListPage(
-            PokemonListResultLoaded(
-                pokemon: [entry(id: 1, name: "bulbasaur")],
+        let page = ProductListPage(
+            ProductListResultLoaded(
+                products: [entry(id: 1, title: "Powder Canister")],
                 hasMore: true,
-                total: 1351
+                total: 194
             )
         )
 
@@ -49,18 +49,18 @@ struct PokemonBridgeTests {
             return
         }
 
-        #expect(snapshot.pokemon.map(\.id) == [1])
+        #expect(snapshot.products.map(\.id) == [1])
         #expect(snapshot.hasMore)
-        #expect(snapshot.total == 1351)
+        #expect(snapshot.total == 194)
     }
 
     @Test("一部だけ失敗したページは理由を連れてくる")
     func degradedResultsCarryTheirFailure() {
-        let page = PokemonListPage(
-            PokemonListResultDegraded(
-                pokemon: [entry(id: 1, name: "bulbasaur")],
+        let page = ProductListPage(
+            ProductListResultDegraded(
+                products: [entry(id: 1, title: "Powder Canister")],
                 hasMore: true,
-                total: 1351,
+                total: 194,
                 failure: ApiFailureOffline.shared
             )
         )
@@ -70,23 +70,23 @@ struct PokemonBridgeTests {
             return
         }
 
-        #expect(snapshot.pokemon.count == 1)
+        #expect(snapshot.products.count == 1)
         #expect(failure == .offline)
     }
 
     @Test("全部失敗したページは失敗になる")
     func failedResultsBecomeAFailure() {
-        let page = PokemonListPage(PokemonListResultFailed(failure: ApiFailureTimeout.shared))
+        let page = ProductListPage(ProductListResultFailed(failure: ApiFailureTimeout.shared))
 
         #expect(page == .failed(.timeout))
     }
 
     @Test("捨てられた結果はそのまま捨てられた結果になる")
     func staleResultsStayStale() {
-        #expect(PokemonListPage(PokemonListResultStale.shared) == .stale)
+        #expect(ProductListPage(ProductListResultStale.shared) == .stale)
     }
 
-    private func entry(id: Int32, name: String) -> PokemonEntry {
-        PokemonEntry(id: id, name: name, imageUrl: "https://img.example/\(id).png")
+    private func entry(id: Int32, title: String) -> ProductEntry {
+        ProductEntry(id: id, title: title, thumbnailUrl: "https://img.example/\(id).webp")
     }
 }
