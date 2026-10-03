@@ -116,7 +116,6 @@ jobs:
           name: test-products
           path: ${{ runner.temp }}/test-products.tar
           retention-days: 1
-          compression-level: 0
 
   test:
     name: Test
@@ -140,7 +139,7 @@ jobs:
               echo "Build が ${build} で終わったのでテストしません" >&2
               exit 1
             fi
-            sleep 5
+            sleep 10
           done
 
       - name: Download the test products
