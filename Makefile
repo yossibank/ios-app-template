@@ -12,12 +12,12 @@ endif
 SWIFTFORMAT ?= mint run swiftformat
 SWIFTLINT   ?= mint run swiftlint
 
-.PHONY: open verify bootstrap lint testplan format test build build-test clean boot boot-wait
+.PHONY: open verify bootstrap lint testplan format test build build-for-testing test-without-building clean boot boot-wait
 
 open:
 	open $(WORKSPACE)
 
-verify: lint testplan build-test
+verify: lint testplan build-for-testing test-without-building
 
 testplan:
 	@sh scripts/check-testplan.sh
@@ -43,8 +43,11 @@ boot-wait:
 test:
 	xcodebuild test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS) $(DERIVED_DATA)
 
-build-test:
-	xcodebuild build test -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS) $(DERIVED_DATA)
+build-for-testing:
+	xcodebuild build-for-testing -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS) $(DERIVED_DATA)
+
+test-without-building:
+	xcodebuild test-without-building -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS) $(DERIVED_DATA)
 
 build:
 	xcodebuild build -workspace $(WORKSPACE) -scheme $(SCHEME) -destination '$(DEST)' $(SETTINGS) $(DERIVED_DATA)

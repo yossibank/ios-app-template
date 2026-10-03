@@ -95,8 +95,11 @@ jobs:
       - name: Start booting the simulator
         run: make boot
 
+      - name: Lint and build
+        run: make lint testplan build-for-testing
+
       - name: Wait for the simulator
         run: make boot-wait
 
-      - name: Verify
-        run: make verify
+      - name: Test
+        run: make test-without-building
