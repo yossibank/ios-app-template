@@ -23,7 +23,6 @@ concurrency:
 
 env:
   DEVELOPER_DIR: /Applications/Xcode.app
-  SHARED_CORE_TOKEN: ${{ secrets.SHARED_CORE_TOKEN || secrets.GITHUB_TOKEN }}
 
 jobs:
   verify:
@@ -40,21 +39,34 @@ jobs:
       - name: Start booting the simulator
         run: make boot
 
+      - name: Create a token for the shared core
+        id: shared-core-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.SHARED_CORE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SHARED_CORE_APP_PRIVATE_KEY }}
+          repositories: kmp-app-template
+          permission-contents: read
+
       - name: Configure git credentials
+        env:
+          SHARED_CORE_TOKEN: ${{ steps.shared-core-token.outputs.token }}
         run: |
           git config --global \
-            url."https://${{ github.actor }}:${SHARED_CORE_TOKEN}@github.com/".insteadOf \
+            url."https://x-access-token:${SHARED_CORE_TOKEN}@github.com/".insteadOf \
             "https://github.com/"
 
       - name: Configure netrc
+        env:
+          SHARED_CORE_TOKEN: ${{ steps.shared-core-token.outputs.token }}
         run: |
           umask 077
           cat > "$HOME/.netrc" <<NETRC
           machine github.com
-            login ${{ github.actor }}
+            login x-access-token
             password ${SHARED_CORE_TOKEN}
           machine api.github.com
-            login ${{ github.actor }}
+            login x-access-token
             password ${SHARED_CORE_TOKEN}
           NETRC
 
