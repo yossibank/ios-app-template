@@ -13,6 +13,29 @@ struct FetchStateTests {
         #expect(state.phase.loaded == [1, 2])
     }
 
+    @Test("認証切れで失敗したらセッションの終わりを知らせる")
+    func unauthorizedFailureEndsTheSession() async {
+        let state = FetchState<[Int]>()
+
+        await state.reload { () throws(FetchFailure) -> [Int] in throw .offline }?.value
+        #expect(!state.sessionEnded, "ただの失敗でセッションが終わったことになっている")
+
+        await state.reload { () throws(FetchFailure) -> [Int] in throw .unauthorized }?.value
+        #expect(state.sessionEnded)
+    }
+
+    @Test("続きの取得が認証切れで失敗しても、セッションの終わりを知らせる")
+    func unauthorizedLoadMoreEndsTheSession() async {
+        let state = FetchState<[Int]>()
+        await state.reload { [1, 2] }?.value
+
+        await state.loadMore { _ throws(FetchFailure) -> FetchMore<[Int]> in throw .unauthorized }?
+            .value
+
+        #expect(state.sessionEnded)
+        #expect(state.phase.loaded == [1, 2], "読み込めている分が消えている")
+    }
+
     @Test("画面に戻っただけでは取得し直さない")
     func reappearingDoesNotRefetch() async {
         let model = CountingModel()

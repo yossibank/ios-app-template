@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct PokemonGrid<Content: View>: View {
+struct ProductGrid<Content: View>: View {
     @ViewBuilder let content: () -> Content
 
     var body: some View {

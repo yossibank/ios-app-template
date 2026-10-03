@@ -7,10 +7,10 @@ import Testing
 struct HomeViewModelTests {
     @Test("取得に成功したら一覧になる")
     func mapsLoadedResult() async throws {
-        let list = try await model(loaded(["pikachu"])).fetch()
+        let list = try await model(loaded(["Red Lipstick"])).fetch()
 
-        #expect(list.pokemon.map(\.name) == ["pikachu"])
-        #expect(list.total == 1351)
+        #expect(list.products.map(\.title) == ["Red Lipstick"])
+        #expect(list.total == 194)
         #expect(list.notice == nil)
     }
 
@@ -24,7 +24,7 @@ struct HomeViewModelTests {
         let first = try await model.fetch()
         let more = try await model.fetchMore(after: first)
 
-        #expect(more.value?.pokemon.map(\.name) == ["a", "b"])
+        #expect(more.value?.products.map(\.title) == ["a", "b"])
     }
 
     @Test("最後のページは終端として返す")
@@ -50,7 +50,7 @@ struct HomeViewModelTests {
         let first = try await model.fetch()
         let more = try await fetchMoreGenerically(model, after: first)
 
-        #expect(more.value?.pokemon.map(\.name) == ["a", "b"], "プロトコル既定の .unchanged が返っている")
+        #expect(more.value?.products.map(\.title) == ["a", "b"], "プロトコル既定の .unchanged が返っている")
     }
 
     @Test("追加取得が一部失敗したら知らせを立て、続きがあることは残す")
@@ -69,29 +69,6 @@ struct HomeViewModelTests {
             Issue.record("失敗しただけで続きが無いことにされている")
             return
         }
-    }
-
-    @Test("閉じると共通コアも閉じる")
-    func closeReachesTheSharedCore() {
-        let stub = StubListing([loaded(["a"])])
-        let model = HomeViewModel(dependency: .init(listing: stub))
-
-        model.close()
-
-        #expect(stub.closed)
-    }
-
-    @Test("画面を手放すと共通コアも閉じる")
-    func releasingTheModelClosesTheSharedCore() {
-        let stub = StubListing([loaded(["a"])])
-        var model: HomeViewModel? = HomeViewModel(dependency: .init(listing: stub))
-
-        #expect(model != nil)
-        #expect(stub.closed == false, "手放す前に閉じている")
-
-        model = nil
-
-        #expect(stub.closed, "手放しても共通コアが開いたまま")
     }
 
     @Test("最初の取得の失敗はそのまま失敗として投げる")
@@ -118,7 +95,7 @@ struct HomeViewModelTests {
             return
         }
 
-        #expect(list.pokemon.map(\.name) == ["a"], "失敗したのに一覧が変わっている")
+        #expect(list.products.map(\.title) == ["a"], "失敗したのに一覧が変わっている")
         #expect(list.notice == .offline)
     }
 
@@ -159,29 +136,53 @@ struct HomeViewModelTests {
             return
         }
 
-        #expect(list.pokemon.map(\.name) == ["x"])
+        #expect(list.products.map(\.title) == ["x"])
         #expect(list.notice == nil, "置き換えられた続きの取得が知らせを立てている")
     }
 
-    private func model(_ pages: PokemonListPage...) -> HomeViewModel {
+    @Test("最初の取得が一部だけ認証切れなら、知らせにせずセッションの終わりとして投げる")
+    func degradedUnauthorizedFetchThrows() async throws {
+        let failure = try await #require(throws: FetchFailure.self) {
+            _ = try await model(degraded(.unauthorized, ["a"])).fetch()
+        }
+
+        #expect(failure.endsSession)
+    }
+
+    @Test("続きの取得が認証切れなら、知らせにせずセッションの終わりとして投げる")
+    func unauthorizedFetchMoreThrows() async throws {
+        let model = model(
+            loaded(["a"], hasMore: true),
+            .failed(.unauthorized)
+        )
+        let first = try await model.fetch()
+
+        let failure = try await #require(throws: FetchFailure.self) {
+            _ = try await model.fetchMore(after: first)
+        }
+
+        #expect(failure.endsSession)
+    }
+
+    private func model(_ pages: ProductListPage...) -> HomeViewModel {
         HomeViewModel(dependency: .init(listing: StubListing(pages)))
     }
 
-    private func loaded(_ names: [String], hasMore: Bool = false) -> PokemonListPage {
+    private func loaded(_ names: [String], hasMore: Bool = false) -> ProductListPage {
         .loaded(snapshot(names, hasMore: hasMore))
     }
 
-    private func degraded(_ failure: FetchFailure, _ names: [String]) -> PokemonListPage {
+    private func degraded(_ failure: FetchFailure, _ names: [String]) -> ProductListPage {
         .degraded(snapshot(names, hasMore: true), failure)
     }
 
-    private func snapshot(_ names: [String], hasMore: Bool) -> PokemonListSnapshot {
-        PokemonListSnapshot(
-            pokemon: names.enumerated().map { index, name in
-                Pokemon(id: index + 1, name: name, artwork: nil)
+    private func snapshot(_ names: [String], hasMore: Bool) -> ProductListSnapshot {
+        ProductListSnapshot(
+            products: names.enumerated().map { index, title in
+                Product(id: index + 1, title: title, thumbnail: nil)
             },
             hasMore: hasMore,
-            total: 1351
+            total: 194
         )
     }
 
@@ -193,56 +194,48 @@ struct HomeViewModelTests {
     }
 }
 
-private final class StubListing: PokemonListing, @unchecked Sendable {
-    private(set) var closed = false
-
-    private let pages: [PokemonListPage]
+private final class StubListing: ProductListing, @unchecked Sendable {
+    private let pages: [ProductListPage]
     private var index = 0
 
-    init(_ pages: [PokemonListPage]) {
+    init(_ pages: [ProductListPage]) {
         self.pages = pages
     }
 
-    func reload() async -> PokemonListPage {
+    func reload() async -> ProductListPage {
         index = 0
         return next()
     }
 
-    func loadNext() async -> PokemonListPage {
+    func loadNext() async -> ProductListPage {
         next()
     }
 
-    func close() {
-        closed = true
-    }
-
-    private func next() -> PokemonListPage {
+    private func next() -> ProductListPage {
         defer { index += 1 }
         return pages[min(index, pages.count - 1)]
     }
 }
 
-private final class GatedListing: PokemonListing, @unchecked Sendable {
+private final class GatedListing: ProductListing, @unchecked Sendable {
     let gate = ListingGate()
 
-    private var reloads: [PokemonListPage]
-    private let next: PokemonListPage
+    private var reloads: [ProductListPage]
+    private let next: ProductListPage
 
-    init(reloads: [PokemonListPage], next: PokemonListPage) {
+    init(reloads: [ProductListPage], next: ProductListPage) {
         self.reloads = reloads
         self.next = next
     }
 
-    func reload() async -> PokemonListPage {
+    func reload() async -> ProductListPage {
         reloads.removeFirst()
     }
 
-    func loadNext() async -> PokemonListPage {
+    func loadNext() async -> ProductListPage {
         await gate.wait()
         return next
     }
-
-    func close() {}
 }
 
 private final class ListingGate: @unchecked Sendable {

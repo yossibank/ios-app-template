@@ -2,7 +2,7 @@
 
 # ios-app-template
 
-SwiftUI と Kotlin Multiplatform で作る、ポケモン図鑑アプリのテンプレート
+SwiftUI と Kotlin Multiplatform で作る、商品一覧アプリのテンプレート
 
 [![Verify](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml/badge.svg)](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml)
 [![License](https://img.shields.io/github/license/yossibank/ios-app-template)](LICENSE)
@@ -12,12 +12,12 @@ SwiftUI と Kotlin Multiplatform で作る、ポケモン図鑑アプリのテ�
 ![Swift Testing](https://img.shields.io/badge/Swift_Testing-555555?logo=swift&logoColor=white)
 ![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin_Multiplatform-7F52FF?logo=kotlin&logoColor=white)
 
-<img src="docs/images/list-light.png" width="260" alt="ポケモンの一覧（ライトモード）">
-<img src="docs/images/list-dark.png" width="260" alt="ポケモンの一覧（ダークモード）">
+<img src="docs/images/list-light.png" width="260" alt="商品の一覧（ライトモード）">
+<img src="docs/images/list-dark.png" width="260" alt="商品の一覧（ダークモード）">
 
 </div>
 
-PokeAPI のポケモンを、無限スクロールと名前での絞り込みで見られます。
+DummyJSON にログインし、商品を無限スクロールと商品名での絞り込みで見られます。
 
 ## 3 つのリポジトリ
 
@@ -40,10 +40,14 @@ flowchart LR
     SHAREDCORE["SharedCore"]
     SCREENCORE["ScreenCore"]
     HOME["FeatureHome"]
+    LOGIN["FeatureLogin"]
     ROOT["AppRoot"]
     SHARED --> SHAREDCORE --> HOME
     SCREENCORE --> HOME
+    SHAREDCORE --> LOGIN
+    SCREENCORE --> LOGIN
     HOME --> ROOT
+    LOGIN --> ROOT
 ```
 
 | モジュール | 役割 |
@@ -51,7 +55,8 @@ flowchart LR
 | `SharedCore` | 共通コアとの境界。KMP の型を Swift の型に直して渡す |
 | `ScreenCore` | 画面の土台（読み込み状態の管理）と、機能に依らない UI 部品 |
 | `FeatureHome` | 一覧の画面 |
-| `AppRoot` | 画面の組み立て |
+| `FeatureLogin` | ログインの画面 |
+| `AppRoot` | ログイン状態に応じた画面の切り替え |
 
 ## 動かし方
 

@@ -8,11 +8,11 @@ struct HomeContent: View {
     @State private var isRefreshing = false
     @State private var position = ScrollPosition(edge: .top)
 
-    let list: PokemonList
+    let list: ProductList
     let actions: ScreenActions
 
     var body: some View {
-        let items = list.pokemon.filtered(query: viewState.query)
+        let items = list.products.filtered(query: viewState.query)
 
         ScrollView {
             LazyVStack(spacing: 16) {
@@ -53,12 +53,12 @@ struct HomeContent: View {
 }
 
 private extension HomeContent {
-    func grid(_ items: [Pokemon]) -> some View {
+    func grid(_ items: [Product]) -> some View {
         let prefetch = Set(items.suffix(8).map(\.id))
 
-        return PokemonGrid {
+        return ProductGrid {
             ForEach(items) { item in
-                PokemonCard(pokemon: item)
+                ProductCard(product: item)
                     .scrollTransition { content, phase in
                         content
                             .scaleEffect(phase.isIdentity ? 1 : 0.94)
@@ -71,7 +71,7 @@ private extension HomeContent {
 
             if isLoadingMore {
                 ForEach(0..<2, id: \.self) { _ in
-                    PokemonCard(pokemon: .placeholder)
+                    ProductCard(product: .placeholder)
                         .skeleton()
                 }
             }
@@ -79,8 +79,8 @@ private extension HomeContent {
     }
 
     func gauge(matched: Int?) -> some View {
-        PokemonListGauge(
-            loaded: list.pokemon.count,
+        ProductListGauge(
+            loaded: list.products.count,
             total: list.total,
             matched: matched
         )
@@ -102,7 +102,7 @@ private extension HomeContent {
         actions.isLoadingMore && list.notice == nil
     }
 
-    func loadMore(at item: Pokemon, prefetch: Set<Pokemon.ID>) {
+    func loadMore(at item: Product, prefetch: Set<Product.ID>) {
         guard
             !isFiltering,
             list.notice == nil,

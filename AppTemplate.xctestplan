@@ -33,6 +33,13 @@
         "identifier" : "FeatureHomeTests",
         "name" : "FeatureHomeTests"
       }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:..\/Package",
+        "identifier" : "FeatureLoginTests",
+        "name" : "FeatureLoginTests"
+      }
     }
   ],
   "version" : 1

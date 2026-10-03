@@ -97,6 +97,8 @@ public extension ScreenView where Model.Value: Collection {
 
 @MainActor
 private struct LiveScreen<Model: ScreenViewModel, Content: View>: View {
+    @Environment(\.onSessionEnded) private var onSessionEnded
+
     @State private var model: Model
 
     private let content: (FetchPhase<Model.Value>, Model.State, ScreenActions) -> Content
@@ -122,6 +124,11 @@ private struct LiveScreen<Model: ScreenViewModel, Content: View>: View {
         )
         .task {
             model.start()
+        }
+        .onChange(of: model.fetchState.sessionEnded) { _, ended in
+            if ended {
+                onSessionEnded()
+            }
         }
     }
 }

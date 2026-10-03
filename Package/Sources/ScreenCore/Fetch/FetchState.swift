@@ -5,6 +5,7 @@ import Observation
 @Observable
 public final class FetchState<Value> {
     public private(set) var phase: FetchPhase<Value> = .idle
+    public private(set) var sessionEnded = false
 
     private(set) var running: FetchOperation?
 
@@ -101,6 +102,10 @@ public final class FetchState<Value> {
             do throws(FetchFailure) {
                 result = try await .success(work())
             } catch {
+                if error.endsSession {
+                    sessionEnded = true
+                }
+
                 result = .failure(error)
             }
 
