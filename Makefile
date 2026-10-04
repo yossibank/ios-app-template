@@ -5,10 +5,13 @@ DEFAULT_SIMULATOR := $(shell xcrun simctl list devices available | awk -F'[()]' 
 SIMULATOR ?= $(DEFAULT_SIMULATOR)
 
 ifdef SHARED_DIR
-DERIVED_DATA := -derivedDataPath $(HOME)/Library/Developer/Xcode/DerivedData/$(SCHEME)-local-shared
+LOCAL_SHARED  := $(HOME)/Library/Developer/Xcode/DerivedData/$(SCHEME)-local-shared
+RESOLVED      := $(WORKSPACE)/xcshareddata/swiftpm/Package.resolved
+DERIVED_DATA  := -derivedDataPath $(LOCAL_SHARED)
+KEEP_RESOLVED := mkdir -p $(LOCAL_SHARED) && cp $(RESOLVED) $(LOCAL_SHARED)/ && trap 'cp $(LOCAL_SHARED)/Package.resolved $(RESOLVED)' EXIT &&
 endif
 
-XCODEBUILD   := xcodebuild -workspace $(WORKSPACE) -scheme $(SCHEME) $(DERIVED_DATA)
+XCODEBUILD   := $(KEEP_RESOLVED) xcodebuild -workspace $(WORKSPACE) -scheme $(SCHEME) $(DERIVED_DATA)
 ON_SIMULATOR := -destination 'platform=iOS Simulator,name=$(SIMULATOR)' SWIFT_SUPPRESS_WARNINGS=NO SWIFT_TREAT_WARNINGS_AS_ERRORS=YES
 
 SWIFTFORMAT ?= mint run swiftformat
