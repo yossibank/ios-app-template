@@ -14,88 +14,158 @@ struct HomeContent: View {
     var body: some View {
         let items = list.products.filtered(query: viewState.query)
 
-        ScrollView {
-            LazyVStack(spacing: 16) {
-                grid(items)
+        VStack(alignment: .leading, spacing: 0) {
+            SearchField(query: $viewState.query)
+                .padding(.horizontal, 20)
 
-                if let notice = list.notice {
-                    BannerView(
-                        text: notice.message,
-                        style: .failure,
-                        accessory: actions.isLoadingMore || isRefreshing
-                            ? .progress
-                            : .retry { retry(after: notice) }
-                    )
+            if isFiltering {
+                summary(matched: items.count)
+            }
+
+            ScrollView {
+                if isFiltering {
+                    results(items)
+                } else {
+                    catalog
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
-        }
-        .scrollPosition($position)
-        .safeAreaInset(edge: .bottom) {
-            if !items.isEmpty {
-                gauge(matched: isFiltering ? items.count : nil)
+            .scrollPosition($position)
+            .scrollDismissesKeyboard(.immediately)
+            .refreshable {
+                await refresh()
+            }
+            .overlay {
+                if isFiltering, items.isEmpty {
+                    noMatch
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                bottomBar
             }
         }
-        .refreshable {
-            await refresh()
-        }
-        .overlay {
-            if items.isEmpty {
-                ContentUnavailableView.search(text: viewState.query)
-            }
-        }
-        .searchable(
-            text: $viewState.query,
-            prompt: .homeSearchPrompt
-        )
     }
 }
 
 private extension HomeContent {
-    func grid(_ items: [Product]) -> some View {
-        let prefetch = Set(items.suffix(8).map(\.id))
+    var catalog: some View {
+        let prefetch = Set(list.products.suffix(8).map(\.id))
 
-        return ProductGrid {
-            ForEach(items) { item in
-                ProductCard(product: item)
-                    .scrollTransition { content, phase in
-                        content
-                            .scaleEffect(phase.isIdentity ? 1 : 0.94)
-                            .opacity(phase.isIdentity ? 1 : 0.6)
+        return LazyVStack(alignment: .leading, spacing: 26) {
+            ForEach(list.chapters) { chapter in
+                ChapterHeader(numeral: chapter.numeral, first: chapter.first, last: chapter.last)
+
+                ForEach(chapter.spreads) { spread in
+                    ProductLead(product: spread.lead)
+                        .onAppear {
+                            loadMore(at: spread.lead, prefetch: prefetch)
+                        }
+
+                    if !spread.pair.isEmpty {
+                        HStack(alignment: .top, spacing: 16) {
+                            ForEach(spread.pair) { product in
+                                ProductTile(product: product)
+                                    .onAppear {
+                                        loadMore(at: product, prefetch: prefetch)
+                                    }
+                            }
+
+                            if spread.pair.count == 1 {
+                                Color.clear
+                                    .frame(maxWidth: .infinity)
+                            }
+                        }
                     }
-                    .onAppear {
-                        loadMore(at: item, prefetch: prefetch)
-                    }
+                }
             }
 
             if isLoadingMore {
-                ForEach(0..<2, id: \.self) { _ in
-                    ProductCard(product: .placeholder)
-                        .skeleton()
+                if let next = list.nextChapter {
+                    ChapterHeader(
+                        numeral: next.numeral,
+                        first: next.first,
+                        last: next.last,
+                        isLoading: true
+                    )
                 }
+
+                LeadSkeleton()
             }
         }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+        .padding(.bottom, 24)
     }
 
-    func gauge(matched: Int?) -> some View {
-        ProductListGauge(
-            loaded: list.products.count,
-            total: list.total,
-            matched: matched
-        )
-        .onTapGesture {
-            withAnimation {
-                position.scrollTo(edge: .top)
+    func results(_ items: [Product]) -> some View {
+        LazyVStack(spacing: 0) {
+            ForEach(items) { product in
+                ProductRow(product: product, query: viewState.query)
             }
         }
-        .padding(.bottom, 8)
+        .padding(.horizontal, 20)
+    }
+
+    func summary(matched: Int) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(.homeProgressFilteredCount(matched))
+                .font(.atelierMincho(15, relativeTo: .subheadline, bold: true))
+
+            Text(.homeProgressFilteredDetail(list.total, list.products.count))
+                .font(.caption)
+                .foregroundStyle(Color.atelierMuted)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 14)
+        .padding(.bottom, 4)
+        .accessibilityElement(children: .combine)
+    }
+
+    var noMatch: some View {
+        VStack(spacing: 16) {
+            Text(0, format: .number)
+                .font(.atelierSerif(64, relativeTo: .largeTitle, italic: true))
+                .foregroundStyle(Color.atelierLine)
+                .accessibilityHidden(true)
+
+            Text(.homeNoMatchTitle(viewState.query))
+                .font(.atelierMincho(18, relativeTo: .headline, bold: true))
+                .multilineTextAlignment(.center)
+
+            Text(.homeNoMatchDescription)
+                .font(.footnote)
+                .foregroundStyle(Color.atelierMuted)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 36)
+    }
+
+    var bottomBar: some View {
+        VStack(spacing: 8) {
+            if let notice = list.notice {
+                BannerView(
+                    text: String(localized: .homeLoadMoreFailed(notice.message)),
+                    accessory: actions.isLoadingMore || isRefreshing
+                        ? .progress
+                        : .retry { retry(after: notice) }
+                )
+                .padding(.horizontal, 16)
+            }
+
+            if !isFiltering {
+                CatalogFooter(loaded: list.products.count, total: list.total)
+                    .onTapGesture {
+                        withAnimation {
+                            position.scrollTo(edge: .top)
+                        }
+                    }
+            }
+        }
     }
 }
 
 private extension HomeContent {
     var isFiltering: Bool {
-        !viewState.query.isEmpty
+        !viewState.query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     var isLoadingMore: Bool {
@@ -132,5 +202,49 @@ private extension HomeContent {
                 await refresh()
             }
         }
+    }
+}
+
+struct LeadSkeleton: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Rectangle()
+                .aspectRatio(16 / 11, contentMode: .fit)
+
+            Rectangle()
+                .frame(width: 96, height: 10)
+
+            HStack {
+                Rectangle()
+                    .frame(width: 180, height: 16)
+
+                Spacer()
+
+                Rectangle()
+                    .frame(width: 60, height: 18)
+            }
+        }
+        .foregroundStyle(Color.atelierSkeleton)
+        .skeleton()
+        .accessibilityHidden(true)
+    }
+}
+
+struct TileSkeleton: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Rectangle()
+                .aspectRatio(1, contentMode: .fit)
+
+            Rectangle()
+                .frame(width: 110, height: 12)
+
+            Rectangle()
+                .frame(width: 50, height: 14)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .foregroundStyle(Color.atelierSkeleton)
+        .skeleton()
+        .accessibilityHidden(true)
     }
 }

@@ -5,13 +5,20 @@ import Shared
 import Testing
 
 struct ProductBridgeTests {
-    @Test("一覧の行が id・商品名・サムネイルの URL になる")
+    @Test("一覧の行が id・商品名・サムネイルの URL・ブランド・価格になる")
     func entriesBecomeProducts() {
-        let product = Product(entry(id: 7, title: "Red Lipstick"))
+        let product = Product(entry(id: 7, title: "Red Lipstick", brand: "Chic Cosmetics"))
 
         #expect(product.id == 7)
         #expect(product.title == "Red Lipstick")
         #expect(product.thumbnail == URL(string: "https://img.example/7.webp"))
+        #expect(product.brand == "Chic Cosmetics")
+        #expect(product.price == 12.99)
+    }
+
+    @Test("ブランドの無い商品はブランドが nil になる")
+    func entriesWithoutABrandHaveNoBrand() {
+        #expect(Product(entry(id: 16, title: "Apple")).brand == nil)
     }
 
     @Test("失敗の種類が共通の文言になる")
@@ -37,8 +44,8 @@ struct ProductBridgeTests {
     @Test("読み込めたページが snapshot になる")
     func loadedResultsBecomeASnapshot() {
         let page = ProductListPage(
-            ProductListResultLoaded(
-                products: [entry(id: 1, title: "Powder Canister")],
+            CatalogResultLoaded(
+                entries: [entry(id: 1, title: "Powder Canister")],
                 hasMore: true,
                 total: 194
             )
@@ -57,8 +64,8 @@ struct ProductBridgeTests {
     @Test("一部だけ失敗したページは理由を連れてくる")
     func degradedResultsCarryTheirFailure() {
         let page = ProductListPage(
-            ProductListResultDegraded(
-                products: [entry(id: 1, title: "Powder Canister")],
+            CatalogResultDegraded(
+                entries: [entry(id: 1, title: "Powder Canister")],
                 hasMore: true,
                 total: 194,
                 failure: ApiFailureOffline.shared
@@ -76,17 +83,23 @@ struct ProductBridgeTests {
 
     @Test("全部失敗したページは失敗になる")
     func failedResultsBecomeAFailure() {
-        let page = ProductListPage(ProductListResultFailed(failure: ApiFailureTimeout.shared))
+        let page = ProductListPage(CatalogResultFailed(failure: ApiFailureTimeout.shared))
 
         #expect(page == .failed(.timeout))
     }
 
     @Test("捨てられた結果はそのまま捨てられた結果になる")
     func staleResultsStayStale() {
-        #expect(ProductListPage(ProductListResultStale.shared) == .stale)
+        #expect(ProductListPage(CatalogResultStale.shared) == .stale)
     }
 
-    private func entry(id: Int32, title: String) -> ProductEntry {
-        ProductEntry(id: id, title: title, thumbnailUrl: "https://img.example/\(id).webp")
+    private func entry(id: Int32, title: String, brand: String? = nil) -> CatalogEntry {
+        CatalogEntry(
+            id: id,
+            title: title,
+            thumbnailUrl: "https://img.example/\(id).webp",
+            brand: brand,
+            price: 12.99
+        )
     }
 }
