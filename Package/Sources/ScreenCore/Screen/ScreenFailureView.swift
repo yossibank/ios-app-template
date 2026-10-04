@@ -5,20 +5,36 @@ struct ScreenFailureView: View {
     let retry: () -> Void
 
     var body: some View {
-        ContentUnavailableView {
-            Label(.screenLoadFailed, systemImage: "exclamationmark.triangle")
-        } description: {
+        VStack(spacing: 18) {
+            Rectangle()
+                .fill(Color.atelierInk)
+                .frame(width: 40, height: 1)
+
+            Text(.screenLoadFailed)
+                .font(.atelierMincho(20, relativeTo: .title3, bold: true))
+
             Text(failure.message)
-        } actions: {
+                .font(.footnote)
+                .foregroundStyle(Color.atelierMuted)
+                .multilineTextAlignment(.center)
+
             if failure.canRetry {
-                Button(.screenRetry, action: retry)
+                Button(action: retry) {
+                    Text(.screenRetry)
+                }
+                .buttonStyle(AtelierOutlineButtonStyle())
+                .padding(.top, 8)
             }
         }
+        .foregroundStyle(Color.atelierInk)
+        .padding(.horizontal, 40)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.atelierGround)
     }
 }
 
 #Preview("失敗") {
-    ScreenFailureView(failure: FetchFailure("ネットワークに接続できません")) {}
+    ScreenFailureView(failure: FetchFailure("接続を確認してください")) {}
 }
 
 #Preview("失敗（再試行できない）") {

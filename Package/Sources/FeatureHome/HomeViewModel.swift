@@ -19,6 +19,10 @@ final class HomeViewModel: ScreenViewModel {
 }
 
 private extension HomeViewModel {
+    var pageSize: Int {
+        dependency.listing.pageSize
+    }
+
     func page(_ list: ProductList, hasMore: Bool) -> FetchMore<ProductList> {
         hasMore ? .more(list) : .last(list)
     }
@@ -36,16 +40,16 @@ extension HomeViewModel {
     func fetch() async throws(FetchFailure) -> ProductList {
         switch await dependency.listing.reload() {
         case let .loaded(snapshot):
-            ProductList(snapshot)
+            ProductList(snapshot, pageSize: pageSize)
 
         case let .degraded(snapshot, failure):
-            try ProductList(snapshot, notice: notice(failure))
+            try ProductList(snapshot, pageSize: pageSize, notice: notice(failure))
 
         case let .failed(failure):
             throw failure
 
         case .stale:
-            ProductList(products: [], total: 0)
+            ProductList(products: [], total: 0, pageSize: pageSize)
         }
     }
 
@@ -55,13 +59,13 @@ extension HomeViewModel {
         switch await dependency.listing.loadNext() {
         case let .loaded(snapshot):
             page(
-                ProductList(snapshot),
+                ProductList(snapshot, pageSize: pageSize),
                 hasMore: snapshot.hasMore
             )
 
         case let .degraded(snapshot, failure):
             try page(
-                ProductList(snapshot, notice: notice(failure)),
+                ProductList(snapshot, pageSize: pageSize, notice: notice(failure)),
                 hasMore: snapshot.hasMore
             )
 
@@ -70,6 +74,7 @@ extension HomeViewModel {
                 ProductList(
                     products: current.products,
                     total: current.total,
+                    pageSize: pageSize,
                     notice: notice(failure)
                 )
             )

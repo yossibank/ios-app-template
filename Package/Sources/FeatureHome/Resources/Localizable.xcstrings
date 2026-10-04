@@ -1,6 +1,61 @@
 {
   "sourceLanguage": "ja",
   "strings": {
+    "home.account": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "アカウント"
+          }
+        }
+      }
+    },
+    "home.chapter_loading": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "· 読み込み中"
+          }
+        }
+      }
+    },
+    "home.chapter_range": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld — %2$lld"
+          }
+        }
+      }
+    },
+    "home.clear_search": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "入力を消す"
+          }
+        }
+      }
+    },
+    "home.collection": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Collection"
+          }
+        }
+      }
+    },
     "home.empty_description": {
       "extractionState": "manual",
       "localizations": {
@@ -23,6 +78,17 @@
         }
       }
     },
+    "home.load_more_failed": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "続きを読み込めませんでした。%@"
+          }
+        }
+      }
+    },
     "home.logout": {
       "extractionState": "manual",
       "localizations": {
@@ -30,6 +96,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "ログアウト"
+          }
+        }
+      }
+    },
+    "home.no_match_description": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "綴りを確認するか、別の語で試してください"
+          }
+        }
+      }
+    },
+    "home.no_match_title": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「%@」に一致する商品がありません"
+          }
+        }
+      }
+    },
+    "home.product_number": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NO. %@"
           }
         }
       }

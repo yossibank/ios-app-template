@@ -179,7 +179,7 @@ struct HomeViewModelTests {
     private func snapshot(_ names: [String], hasMore: Bool) -> ProductListSnapshot {
         ProductListSnapshot(
             products: names.enumerated().map { index, title in
-                Product(id: index + 1, title: title, thumbnail: nil)
+                Product(id: index + 1, title: title, thumbnail: nil, brand: nil, price: 1)
             },
             hasMore: hasMore,
             total: 194
@@ -195,6 +195,8 @@ struct HomeViewModelTests {
 }
 
 private final class StubListing: ProductListing, @unchecked Sendable {
+    let pageSize = 20
+
     private let pages: [ProductListPage]
     private var index = 0
 
@@ -218,6 +220,7 @@ private final class StubListing: ProductListing, @unchecked Sendable {
 }
 
 private final class GatedListing: ProductListing, @unchecked Sendable {
+    let pageSize = 20
     let gate = ListingGate()
 
     private var reloads: [ProductListPage]

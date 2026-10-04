@@ -3,17 +3,19 @@ import ScreenCore
 import Shared
 
 extension Product {
-    init(_ entry: ProductEntry) {
+    init(_ entry: CatalogEntry) {
         self.init(
             id: Int(entry.id),
             title: entry.title,
-            thumbnail: URL(string: entry.thumbnailUrl)
+            thumbnail: URL(string: entry.thumbnailUrl),
+            brand: entry.brand,
+            price: entry.price
         )
     }
 }
 
 extension ProductListSnapshot {
-    init(products: [ProductEntry], hasMore: Bool, total: Int32) {
+    init(products: [CatalogEntry], hasMore: Bool, total: Int32) {
         self.init(
             products: products.map(Product.init),
             hasMore: hasMore,
@@ -23,12 +25,12 @@ extension ProductListSnapshot {
 }
 
 extension ProductListPage {
-    init(_ result: ProductListResult) {
+    init(_ result: CatalogResult) {
         switch onEnum(of: result) {
         case let .loaded(loaded):
             self = .loaded(
                 ProductListSnapshot(
-                    products: loaded.products,
+                    products: loaded.entries,
                     hasMore: loaded.hasMore,
                     total: loaded.total
                 )
@@ -37,7 +39,7 @@ extension ProductListPage {
         case let .degraded(degraded):
             self = .degraded(
                 ProductListSnapshot(
-                    products: degraded.products,
+                    products: degraded.entries,
                     hasMore: degraded.hasMore,
                     total: degraded.total
                 ),

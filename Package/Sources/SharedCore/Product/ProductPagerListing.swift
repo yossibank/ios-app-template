@@ -2,7 +2,11 @@ import ScreenCore
 import Shared
 
 public final class ProductPagerListing: ProductListing, @unchecked Sendable {
-    private let pager = ProductPager()
+    private let pager = CatalogPager()
+
+    public var pageSize: Int {
+        Int(pager.pageSize)
+    }
 
     public init() {}
 

@@ -2,24 +2,21 @@ import SwiftUI
 
 public struct BannerView: View {
     private let text: String
-    private let style: Style
     private let accessory: Accessory
 
     public init(
         text: String,
-        style: Style = .info,
         accessory: Accessory = .none
     ) {
         self.text = text
-        self.style = style
         self.accessory = accessory
     }
 
     public var body: some View {
-        HStack(spacing: 16) {
-            Label(text, systemImage: style.symbol)
+        HStack(spacing: 12) {
+            Text(text)
                 .font(.footnote)
-                .foregroundStyle(style.tint)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             switch accessory {
             case .none:
@@ -27,58 +24,32 @@ public struct BannerView: View {
 
             case .progress:
                 ProgressView()
-                    .controlSize(.small)
+                    .tint(Color.atelierGround)
+                    .frame(minWidth: 44, minHeight: 44)
 
             case let .button(title, action):
-                outlinedButton(title, action: action)
+                Button(action: action) {
+                    Text(title)
+                }
+                .buttonStyle(
+                    AtelierOutlineButtonStyle(
+                        color: .atelierGround,
+                        horizontalPadding: 16,
+                        minHeight: 44
+                    )
+                )
             }
         }
-        .padding(.horizontal, 4)
-        .frame(maxWidth: .infinity, alignment: .center)
-    }
-}
-
-private extension BannerView {
-    func outlinedButton(
-        _ title: LocalizedStringResource,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Text(title)
-                .font(.footnote.weight(.medium))
-                .foregroundStyle(.primary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
-                .overlay {
-                    Capsule()
-                        .stroke(.quaternary, lineWidth: 1)
-                }
-                .contentShape(.capsule)
-        }
-        .buttonStyle(.plain)
+        .foregroundStyle(Color.atelierGround)
+        .padding(.leading, 18)
+        .padding(.trailing, 12)
+        .padding(.vertical, 12)
+        .background(Color.atelierInk)
+        .accessibilityElement(children: .contain)
     }
 }
 
 public extension BannerView {
-    enum Style: Sendable {
-        case info
-        case failure
-
-        var tint: Color {
-            switch self {
-            case .info: .secondary
-            case .failure: .red
-            }
-        }
-
-        var symbol: String {
-            switch self {
-            case .info: "info.circle"
-            case .failure: "exclamationmark.triangle"
-            }
-        }
-    }
-
     enum Accessory {
         case none
         case progress
@@ -90,24 +61,18 @@ public extension BannerView {
     }
 }
 
-#Preview("バナー") {
+#Preview("バナー（失敗）") {
     BannerView(
-        text: "8 件の詳細を取得できませんでした",
-        accessory: .none
-    )
-}
-
-#Preview("バナー(実行中)") {
-    BannerView(
-        text: "8 件の詳細を取得できませんでした",
-        accessory: .progress
-    )
-}
-
-#Preview("バナー(失敗)") {
-    BannerView(
-        text: "接続を確認してください",
-        style: .failure,
+        text: "続きを読み込めませんでした。接続を確認してください",
         accessory: .retry {}
     )
+    .padding()
+}
+
+#Preview("バナー（実行中）") {
+    BannerView(
+        text: "続きを読み込めませんでした。接続を確認してください",
+        accessory: .progress
+    )
+    .padding()
 }

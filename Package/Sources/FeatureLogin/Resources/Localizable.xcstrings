@@ -1,6 +1,28 @@
 {
   "sourceLanguage": "ja",
   "strings": {
+    "login.collection": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Collection"
+          }
+        }
+      }
+    },
+    "login.hide_password": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パスワードを隠す"
+          }
+        }
+      }
+    },
     "login.password": {
       "extractionState": "manual",
       "localizations": {
@@ -19,6 +41,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "ユーザー名かパスワードが違います"
+          }
+        }
+      }
+    },
+    "login.show_password": {
+      "extractionState": "manual",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "パスワードを表示"
           }
         }
       }
