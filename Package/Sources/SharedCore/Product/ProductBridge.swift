@@ -15,7 +15,11 @@ extension Product {
 }
 
 extension ProductListSnapshot {
-    init(products: [CatalogEntry], hasMore: Bool, total: Int32) {
+    init(
+        products: [CatalogEntry],
+        hasMore: Bool,
+        total: Int32
+    ) {
         self.init(
             products: products.map(Product.init),
             hasMore: hasMore,

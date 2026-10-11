@@ -1,7 +1,8 @@
 import ScreenCore
 import SwiftUI
 
-public struct LoginView: View {
+@MainActor
+public struct LoginView {
     @State private var model: LoginViewModel
     @State private var showsPassword = false
 
@@ -9,42 +10,12 @@ public struct LoginView: View {
 
     private let onLoggedIn: () -> Void
 
-    init(model: LoginViewModel, onLoggedIn: @escaping () -> Void = {}) {
+    init(
+        model: LoginViewModel,
+        onLoggedIn: @escaping () -> Void = {}
+    ) {
         _model = State(initialValue: model)
         self.onLoggedIn = onLoggedIn
-    }
-
-    public var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 56) {
-                heading
-
-                VStack(alignment: .leading, spacing: 32) {
-                    usernameField
-                    passwordField
-
-                    if let failure = model.failure {
-                        Text(failure.message)
-                            .font(.footnote)
-                            .foregroundStyle(Color.atelierError)
-                    }
-
-                    submitButton
-                        .padding(.top, 16)
-                }
-            }
-            .padding(.horizontal, 28)
-            .padding(.top, 96)
-            .padding(.bottom, 48)
-        }
-        .scrollDismissesKeyboard(.interactively)
-        .foregroundStyle(Color.atelierInk)
-        .background(Color.atelierGround)
-        .onChange(of: model.isLoggedIn) { _, isLoggedIn in
-            if isLoggedIn {
-                onLoggedIn()
-            }
-        }
     }
 }
 
@@ -179,6 +150,41 @@ private extension LoginView {
 
         Task {
             await model.submit()
+        }
+    }
+}
+
+extension LoginView: View {
+    public var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 56) {
+                heading
+
+                VStack(alignment: .leading, spacing: 32) {
+                    usernameField
+                    passwordField
+
+                    if let failure = model.failure {
+                        Text(failure.message)
+                            .font(.footnote)
+                            .foregroundStyle(Color.atelierError)
+                    }
+
+                    submitButton
+                        .padding(.top, 16)
+                }
+            }
+            .padding(.horizontal, 28)
+            .padding(.top, 96)
+            .padding(.bottom, 48)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .foregroundStyle(Color.atelierInk)
+        .background(Color.atelierGround)
+        .onChange(of: model.isLoggedIn) { _, isLoggedIn in
+            if isLoggedIn {
+                onLoggedIn()
+            }
         }
     }
 }

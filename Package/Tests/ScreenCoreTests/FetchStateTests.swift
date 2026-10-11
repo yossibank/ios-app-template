@@ -17,10 +17,16 @@ struct FetchStateTests {
     func unauthorizedFailureEndsTheSession() async {
         let state = FetchState<[Int]>()
 
-        await state.reload { () throws(FetchFailure) -> [Int] in throw .offline }?.value
+        await state.reload { () throws(FetchFailure) -> [Int] in
+            throw .offline
+        }?.value
+
         #expect(!state.sessionEnded, "ただの失敗でセッションが終わったことになっている")
 
-        await state.reload { () throws(FetchFailure) -> [Int] in throw .unauthorized }?.value
+        await state.reload { () throws(FetchFailure) -> [Int] in
+            throw .unauthorized
+        }?.value
+
         #expect(state.sessionEnded)
     }
 
@@ -29,8 +35,9 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         await state.reload { [1, 2] }?.value
 
-        await state.loadMore { _ throws(FetchFailure) -> FetchMore<[Int]> in throw .unauthorized }?
-            .value
+        await state.loadMore { _ throws(FetchFailure) -> FetchMore<[Int]> in
+            throw .unauthorized
+        }?.value
 
         #expect(state.sessionEnded)
         #expect(state.phase.loaded == [1, 2], "読み込めている分が消えている")
@@ -71,10 +78,13 @@ struct FetchStateTests {
     func refreshKeepsTheListOnScreen() async {
         let state = FetchState<[Int]>()
         let gate = Gate()
-
         await state.reload { [1] }?.value
 
-        let running = state.refresh { await gate.wait(); return [2] }
+        let running = state.refresh {
+            await gate.wait()
+            return [2]
+        }
+
         await gate.waitUntilEntered()
 
         #expect(state.phase.loaded == [1], "再取得の途中で一覧が消えている")
@@ -100,9 +110,12 @@ struct FetchStateTests {
         let state = FetchState<[Int]>()
         let gate = Gate()
 
-        let first = state.reload { await gate.wait(); return [1] }
-        await gate.waitUntilEntered()
+        let first = state.reload {
+            await gate.wait()
+            return [1]
+        }
 
+        await gate.waitUntilEntered()
         await state.reload { [2] }?.value
         gate.open()
         await first?.value
@@ -119,8 +132,8 @@ struct FetchStateTests {
             await gate.wait()
             throw FetchFailure("置き換えた後の失敗")
         }
-        await gate.waitUntilEntered()
 
+        await gate.waitUntilEntered()
         await state.reload { [2] }?.value
         gate.open()
         await first?.value
@@ -171,14 +184,16 @@ struct FetchStateTests {
     @Test("続きの取得中に再取得すると、続きの結果は捨てられ、読み込み中の表示も残らない")
     func reloadDuringLoadMoreDiscardsIt() async {
         let state = FetchState<[Int]>()
+        let gate = Gate()
         await state.reload { [1] }?.value
 
-        let gate = Gate()
-        let more = state.loadMore { _ in await gate.wait(); return .more([1, 2]) }
+        let more = state.loadMore { _ in
+            await gate.wait()
+            return .more([1, 2])
+        }
+
         await gate.waitUntilEntered()
-
         await state.reload { [9] }?.value
-
         gate.open()
         await more?.value
 
@@ -186,17 +201,17 @@ struct FetchStateTests {
         #expect(state.isRunning(.loadMore) == false)
 
         await state.loadMore { _ in .more([9, 10]) }?.value
+
         #expect(state.phase.loaded == [9, 10], "続きを読めなくなっている")
     }
 
     @Test("終端を受け取ったら、もう続きを取りにいかない")
     func stopsAskingAfterTheLastPage() async {
         let state = FetchState<[Int]>()
+        var asked = false
         await state.reload { [1] }?.value
-
         await state.loadMore { _ in .last([1, 2]) }?.value
 
-        var asked = false
         await state.loadMore { _ in
             asked = true
             return .more([1, 2, 3])
@@ -235,13 +250,17 @@ struct FetchStateTests {
     @Test("プルして再取得している間は続きを取りにいかない")
     func loadMoreWaitsForRefresh() async {
         let state = FetchState<[Int]>()
+        let gate = Gate()
+        var asked = false
         await state.reload { [1] }?.value
 
-        let gate = Gate()
-        let refreshing = state.refresh { await gate.wait(); return [2] }
+        let refreshing = state.refresh {
+            await gate.wait()
+            return [2]
+        }
+
         await gate.waitUntilEntered()
 
-        var asked = false
         let more = state.loadMore { _ in
             asked = true
             return .more([2, 3])
@@ -256,21 +275,25 @@ struct FetchStateTests {
     }
 }
 
-@MainActor
-@Observable
-private final class CountingModel: ScreenViewModel {
+extension FetchStateTests {
+    @MainActor
+    @Observable
+    final class CountingModel {
+        let viewState = State()
+        let fetchState = FetchState<[Int]>()
+        private(set) var fetchCalls = 0
+    }
+
+    @MainActor
+    final class Gate {
+        private var continuation: CheckedContinuation<Void, Never>?
+        private var entered = false
+    }
+}
+
+extension FetchStateTests.CountingModel {
     @Observable
     final class State: ScreenViewState {}
-
-    let viewState = State()
-    let fetchState = FetchState<[Int]>()
-
-    private(set) var fetchCalls = 0
-
-    func fetch() async throws(FetchFailure) -> [Int] {
-        fetchCalls += 1
-        return [fetchCalls]
-    }
 
     func settle() async {
         while fetchState.isRunning(.reload) {
@@ -279,11 +302,14 @@ private final class CountingModel: ScreenViewModel {
     }
 }
 
-@MainActor
-private final class Gate {
-    private var continuation: CheckedContinuation<Void, Never>?
-    private var entered = false
+extension FetchStateTests.CountingModel: ScreenViewModel {
+    func fetch() async throws(FetchFailure) -> [Int] {
+        fetchCalls += 1
+        return [fetchCalls]
+    }
+}
 
+extension FetchStateTests.Gate {
     func wait() async {
         await withCheckedContinuation { continuation in
             self.continuation = continuation

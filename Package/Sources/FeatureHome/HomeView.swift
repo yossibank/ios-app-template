@@ -2,35 +2,12 @@ import ScreenCore
 import SharedCore
 import SwiftUI
 
-public struct HomeView: View {
+@MainActor
+public struct HomeView {
     @State private var total: Int?
 
     let source: ScreenSource<HomeViewModel>
     var onLogout: () -> Void = {}
-
-    public var body: some View {
-        VStack(spacing: 0) {
-            HomeHeader(total: total, onLogout: onLogout)
-
-            ScreenView(source, isEmpty: \.products.isEmpty) { viewState, list, actions in
-                HomeContent(
-                    viewState: viewState,
-                    list: list,
-                    actions: actions
-                )
-                .onChange(of: list.total, initial: true) { _, value in
-                    total = value
-                }
-            } empty: { actions in
-                empty(actions)
-            } loading: {
-                skeleton
-            }
-        }
-        .foregroundStyle(Color.atelierInk)
-        .background(Color.atelierGround)
-        .toolbar(.hidden, for: .navigationBar)
-    }
 }
 
 public extension HomeView {
@@ -81,6 +58,32 @@ private extension HomeView {
         .padding(.horizontal, 20)
         .frame(maxHeight: .infinity, alignment: .top)
         .clipped()
+    }
+}
+
+extension HomeView: View {
+    public var body: some View {
+        VStack(spacing: 0) {
+            HomeHeader(total: total, onLogout: onLogout)
+
+            ScreenView(source, isEmpty: \.products.isEmpty) { viewState, list, actions in
+                HomeContent(
+                    viewState: viewState,
+                    list: list,
+                    actions: actions
+                )
+                .onChange(of: list.total, initial: true) { _, value in
+                    total = value
+                }
+            } empty: { actions in
+                empty(actions)
+            } loading: {
+                skeleton
+            }
+        }
+        .foregroundStyle(Color.atelierInk)
+        .background(Color.atelierGround)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

@@ -40,16 +40,14 @@ extension Product {
     }
 }
 
-struct Chapter: Identifiable {
+struct Chapter {
     let index: Int
     let first: Int
     let last: Int
     let spreads: [Spread]
+}
 
-    var id: Int {
-        index
-    }
-
+extension Chapter {
     var numeral: String {
         Chapter.numeral(index + 1)
     }
@@ -60,6 +58,7 @@ struct Chapter: Identifiable {
             (100, "C"), (90, "XC"), (50, "L"), (40, "XL"),
             (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")
         ]
+
         var rest = value
 
         return symbols.reduce(into: "") { text, symbol in
@@ -71,10 +70,18 @@ struct Chapter: Identifiable {
     }
 }
 
-struct Spread: Identifiable {
+extension Chapter: Identifiable {
+    var id: Int {
+        index
+    }
+}
+
+struct Spread {
     let lead: Product
     let pair: [Product]
+}
 
+extension Spread: Identifiable {
     var id: Product.ID {
         lead.id
     }
@@ -83,18 +90,21 @@ struct Spread: Identifiable {
 extension ProductList {
     var chapters: [Chapter] {
         stride(from: 0, to: products.count, by: pageSize).map { start in
-            let products = Array(products[start..<Swift.min(start + pageSize, products.count)])
+            let end = Swift.min(start + pageSize, products.count)
+            let products = Array(products[start..<end])
+            let last = Swift.min(start + pageSize, total)
+
+            let spreads = stride(from: 0, to: products.count, by: 3).map { offset in
+                let pairEnd = Swift.min(offset + 3, products.count)
+                let pair = Array(products[(offset + 1)..<pairEnd])
+                return Spread(lead: products[offset], pair: pair)
+            }
 
             return Chapter(
                 index: start / pageSize,
                 first: start + 1,
-                last: Swift.min(start + pageSize, total),
-                spreads: stride(from: 0, to: products.count, by: 3).map { offset in
-                    Spread(
-                        lead: products[offset],
-                        pair: Array(products[(offset + 1)..<Swift.min(offset + 3, products.count)])
-                    )
-                }
+                last: last,
+                spreads: spreads
             )
         }
     }

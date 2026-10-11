@@ -14,7 +14,10 @@ public protocol Authenticating: Sendable {
 public struct SessionAuthenticator: Authenticating {
     public init() {}
 
-    public func login(username: String, password: String) async -> LoginOutcome {
+    public func login(
+        username: String,
+        password: String
+    ) async -> LoginOutcome {
         do {
             return try await LoginOutcome(Session.shared.login(
                 username: username,

@@ -32,22 +32,27 @@ struct ProductListChaptersTests {
     @Test("読み込み中の章は、今の章が埋まっているときだけ次の番号で出す")
     func theNextChapterIsKnownOnlyAfterAFullChapter() {
         let next = list(count: 40, total: 194).nextChapter
+        let nextAfterPartialChapter = list(count: 45, total: 194).nextChapter
 
         #expect(next?.index == 2)
         #expect(next?.first == 41)
         #expect(next?.last == 60)
-        #expect(list(count: 45, total: 194).nextChapter == nil)
+        #expect(nextAfterPartialChapter == nil)
     }
 
     @Test("章の番号はローマ数字になる")
     func numeralsAreRoman() {
-        #expect([1, 4, 9, 10, 14, 40].map(Chapter.numeral) == ["I", "IV", "IX", "X", "XIV", "XL"])
+        let numerals = [1, 4, 9, 10, 14, 40].map(Chapter.numeral)
+        #expect(numerals == ["I", "IV", "IX", "X", "XIV", "XL"])
     }
 
     @Test("商品番号は 3 桁にそろえる")
     func numbersArePaddedToThreeDigits() {
-        #expect(product(id: 6).number == "NO. 006")
-        #expect(product(id: 194).number == "NO. 194")
+        let small = product(id: 6)
+        let large = product(id: 194)
+
+        #expect(small.number == "NO. 006")
+        #expect(large.number == "NO. 194")
     }
 
     @Test("価格は日本語の環境でもドルで小数 2 桁まで出す")
@@ -60,19 +65,38 @@ struct ProductListChaptersTests {
             price: 49.99
         )
 
-        #expect(product.priceText(locale: Locale(identifier: "ja_JP")) == "$49.99")
-        #expect(product.priceText(locale: Locale(identifier: "en_US")) == "$49.99")
-    }
+        let japanese = Locale(identifier: "ja_JP")
+        let english = Locale(identifier: "en_US")
 
-    private func list(count: Int, total: Int) -> ProductList {
-        ProductList(
-            products: (1...count).map(product),
+        let japaneseText = product.priceText(locale: japanese)
+        let englishText = product.priceText(locale: english)
+
+        #expect(japaneseText == "$49.99")
+        #expect(englishText == "$49.99")
+    }
+}
+
+private extension ProductListChaptersTests {
+    func list(
+        count: Int,
+        total: Int
+    ) -> ProductList {
+        let products = (1...count).map(product)
+
+        return ProductList(
+            products: products,
             total: total,
             pageSize: 20
         )
     }
 
-    private func product(id: Int) -> Product {
-        Product(id: id, title: "p\(id)", thumbnail: nil, brand: nil, price: 1)
+    func product(id: Int) -> Product {
+        Product(
+            id: id,
+            title: "p\(id)",
+            thumbnail: nil,
+            brand: nil,
+            price: 1
+        )
     }
 }
