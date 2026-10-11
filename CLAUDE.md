@@ -1,6 +1,8 @@
 # ios-app-template
 
-## 🛠️ 作業の進め方
+SwiftUI と Kotlin Multiplatform で作る、商品一覧アプリのテンプレート。
+
+## 作業の進め方
 
 - 変更したら `make verify` を通す。
 - Makefile では `$(SWIFTFORMAT)` / `$(SWIFTLINT)` を使い、実体名を直接書かない。
@@ -14,15 +16,12 @@
 > [!WARNING]
 > 警告を数えるときは **DerivedData を捨てる**。増分ビルドでは再コンパイルされず 0 件に見える。
 
-## ✍️ コードの書き方
-
-> [!IMPORTANT]
-> **コメントを書かない。** コード、設定、スクリプト、CI のいずれにも書かない。要ると判断したら、書かずに提案する。Renovate が Actions の SHA の横に付けるバージョンのコメントは除く。
+## コードの書き方
 
 - 画面に出る文言は `Localizable.xcstrings` に置き、生成されたシンボル（`.homeTitle` など）で引く。
   - 例外：`#Preview` の中だけはリテラルでよい。
 
-## 🔗 3 リポジトリの取り決め
+## 3 リポジトリの取り決め
 
 - 共通ロジックは kmp-app-template に置く。ここには iOS 固有のものだけを置く。
 - 失敗画面と絞り込み 0 件は、次のように揃える。
