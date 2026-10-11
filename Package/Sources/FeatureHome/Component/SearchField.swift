@@ -1,11 +1,20 @@
 import ScreenCore
 import SwiftUI
 
-struct SearchField: View {
+@MainActor
+struct SearchField {
     @Binding var query: String
 
     @FocusState private var isFocused: Bool
+}
 
+private extension SearchField {
+    var isActive: Bool {
+        isFocused || !query.isEmpty
+    }
+}
+
+extension SearchField: View {
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
@@ -44,12 +53,6 @@ struct SearchField: View {
                 .frame(height: isActive ? 1.5 : 1)
         }
         .animation(.snappy, value: isActive)
-    }
-}
-
-private extension SearchField {
-    var isActive: Bool {
-        isFocused || !query.isEmpty
     }
 }
 

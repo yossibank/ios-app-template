@@ -6,7 +6,7 @@ public struct ScreenView<
     Success: View,
     EmptyContent: View,
     Loading: View
->: View {
+> {
     private let source: ScreenSource<Model>
     private let isEmpty: (Model.Value) -> Bool
     private let success: (Model.State, Model.Value, ScreenActions) -> Success
@@ -25,40 +25,6 @@ public struct ScreenView<
         self.success = success
         self.empty = empty
         self.loading = loading
-    }
-
-    public var body: some View {
-        switch source.kind {
-        case let .live(model):
-            LiveScreen(model, content: content)
-
-        case let .snapshot(phase, loadingMore):
-            SnapshotScreen<Model, _>(phase: phase, loadingMore: loadingMore, content: content)
-        }
-    }
-}
-
-private extension ScreenView {
-    @ViewBuilder
-    func content(
-        phase: FetchPhase<Model.Value>,
-        viewState: Model.State,
-        actions: ScreenActions
-    ) -> some View {
-        switch phase {
-        case .idle, .loading:
-            loading()
-
-        case let .loaded(value):
-            if isEmpty(value) {
-                empty(actions)
-            } else {
-                success(viewState, value, actions)
-            }
-
-        case let .failed(failure):
-            ScreenFailureView(failure: failure, retry: actions.reload)
-        }
     }
 }
 
@@ -96,7 +62,43 @@ public extension ScreenView where Model.Value: Collection {
 }
 
 @MainActor
-private struct LiveScreen<Model: ScreenViewModel, Content: View>: View {
+private extension ScreenView {
+    @ViewBuilder
+    func content(
+        phase: FetchPhase<Model.Value>,
+        viewState: Model.State,
+        actions: ScreenActions
+    ) -> some View {
+        switch phase {
+        case .idle, .loading:
+            loading()
+
+        case let .loaded(value):
+            if isEmpty(value) {
+                empty(actions)
+            } else {
+                success(viewState, value, actions)
+            }
+
+        case let .failed(failure):
+            ScreenFailureView(failure: failure, retry: actions.reload)
+        }
+    }
+}
+
+extension ScreenView: View {
+    public var body: some View {
+        switch source.kind {
+        case let .live(model):
+            LiveScreen(model, content: content)
+
+        case let .snapshot(phase, loadingMore):
+            SnapshotScreen<Model, _>(phase: phase, loadingMore: loadingMore, content: content)
+        }
+    }
+}
+
+private struct LiveScreen<Model: ScreenViewModel, Content: View> {
     @Environment(\.onSessionEnded) private var onSessionEnded
 
     @State private var model: Model
@@ -110,7 +112,9 @@ private struct LiveScreen<Model: ScreenViewModel, Content: View>: View {
         _model = State(initialValue: model)
         self.content = content
     }
+}
 
+extension LiveScreen: View {
     var body: some View {
         content(
             model.fetchState.phase,
@@ -134,7 +138,7 @@ private struct LiveScreen<Model: ScreenViewModel, Content: View>: View {
 }
 
 @MainActor
-private struct SnapshotScreen<Model: ScreenViewModel, Content: View>: View {
+private struct SnapshotScreen<Model: ScreenViewModel, Content: View> {
     @State private var viewState: Model.State
 
     private let phase: FetchPhase<Model.Value>
@@ -151,7 +155,9 @@ private struct SnapshotScreen<Model: ScreenViewModel, Content: View>: View {
         self.loadingMore = loadingMore
         self.content = content
     }
+}
 
+extension SnapshotScreen: View {
     var body: some View {
         content(
             phase,

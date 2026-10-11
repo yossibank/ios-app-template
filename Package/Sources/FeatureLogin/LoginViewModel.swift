@@ -20,16 +20,22 @@ final class LoginViewModel {
 
     let dependency: Dependency
 
+    init(dependency: Dependency) {
+        self.dependency = dependency
+    }
+}
+
+extension LoginViewModel {
+    struct Dependency {
+        var authenticator: any Authenticating = SessionAuthenticator()
+    }
+
     var canSubmit: Bool {
         !trimmedUsername.isEmpty && !password.isEmpty && !isSubmitting
     }
 
     convenience init() {
         self.init(dependency: .init())
-    }
-
-    init(dependency: Dependency) {
-        self.dependency = dependency
     }
 
     func submit() async {
@@ -63,11 +69,5 @@ final class LoginViewModel {
 private extension LoginViewModel {
     var trimmedUsername: String {
         username.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-}
-
-extension LoginViewModel {
-    struct Dependency {
-        var authenticator: any Authenticating = SessionAuthenticator()
     }
 }

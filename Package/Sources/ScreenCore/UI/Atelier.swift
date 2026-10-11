@@ -57,7 +57,10 @@ public extension Font {
 }
 
 private extension Color {
-    init(light: UInt32, dark: UInt32) {
+    init(
+        light: UInt32,
+        dark: UInt32
+    ) {
         self.init(uiColor: UIColor { traits in
             UIColor(rgb: traits.userInterfaceStyle == .dark ? dark : light)
         })

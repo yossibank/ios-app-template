@@ -7,7 +7,10 @@ import Testing
 struct HomeViewModelTests {
     @Test("取得に成功したら一覧になる")
     func mapsLoadedResult() async throws {
-        let list = try await model(loaded(["Red Lipstick"])).fetch()
+        let page = loaded(["Red Lipstick"])
+        let model = makeModel([page])
+
+        let list = try await model.fetch()
 
         #expect(list.products.map(\.title) == ["Red Lipstick"])
         #expect(list.total == 194)
@@ -16,10 +19,8 @@ struct HomeViewModelTests {
 
     @Test("続きを読むと一覧が伸びる")
     func fetchMoreAppends() async throws {
-        let model = model(
-            loaded(["a"], hasMore: true),
-            loaded(["a", "b"])
-        )
+        let pages = [loaded(["a"], hasMore: true), loaded(["a", "b"])]
+        let model = makeModel(pages)
 
         let first = try await model.fetch()
         let more = try await model.fetchMore(after: first)
@@ -29,7 +30,8 @@ struct HomeViewModelTests {
 
     @Test("最後のページは終端として返す")
     func theLastPageIsMarkedAsLast() async throws {
-        let model = model(loaded(["a"]))
+        let page = loaded(["a"])
+        let model = makeModel([page])
 
         let first = try await model.fetch()
         let more = try await model.fetchMore(after: first)
@@ -42,10 +44,8 @@ struct HomeViewModelTests {
 
     @Test("ジェネリック文脈からでも画面の実装が呼ばれる")
     func fetchMoreDispatchesToTheScreen() async throws {
-        let model = model(
-            loaded(["a"], hasMore: true),
-            loaded(["a", "b"])
-        )
+        let pages = [loaded(["a"], hasMore: true), loaded(["a", "b"])]
+        let model = makeModel(pages)
 
         let first = try await model.fetch()
         let more = try await fetchMoreGenerically(model, after: first)
@@ -55,10 +55,8 @@ struct HomeViewModelTests {
 
     @Test("追加取得が一部失敗したら知らせを立て、続きがあることは残す")
     func fetchMoreSurfacesItsFailure() async throws {
-        let model = model(
-            loaded(["a"], hasMore: true),
-            degraded(.offline, ["a"])
-        )
+        let pages = [loaded(["a"], hasMore: true), degraded(.offline, ["a"])]
+        let model = makeModel(pages)
 
         let first = try await model.fetch()
         let more = try await model.fetchMore(after: first)
@@ -73,8 +71,10 @@ struct HomeViewModelTests {
 
     @Test("最初の取得の失敗はそのまま失敗として投げる")
     func fetchThrowsTheFailure() async throws {
+        let model = makeModel([.failed(.timeout)])
+
         let failure = try await #require(throws: FetchFailure.self) {
-            _ = try await model(.failed(.timeout)).fetch()
+            _ = try await model.fetch()
         }
 
         #expect(failure == .timeout)
@@ -82,10 +82,8 @@ struct HomeViewModelTests {
 
     @Test("続きの取得がすべて失敗したら、読み込めている分はそのままに知らせを載せる")
     func fetchMoreFailureRaisesANotice() async throws {
-        let model = model(
-            loaded(["a"], hasMore: true),
-            .failed(.offline)
-        )
+        let pages: [ProductListPage] = [loaded(["a"], hasMore: true), .failed(.offline)]
+        let model = makeModel(pages)
 
         let first = try await model.fetch()
         let more = try await model.fetchMore(after: first)
@@ -101,10 +99,8 @@ struct HomeViewModelTests {
 
     @Test("捨てられた結果は続きとして積まない")
     func staleResultsAreNotAppended() async throws {
-        let model = model(
-            loaded(["a"], hasMore: true),
-            .stale
-        )
+        let pages: [ProductListPage] = [loaded(["a"], hasMore: true), .stale]
+        let model = makeModel(pages)
 
         let first = try await model.fetch()
         let more = try await model.fetchMore(after: first)
@@ -117,16 +113,15 @@ struct HomeViewModelTests {
 
     @Test("再取得で置き換えられた続きの取得は、知らせを立てない")
     func replacedLoadMoreDoesNotRaiseANotice() async {
-        let listing = GatedListing(
-            reloads: [loaded(["a"], hasMore: true), loaded(["x"])],
-            next: degraded(.offline, ["a", "b"])
-        )
-        let model = HomeViewModel(dependency: .init(listing: listing))
+        let reloads = [loaded(["a"], hasMore: true), loaded(["x"])]
+        let next = degraded(.offline, ["a", "b"])
+        let listing = GatedListing(reloads: reloads, next: next)
+        let dependency = HomeViewModel.Dependency(listing: listing)
+        let model = HomeViewModel(dependency: dependency)
 
         await model.fetchState.reload(model.fetch)?.value
         let more = model.fetchState.loadMore(model.fetchMore(after:))
         await listing.gate.waitUntilEntered()
-
         await model.fetchState.reload(model.fetch)?.value
         listing.gate.open()
         await more?.value
@@ -142,8 +137,11 @@ struct HomeViewModelTests {
 
     @Test("最初の取得が一部だけ認証切れなら、知らせにせずセッションの終わりとして投げる")
     func degradedUnauthorizedFetchThrows() async throws {
+        let page = degraded(.unauthorized, ["a"])
+        let model = makeModel([page])
+
         let failure = try await #require(throws: FetchFailure.self) {
-            _ = try await model(degraded(.unauthorized, ["a"])).fetch()
+            _ = try await model.fetch()
         }
 
         #expect(failure.endsSession)
@@ -151,10 +149,8 @@ struct HomeViewModelTests {
 
     @Test("続きの取得が認証切れなら、知らせにせずセッションの終わりとして投げる")
     func unauthorizedFetchMoreThrows() async throws {
-        let model = model(
-            loaded(["a"], hasMore: true),
-            .failed(.unauthorized)
-        )
+        let pages: [ProductListPage] = [loaded(["a"], hasMore: true), .failed(.unauthorized)]
+        let model = makeModel(pages)
         let first = try await model.fetch()
 
         let failure = try await #require(throws: FetchFailure.self) {
@@ -163,30 +159,87 @@ struct HomeViewModelTests {
 
         #expect(failure.endsSession)
     }
+}
 
-    private func model(_ pages: ProductListPage...) -> HomeViewModel {
-        HomeViewModel(dependency: .init(listing: StubListing(pages)))
+extension HomeViewModelTests {
+    final class StubListing: @unchecked Sendable {
+        let pageSize = 20
+
+        private let pages: [ProductListPage]
+        private var index = 0
+
+        init(_ pages: [ProductListPage]) {
+            self.pages = pages
+        }
     }
 
-    private func loaded(_ names: [String], hasMore: Bool = false) -> ProductListPage {
-        .loaded(snapshot(names, hasMore: hasMore))
+    final class GatedListing: @unchecked Sendable {
+        let pageSize = 20
+        let gate = ListingGate()
+
+        private var reloads: [ProductListPage]
+        private let next: ProductListPage
+
+        init(
+            reloads: [ProductListPage],
+            next: ProductListPage
+        ) {
+            self.reloads = reloads
+            self.next = next
+        }
     }
 
-    private func degraded(_ failure: FetchFailure, _ names: [String]) -> ProductListPage {
-        .degraded(snapshot(names, hasMore: true), failure)
+    final class ListingGate: @unchecked Sendable {
+        private var continuation: CheckedContinuation<Void, Never>?
+        private var entered = false
+    }
+}
+
+private extension HomeViewModelTests {
+    func makeModel(_ pages: [ProductListPage]) -> HomeViewModel {
+        let listing = StubListing(pages)
+        let dependency = HomeViewModel.Dependency(listing: listing)
+        return HomeViewModel(dependency: dependency)
     }
 
-    private func snapshot(_ names: [String], hasMore: Bool) -> ProductListSnapshot {
-        ProductListSnapshot(
-            products: names.enumerated().map { index, title in
-                Product(id: index + 1, title: title, thumbnail: nil, brand: nil, price: 1)
-            },
+    func loaded(
+        _ names: [String],
+        hasMore: Bool = false
+    ) -> ProductListPage {
+        let snapshot = snapshot(names, hasMore: hasMore)
+        return .loaded(snapshot)
+    }
+
+    func degraded(
+        _ failure: FetchFailure,
+        _ names: [String]
+    ) -> ProductListPage {
+        let snapshot = snapshot(names, hasMore: true)
+        return .degraded(snapshot, failure)
+    }
+
+    func snapshot(
+        _ names: [String],
+        hasMore: Bool
+    ) -> ProductListSnapshot {
+        let products = names.enumerated().map { index, title in
+            Product(
+                id: index + 1,
+                title: title,
+                thumbnail: nil,
+                brand: nil,
+                price: 1
+            )
+        }
+
+        return ProductListSnapshot(
+            products: products,
             hasMore: hasMore,
             total: 194
         )
     }
 
-    private func fetchMoreGenerically<Model: ScreenViewModel>(
+    func fetchMoreGenerically<Model: ScreenViewModel>(
         _ model: Model,
         after current: Model.Value
     ) async throws -> FetchMore<Model.Value> {
@@ -194,16 +247,17 @@ struct HomeViewModelTests {
     }
 }
 
-private final class StubListing: ProductListing, @unchecked Sendable {
-    let pageSize = 20
+private extension HomeViewModelTests.StubListing {
+    func next() -> ProductListPage {
+        defer {
+            index += 1
+        }
 
-    private let pages: [ProductListPage]
-    private var index = 0
-
-    init(_ pages: [ProductListPage]) {
-        self.pages = pages
+        return pages[min(index, pages.count - 1)]
     }
+}
 
+extension HomeViewModelTests.StubListing: ProductListing {
     func reload() async -> ProductListPage {
         index = 0
         return next()
@@ -212,25 +266,9 @@ private final class StubListing: ProductListing, @unchecked Sendable {
     func loadNext() async -> ProductListPage {
         next()
     }
-
-    private func next() -> ProductListPage {
-        defer { index += 1 }
-        return pages[min(index, pages.count - 1)]
-    }
 }
 
-private final class GatedListing: ProductListing, @unchecked Sendable {
-    let pageSize = 20
-    let gate = ListingGate()
-
-    private var reloads: [ProductListPage]
-    private let next: ProductListPage
-
-    init(reloads: [ProductListPage], next: ProductListPage) {
-        self.reloads = reloads
-        self.next = next
-    }
-
+extension HomeViewModelTests.GatedListing: ProductListing {
     func reload() async -> ProductListPage {
         reloads.removeFirst()
     }
@@ -241,10 +279,7 @@ private final class GatedListing: ProductListing, @unchecked Sendable {
     }
 }
 
-private final class ListingGate: @unchecked Sendable {
-    private var continuation: CheckedContinuation<Void, Never>?
-    private var entered = false
-
+extension HomeViewModelTests.ListingGate {
     func wait() async {
         await withCheckedContinuation { continuation in
             self.continuation = continuation

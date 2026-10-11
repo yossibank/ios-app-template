@@ -2,7 +2,8 @@ import ScreenCore
 import SharedCore
 import SwiftUI
 
-struct HomeContent: View {
+@MainActor
+struct HomeContent {
     @Bindable var viewState: HomeViewModel.State
 
     @State private var isRefreshing = false
@@ -10,40 +11,6 @@ struct HomeContent: View {
 
     let list: ProductList
     let actions: ScreenActions
-
-    var body: some View {
-        let items = list.products.filtered(query: viewState.query)
-
-        VStack(alignment: .leading, spacing: 0) {
-            SearchField(query: $viewState.query)
-                .padding(.horizontal, 20)
-
-            if isFiltering {
-                summary(matched: items.count)
-            }
-
-            ScrollView {
-                if isFiltering {
-                    results(items)
-                } else {
-                    catalog
-                }
-            }
-            .scrollPosition($position)
-            .scrollDismissesKeyboard(.immediately)
-            .refreshable {
-                await refresh()
-            }
-            .overlay {
-                if isFiltering, items.isEmpty {
-                    noMatch
-                }
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                bottomBar
-            }
-        }
-    }
 }
 
 private extension HomeContent {
@@ -172,7 +139,10 @@ private extension HomeContent {
         actions.isLoadingMore && list.notice == nil
     }
 
-    func loadMore(at item: Product, prefetch: Set<Product.ID>) {
+    func loadMore(
+        at item: Product,
+        prefetch: Set<Product.ID>
+    ) {
         guard
             !isFiltering,
             list.notice == nil,
@@ -205,7 +175,46 @@ private extension HomeContent {
     }
 }
 
-struct LeadSkeleton: View {
+extension HomeContent: View {
+    var body: some View {
+        let items = list.products.filtered(query: viewState.query)
+
+        VStack(alignment: .leading, spacing: 0) {
+            SearchField(query: $viewState.query)
+                .padding(.horizontal, 20)
+
+            if isFiltering {
+                summary(matched: items.count)
+            }
+
+            ScrollView {
+                if isFiltering {
+                    results(items)
+                } else {
+                    catalog
+                }
+            }
+            .scrollPosition($position)
+            .scrollDismissesKeyboard(.immediately)
+            .refreshable {
+                await refresh()
+            }
+            .overlay {
+                if isFiltering, items.isEmpty {
+                    noMatch
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                bottomBar
+            }
+        }
+    }
+}
+
+@MainActor
+struct LeadSkeleton {}
+
+extension LeadSkeleton: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Rectangle()
@@ -230,7 +239,10 @@ struct LeadSkeleton: View {
     }
 }
 
-struct TileSkeleton: View {
+@MainActor
+struct TileSkeleton {}
+
+extension TileSkeleton: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Rectangle()

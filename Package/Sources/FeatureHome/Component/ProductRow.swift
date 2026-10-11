@@ -2,10 +2,13 @@ import ScreenCore
 import SharedCore
 import SwiftUI
 
-struct ProductRow: View {
+@MainActor
+struct ProductRow {
     let product: Product
     let query: String
+}
 
+extension ProductRow: View {
     var body: some View {
         HStack(spacing: 16) {
             ProductThumbnail(product: product, inset: 10)

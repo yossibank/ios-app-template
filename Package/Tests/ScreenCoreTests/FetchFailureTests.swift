@@ -4,20 +4,18 @@ import Testing
 struct FetchFailureTests {
     @Test("失敗の文言はカタログから引かれる")
     func resolvesFromTheCatalog() {
+        let unexpected = FetchFailure.unexpected(canRetry: true)
+
         #expect(FetchFailure.offline.message == "接続を確認してください")
         #expect(FetchFailure.timeout.message == "時間内に応答がありませんでした")
         #expect(FetchFailure.unreadable.message == "データを読み取れませんでした")
-        #expect(FetchFailure.unexpected(canRetry: true).message == "予期しないエラーが発生しました")
+        #expect(unexpected.message == "予期しないエラーが発生しました")
     }
 
     @Test("サーバーエラーは状態コードを文言に含める")
     func serverErrorCarriesTheStatusCode() {
-        #expect(
-            FetchFailure.server(
-                statusCode: 503,
-                canRetry: true
-            ).message == "サーバーが応答しませんでした（503）"
-        )
+        let failure = FetchFailure.server(statusCode: 503, canRetry: true)
+        #expect(failure.message == "サーバーが応答しませんでした（503）")
     }
 
     @Test("応答が遅いときは接続断とは別の文言になる")
@@ -34,10 +32,12 @@ struct FetchFailureTests {
 
     @Test("認証切れだけがセッションの終わりを知らせる")
     func onlyUnauthorizedEndsTheSession() {
+        let serverUnauthorized = FetchFailure.server(statusCode: 401, canRetry: false)
+
         #expect(FetchFailure.unauthorized.message == "ログインし直してください")
         #expect(FetchFailure.unauthorized.endsSession)
         #expect(!FetchFailure.unauthorized.canRetry)
         #expect(!FetchFailure.offline.endsSession)
-        #expect(!FetchFailure.server(statusCode: 401, canRetry: false).endsSession)
+        #expect(!serverUnauthorized.endsSession)
     }
 }

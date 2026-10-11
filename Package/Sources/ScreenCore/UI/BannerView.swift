@@ -1,6 +1,7 @@
 import SwiftUI
 
-public struct BannerView: View {
+@MainActor
+public struct BannerView {
     private let text: String
     private let accessory: Accessory
 
@@ -11,7 +12,21 @@ public struct BannerView: View {
         self.text = text
         self.accessory = accessory
     }
+}
 
+public extension BannerView {
+    enum Accessory {
+        case none
+        case progress
+        case button(LocalizedStringResource, action: () -> Void)
+
+        public static func retry(_ action: @escaping () -> Void) -> Self {
+            .button(.screenRetry, action: action)
+        }
+    }
+}
+
+extension BannerView: View {
     public var body: some View {
         HStack(spacing: 12) {
             Text(text)
@@ -46,18 +61,6 @@ public struct BannerView: View {
         .padding(.vertical, 12)
         .background(Color.atelierInk)
         .accessibilityElement(children: .contain)
-    }
-}
-
-public extension BannerView {
-    enum Accessory {
-        case none
-        case progress
-        case button(LocalizedStringResource, action: () -> Void)
-
-        public static func retry(_ action: @escaping () -> Void) -> Self {
-            .button(.screenRetry, action: action)
-        }
     }
 }
 

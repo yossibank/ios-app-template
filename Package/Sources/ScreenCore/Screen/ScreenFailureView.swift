@@ -1,9 +1,12 @@
 import SwiftUI
 
-struct ScreenFailureView: View {
+@MainActor
+struct ScreenFailureView {
     let failure: FetchFailure
     let retry: () -> Void
+}
 
+extension ScreenFailureView: View {
     var body: some View {
         VStack(spacing: 18) {
             Rectangle()

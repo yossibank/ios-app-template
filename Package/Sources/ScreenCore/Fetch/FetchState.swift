@@ -12,16 +12,10 @@ public final class FetchState<Value> {
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private var reachedEnd = false
 
-    private var isLoaded: Bool {
-        if case .loaded = phase {
-            true
-        } else {
-            false
-        }
-    }
-
     public init() {}
+}
 
+extension FetchState {
     func isRunning(_ operation: FetchOperation) -> Bool {
         running == operation
     }
@@ -32,7 +26,6 @@ public final class FetchState<Value> {
     ) -> Task<Void, Never>? {
         reachedEnd = false
         phase = .loading
-
         return run(.reload, work, then: show)
     }
 
@@ -77,8 +70,18 @@ public final class FetchState<Value> {
             }
         }
     }
+}
 
-    private func show(_ result: Result<Value, FetchFailure>) {
+private extension FetchState {
+    var isLoaded: Bool {
+        if case .loaded = phase {
+            true
+        } else {
+            false
+        }
+    }
+
+    func show(_ result: Result<Value, FetchFailure>) {
         switch result {
         case let .success(value):
             phase = .loaded(value)
@@ -88,7 +91,7 @@ public final class FetchState<Value> {
         }
     }
 
-    private func run<Output>(
+    func run<Output>(
         _ operation: FetchOperation,
         _ work: @escaping @MainActor () async throws(FetchFailure) -> Output,
         then apply: @escaping @MainActor (Result<Output, FetchFailure>) -> Void

@@ -6,9 +6,11 @@ public struct SessionEndedAction: Sendable {
     public init(_ action: @escaping @MainActor @Sendable () -> Void) {
         self.action = action
     }
+}
 
+public extension SessionEndedAction {
     @MainActor
-    public func callAsFunction() {
+    func callAsFunction() {
         action()
     }
 }
@@ -19,6 +21,7 @@ public extension EnvironmentValues {
 
 public extension View {
     func onSessionEnded(_ action: @escaping @MainActor @Sendable () -> Void) -> some View {
-        environment(\.onSessionEnded, SessionEndedAction(action))
+        let sessionEnded = SessionEndedAction(action)
+        return environment(\.onSessionEnded, sessionEnded)
     }
 }
