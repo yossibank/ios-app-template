@@ -5,10 +5,7 @@ SwiftUI と Kotlin Multiplatform で作る、商品一覧アプリのテンプ�
 [![Verify](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml/badge.svg)](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml)
 [![License](https://img.shields.io/github/license/yossibank/ios-app-template)](LICENSE)
 
-![Swift](https://img.shields.io/badge/Swift-F05138?logo=swift&logoColor=white)
-![SwiftUI](https://img.shields.io/badge/SwiftUI-0D96F6?logo=swift&logoColor=white)
-![Swift Testing](https://img.shields.io/badge/Swift_Testing-555555?logo=swift&logoColor=white)
-![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin_Multiplatform-7F52FF?logo=kotlin&logoColor=white)
+使う技術は、Swift、SwiftUI、Swift Testing、Kotlin Multiplatform である。
 
 <img src="docs/images/list-light.png" width="260" alt="商品の一覧（ライトモード）">
 <img src="docs/images/list-dark.png" width="260" alt="商品の一覧（ダークモード）">
