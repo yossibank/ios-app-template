@@ -1,5 +1,3 @@
-<div align="center">
-
 # 🍎 ios-app-template
 
 SwiftUI と Kotlin Multiplatform で作る、商品一覧アプリのテンプレート
@@ -16,8 +14,6 @@ SwiftUI と Kotlin Multiplatform で作る、商品一覧アプリのテンプ�
 <img src="docs/images/list-dark.png" width="260" alt="商品の一覧（ダークモード）">
 
 DummyJSON にログイン ・ 無限スクロール ・ 商品名で絞り込み
-
-</div>
 
 ## 3 つのリポジトリ
 
