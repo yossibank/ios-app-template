@@ -2,13 +2,25 @@
 
 SwiftUI と Kotlin Multiplatform で作る、商品一覧アプリのテンプレート
 
-[![Verify](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml/badge.svg)](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml)
+[![Verify](https://img.shields.io/github/actions/workflow/status/yossibank/ios-app-template/verify.yml?label=Verify&logo=github)](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml)
 [![License](https://img.shields.io/github/license/yossibank/ios-app-template)](LICENSE)
 
-Swift ・ SwiftUI ・ Swift Testing ・ Kotlin Multiplatform
+![iOS 26.5+](https://img.shields.io/badge/iOS-26.5%2B-000000?logo=apple&logoColor=white)
+![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
+![SwiftUI](https://img.shields.io/badge/SwiftUI-0A84FF?logo=swift&logoColor=white)
+![Swift Testing](https://img.shields.io/badge/Swift_Testing-F05138?logo=swift&logoColor=white)
+![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin_Multiplatform-7F52FF?logo=kotlin&logoColor=white)
 
-<img src="docs/images/list-light.png" width="260" alt="商品の一覧（ライトモード）">
-<img src="docs/images/list-dark.png" width="260" alt="商品の一覧（ダークモード）">
+<table>
+  <tr>
+    <th>ライト</th>
+    <th>ダーク</th>
+  </tr>
+  <tr>
+    <td><img src="docs/images/list-light.png" width="260" alt="商品の一覧（ライトモード）"></td>
+    <td><img src="docs/images/list-dark.png" width="260" alt="商品の一覧（ダークモード）"></td>
+  </tr>
+</table>
 
 DummyJSON にログイン ・ 無限スクロール ・ 商品名で絞り込み
 
@@ -53,6 +65,8 @@ flowchart LR
 | `AppRoot` | ログイン状態に応じた画面の切り替え |
 
 ## 動かし方
+
+最初に、次の順にコマンドを実行する。
 
 | 順 | コマンド | 内容 |
 | --- | --- | --- |
