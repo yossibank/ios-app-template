@@ -1,15 +1,12 @@
 import ScreenCore
 import SwiftUI
 
-@MainActor
-struct ChapterHeader {
+struct ChapterHeader: View {
     let numeral: String
     let first: Int
     let last: Int
     var isLoading = false
-}
 
-extension ChapterHeader: View {
     var body: some View {
         HStack(spacing: 12) {
             Text(numeral)

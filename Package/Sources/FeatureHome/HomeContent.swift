@@ -2,8 +2,7 @@ import ScreenCore
 import SharedCore
 import SwiftUI
 
-@MainActor
-struct HomeContent {
+struct HomeContent: View {
     @Bindable var viewState: HomeViewModel.State
 
     @State private var isRefreshing = false
@@ -11,6 +10,40 @@ struct HomeContent {
 
     let list: ProductList
     let actions: ScreenActions
+
+    var body: some View {
+        let items = list.products.filtered(query: viewState.query)
+
+        VStack(alignment: .leading, spacing: 0) {
+            SearchField(query: $viewState.query)
+                .padding(.horizontal, 20)
+
+            if isFiltering {
+                summary(matched: items.count)
+            }
+
+            ScrollView {
+                if isFiltering {
+                    results(items)
+                } else {
+                    catalog
+                }
+            }
+            .scrollPosition($position)
+            .scrollDismissesKeyboard(.immediately)
+            .refreshable {
+                await refresh()
+            }
+            .overlay {
+                if isFiltering, items.isEmpty {
+                    noMatch
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                bottomBar
+            }
+        }
+    }
 }
 
 private extension HomeContent {
@@ -175,46 +208,7 @@ private extension HomeContent {
     }
 }
 
-extension HomeContent: View {
-    var body: some View {
-        let items = list.products.filtered(query: viewState.query)
-
-        VStack(alignment: .leading, spacing: 0) {
-            SearchField(query: $viewState.query)
-                .padding(.horizontal, 20)
-
-            if isFiltering {
-                summary(matched: items.count)
-            }
-
-            ScrollView {
-                if isFiltering {
-                    results(items)
-                } else {
-                    catalog
-                }
-            }
-            .scrollPosition($position)
-            .scrollDismissesKeyboard(.immediately)
-            .refreshable {
-                await refresh()
-            }
-            .overlay {
-                if isFiltering, items.isEmpty {
-                    noMatch
-                }
-            }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                bottomBar
-            }
-        }
-    }
-}
-
-@MainActor
-struct LeadSkeleton {}
-
-extension LeadSkeleton: View {
+struct LeadSkeleton: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Rectangle()
@@ -239,10 +233,7 @@ extension LeadSkeleton: View {
     }
 }
 
-@MainActor
-struct TileSkeleton {}
-
-extension TileSkeleton: View {
+struct TileSkeleton: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Rectangle()

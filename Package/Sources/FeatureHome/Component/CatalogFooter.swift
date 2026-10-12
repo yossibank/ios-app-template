@@ -1,19 +1,10 @@
 import ScreenCore
 import SwiftUI
 
-@MainActor
-struct CatalogFooter {
+struct CatalogFooter: View {
     let loaded: Int
     let total: Int
-}
 
-private extension CatalogFooter {
-    var fraction: CGFloat {
-        total > 0 ? CGFloat(loaded) / CGFloat(total) : 0
-    }
-}
-
-extension CatalogFooter: View {
     var body: some View {
         HStack(spacing: 12) {
             GeometryReader { proxy in
@@ -42,6 +33,12 @@ extension CatalogFooter: View {
         .padding(.vertical, 10)
         .background(Color.atelierGround)
         .accessibilityElement(children: .combine)
+    }
+}
+
+private extension CatalogFooter {
+    var fraction: CGFloat {
+        total > 0 ? CGFloat(loaded) / CGFloat(total) : 0
     }
 }
 

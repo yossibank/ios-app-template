@@ -1,12 +1,11 @@
 import SwiftUI
 
-@MainActor
 public struct ScreenView<
     Model: ScreenViewModel,
     Success: View,
     EmptyContent: View,
     Loading: View
-> {
+>: View {
     private let source: ScreenSource<Model>
     private let isEmpty: (Model.Value) -> Bool
     private let success: (Model.State, Model.Value, ScreenActions) -> Success
@@ -25,6 +24,16 @@ public struct ScreenView<
         self.success = success
         self.empty = empty
         self.loading = loading
+    }
+
+    public var body: some View {
+        switch source.kind {
+        case let .live(model):
+            LiveScreen(model, content: content)
+
+        case let .snapshot(phase, loadingMore):
+            SnapshotScreen<Model, _>(phase: phase, loadingMore: loadingMore, content: content)
+        }
     }
 }
 
@@ -61,7 +70,6 @@ public extension ScreenView where Model.Value: Collection {
     }
 }
 
-@MainActor
 private extension ScreenView {
     @ViewBuilder
     func content(
@@ -86,19 +94,7 @@ private extension ScreenView {
     }
 }
 
-extension ScreenView: View {
-    public var body: some View {
-        switch source.kind {
-        case let .live(model):
-            LiveScreen(model, content: content)
-
-        case let .snapshot(phase, loadingMore):
-            SnapshotScreen<Model, _>(phase: phase, loadingMore: loadingMore, content: content)
-        }
-    }
-}
-
-private struct LiveScreen<Model: ScreenViewModel, Content: View> {
+private struct LiveScreen<Model: ScreenViewModel, Content: View>: View {
     @Environment(\.onSessionEnded) private var onSessionEnded
 
     @State private var model: Model
@@ -112,9 +108,7 @@ private struct LiveScreen<Model: ScreenViewModel, Content: View> {
         _model = State(initialValue: model)
         self.content = content
     }
-}
 
-extension LiveScreen: View {
     var body: some View {
         content(
             model.fetchState.phase,
@@ -137,8 +131,7 @@ extension LiveScreen: View {
     }
 }
 
-@MainActor
-private struct SnapshotScreen<Model: ScreenViewModel, Content: View> {
+private struct SnapshotScreen<Model: ScreenViewModel, Content: View>: View {
     @State private var viewState: Model.State
 
     private let phase: FetchPhase<Model.Value>
@@ -155,9 +148,7 @@ private struct SnapshotScreen<Model: ScreenViewModel, Content: View> {
         self.loadingMore = loadingMore
         self.content = content
     }
-}
 
-extension SnapshotScreen: View {
     var body: some View {
         content(
             phase,
