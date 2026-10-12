@@ -26,11 +26,6 @@ public extension LoginView {
 }
 
 private extension LoginView {
-    enum Field {
-        case username
-        case password
-    }
-
     var heading: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(.loginCollection)
@@ -143,6 +138,13 @@ private extension LoginView {
         Rectangle()
             .fill(Color.atelierInk)
             .frame(height: isActive ? 1.5 : 1)
+    }
+}
+
+private extension LoginView {
+    enum Field {
+        case username
+        case password
     }
 
     func submit() {

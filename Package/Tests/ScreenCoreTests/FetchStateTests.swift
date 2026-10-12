@@ -281,6 +281,7 @@ extension FetchStateTests {
     final class CountingModel {
         let viewState = State()
         let fetchState = FetchState<[Int]>()
+
         private(set) var fetchCalls = 0
     }
 
