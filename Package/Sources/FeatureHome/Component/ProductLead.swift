@@ -2,12 +2,9 @@ import ScreenCore
 import SharedCore
 import SwiftUI
 
-@MainActor
-struct ProductLead {
+struct ProductLead: View {
     let product: Product
-}
 
-extension ProductLead: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             ProductThumbnail(product: product, inset: 20)

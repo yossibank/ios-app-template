@@ -1,8 +1,7 @@
 import ScreenCore
 import SwiftUI
 
-@MainActor
-public struct LoginView {
+public struct LoginView: View {
     @State private var model: LoginViewModel
     @State private var showsPassword = false
 
@@ -17,6 +16,39 @@ public struct LoginView {
         _model = State(initialValue: model)
         self.onLoggedIn = onLoggedIn
     }
+
+    public var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 56) {
+                heading
+
+                VStack(alignment: .leading, spacing: 32) {
+                    usernameField
+                    passwordField
+
+                    if let failure = model.failure {
+                        Text(failure.message)
+                            .font(.footnote)
+                            .foregroundStyle(Color.atelierError)
+                    }
+
+                    submitButton
+                        .padding(.top, 16)
+                }
+            }
+            .padding(.horizontal, 28)
+            .padding(.top, 96)
+            .padding(.bottom, 48)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .foregroundStyle(Color.atelierInk)
+        .background(Color.atelierGround)
+        .onChange(of: model.isLoggedIn) { _, isLoggedIn in
+            if isLoggedIn {
+                onLoggedIn()
+            }
+        }
+    }
 }
 
 public extension LoginView {
@@ -26,11 +58,6 @@ public extension LoginView {
 }
 
 private extension LoginView {
-    enum Field {
-        case username
-        case password
-    }
-
     var heading: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(.loginCollection)
@@ -144,47 +171,19 @@ private extension LoginView {
             .fill(Color.atelierInk)
             .frame(height: isActive ? 1.5 : 1)
     }
+}
+
+private extension LoginView {
+    enum Field {
+        case username
+        case password
+    }
 
     func submit() {
         focus = nil
 
         Task {
             await model.submit()
-        }
-    }
-}
-
-extension LoginView: View {
-    public var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 56) {
-                heading
-
-                VStack(alignment: .leading, spacing: 32) {
-                    usernameField
-                    passwordField
-
-                    if let failure = model.failure {
-                        Text(failure.message)
-                            .font(.footnote)
-                            .foregroundStyle(Color.atelierError)
-                    }
-
-                    submitButton
-                        .padding(.top, 16)
-                }
-            }
-            .padding(.horizontal, 28)
-            .padding(.top, 96)
-            .padding(.bottom, 48)
-        }
-        .scrollDismissesKeyboard(.interactively)
-        .foregroundStyle(Color.atelierInk)
-        .background(Color.atelierGround)
-        .onChange(of: model.isLoggedIn) { _, isLoggedIn in
-            if isLoggedIn {
-                onLoggedIn()
-            }
         }
     }
 }

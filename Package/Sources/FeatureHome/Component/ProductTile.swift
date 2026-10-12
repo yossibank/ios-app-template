@@ -2,12 +2,9 @@ import ScreenCore
 import SharedCore
 import SwiftUI
 
-@MainActor
-struct ProductTile {
+struct ProductTile: View {
     let product: Product
-}
 
-extension ProductTile: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             ProductThumbnail(product: product)

@@ -4,20 +4,11 @@ import ScreenCore
 import SharedCore
 import SwiftUI
 
-@MainActor
-public struct AppRootView {
+public struct AppRootView: View {
     @State private var isLoggedIn = Account.isLoggedIn
 
     public init() {}
-}
 
-public extension AppRootView {
-    static func configure(baseURL: String) {
-        Account.configure(baseURL: baseURL)
-    }
-}
-
-extension AppRootView: View {
     public var body: some View {
         if isLoggedIn {
             NavigationStack {
@@ -34,5 +25,11 @@ extension AppRootView: View {
                 isLoggedIn = true
             }
         }
+    }
+}
+
+public extension AppRootView {
+    static func configure(baseURL: String) {
+        Account.configure(baseURL: baseURL)
     }
 }

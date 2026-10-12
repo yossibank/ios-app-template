@@ -2,13 +2,10 @@ import ScreenCore
 import SharedCore
 import SwiftUI
 
-@MainActor
-struct ProductThumbnail {
+struct ProductThumbnail: View {
     let product: Product
     var inset: CGFloat = 16
-}
 
-extension ProductThumbnail: View {
     var body: some View {
         AsyncImage(
             url: product.thumbnail,
@@ -37,13 +34,10 @@ extension ProductThumbnail: View {
     }
 }
 
-@MainActor
-struct ProductNumber {
+struct ProductNumber: View {
     let product: Product
     var size: CGFloat = 11
-}
 
-extension ProductNumber: View {
     var body: some View {
         Text(product.number)
             .font(.atelierSerif(size, relativeTo: .caption2, semibold: true))
@@ -52,13 +46,10 @@ extension ProductNumber: View {
     }
 }
 
-@MainActor
-struct BrandText {
+struct BrandText: View {
     let brand: String
     var size: CGFloat = 11
-}
 
-extension BrandText: View {
     var body: some View {
         Text(brand.uppercased())
             .font(.atelierSerif(size, relativeTo: .caption2, semibold: true))

@@ -1,13 +1,10 @@
 import ScreenCore
 import SwiftUI
 
-@MainActor
-struct HomeHeader {
+struct HomeHeader: View {
     let total: Int?
     let onLogout: () -> Void
-}
 
-extension HomeHeader: View {
     var body: some View {
         HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 2) {
