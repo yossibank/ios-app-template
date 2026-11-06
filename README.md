@@ -2,31 +2,21 @@
 
 SwiftUI と Kotlin Multiplatform で作る、商品一覧アプリのテンプレート
 
-[![Verify](https://img.shields.io/github/actions/workflow/status/yossibank/ios-app-template/verify.yml?label=Verify&logo=github)](https://github.com/yossibank/ios-app-template/actions/workflows/verify.yml)
-[![License](https://img.shields.io/github/license/yossibank/ios-app-template)](LICENSE)
+<img src="docs/images/tech.svg" alt="iOS 26.5+、Swift 6、SwiftUI、Swift Testing、Kotlin Multiplatform">
 
-![iOS 26.5+](https://img.shields.io/badge/iOS-26.5%2B-000000?logo=apple&logoColor=white)
-![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
-![SwiftUI](https://img.shields.io/badge/SwiftUI-0A84FF?logo=swift&logoColor=white)
-![Swift Testing](https://img.shields.io/badge/Swift_Testing-F05138?logo=swift&logoColor=white)
-![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin_Multiplatform-7F52FF?logo=kotlin&logoColor=white)
+## ✨ 機能
 
-<table>
-  <tr>
-    <th>ライト</th>
-    <th>ダーク</th>
-  </tr>
-  <tr>
-    <td><img src="docs/images/list-light.png" width="260" alt="商品の一覧（ライトモード）"></td>
-    <td><img src="docs/images/list-dark.png" width="260" alt="商品の一覧（ダークモード）"></td>
-  </tr>
-</table>
+| 商品の一覧（ライト） | 商品の一覧（ダーク） |
+| --- | --- |
+| <img src="docs/images/list-light.png" width="260" alt="商品の一覧（ライトモード）"> | <img src="docs/images/list-dark.png" width="260" alt="商品の一覧（ダークモード）"> |
 
-DummyJSON にログイン ・ 無限スクロール ・ 商品名で絞り込み
+| 機能 | 内容 |
+| --- | --- |
+| ログイン | DummyJSON にログインする |
+| 無限スクロール | 一覧を下へ進むと続きを読み込む |
+| 絞り込み | 商品名で絞り込む |
 
 ## 🗺️ 全体像
-
-共通コアと 2 つのアプリを、3 つのリポジトリに分けている。
 
 ```mermaid
 flowchart LR
@@ -41,8 +31,6 @@ flowchart LR
 [🧩 kmp-app-template](https://github.com/yossibank/kmp-app-template) ・ [🤖 android-app-template](https://github.com/yossibank/android-app-template)
 
 ### モジュール構成
-
-アプリは、次のモジュールに分けている。
 
 ```mermaid
 flowchart LR
@@ -68,32 +56,30 @@ flowchart LR
 | `FeatureLogin` | ログインの画面 |
 | `AppRoot` | ログイン状態に応じた画面の切り替え |
 
-## 🚀 動かし方
+## 💻 実行環境
 
-最初に、次の順にコマンドを実行する。
+| 項目 | 内容 |
+| --- | --- |
+| 対応 OS | iOS 26.5+ |
+| 言語 | Swift 6 |
+| 共通コア | Kotlin Multiplatform |
+| 整形・lint | SwiftFormat 0.63.1、SwiftLint 0.65.1（Mint） |
 
-| 順 | コマンド | 内容 |
-| --- | --- | --- |
-| 1 | `make bootstrap` | SwiftFormat / SwiftLint と、コミット前に整形と lint を検査するフックを用意する |
-| 2 | `make open` | `AppTemplate.xcworkspace` を開く |
-| 3 | `make verify` | 変更したら通す |
+[手順とコマンド](docs/development.md)
 
-> [!NOTE]
-> kmp-app-template が非公開なら、`~/.netrc` に `api.github.com` の資格情報が要る。[組み込みの手順](https://github.com/yossibank/kmp-app-template/blob/main/docs/integration.md#ios)を見る。
-
-### 共通コアを手元のものに差し替える
-
-kmp-app-template で `make build-ios` してから、そのディレクトリを絶対パスで渡す。
+## 🚀 入れ方
 
 ```sh
+# テンプレートから作ったとき：GitHub のオーナーとパッケージの接頭辞を置き換える
+# 3 つのリポジトリそれぞれで実行する
+scripts/rename.sh <GitHub のオーナー> <パッケージの接頭辞>    # 例: scripts/rename.sh acme com.acme
+
+# 共通コアを手元のものに差し替える：kmp-app-template で make build-ios した後、絶対パスで渡す
 SHARED_DIR=/path/to/kmp-app-template make verify
 ```
 
-### テンプレートから作ったとき
+## 📚 文書
 
-パッケージの接頭辞と GitHub のオーナーを置き換える。3 つのリポジトリそれぞれで実行する。
-
-```sh
-scripts/rename.sh <GitHub のオーナー> <パッケージの接頭辞>    # 例: scripts/rename.sh acme com.acme
-```
-
+| 文書 | 内容 |
+| --- | --- |
+| [docs/development.md](docs/development.md) | 動かし方と、共通コアを取得する資格情報 |
