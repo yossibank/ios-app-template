@@ -8,8 +8,8 @@ public struct SessionEndedAction: Sendable {
     }
 }
 
+@MainActor
 public extension SessionEndedAction {
-    @MainActor
     func callAsFunction() {
         action()
     }
