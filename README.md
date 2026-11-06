@@ -24,7 +24,9 @@ SwiftUI と Kotlin Multiplatform で作る、商品一覧アプリのテンプ�
 
 DummyJSON にログイン ・ 無限スクロール ・ 商品名で絞り込み
 
-## 3 つのリポジトリ
+## 🗺️ 全体像
+
+共通コアと 2 つのアプリを、3 つのリポジトリに分けている。
 
 ```mermaid
 flowchart LR
@@ -38,7 +40,9 @@ flowchart LR
 
 [🧩 kmp-app-template](https://github.com/yossibank/kmp-app-template) ・ [🤖 android-app-template](https://github.com/yossibank/android-app-template)
 
-## モジュール構成
+### モジュール構成
+
+アプリは、次のモジュールに分けている。
 
 ```mermaid
 flowchart LR
@@ -64,7 +68,7 @@ flowchart LR
 | `FeatureLogin` | ログインの画面 |
 | `AppRoot` | ログイン状態に応じた画面の切り替え |
 
-## 動かし方
+## 🚀 動かし方
 
 最初に、次の順にコマンドを実行する。
 
@@ -75,7 +79,7 @@ flowchart LR
 | 3 | `make verify` | 変更したら通す |
 
 > [!NOTE]
-> kmp-app-template をプライベートにしたときは、`~/.netrc` に `api.github.com` の資格情報が要る（[組み込みの手順](https://github.com/yossibank/kmp-app-template/blob/main/docs/integration.md#ios)）。
+> kmp-app-template が非公開なら、`~/.netrc` に `api.github.com` の資格情報が要る。[組み込みの手順](https://github.com/yossibank/kmp-app-template/blob/main/docs/integration.md#ios)を見る。
 
 ### 共通コアを手元のものに差し替える
 
